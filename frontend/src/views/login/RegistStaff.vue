@@ -2,7 +2,12 @@
   <a-card :bordered="false" hoverable style="margin-top: 130px">
     <div class="user-layout-register">
       <a-form ref="formRegister" :autoFormCreate="(form)=>{this.form = form}" id="formRegister">
-        <a-divider orientation="left"><span style="font-size: 16px">用户注册</span></a-divider>
+        <a-divider orientation="left"><span style="font-size: 16px">车主注册</span></a-divider>
+        <a-form-item
+          fieldDecoratorId="staffName"
+          :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入车主姓名' }], validateTrigger: ['change', 'blur']}">
+          <a-input type="text" v-model="staffName" placeholder="车主姓名"></a-input>
+        </a-form-item>
         <a-form-item
           fieldDecoratorId="email"
           :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入注册账号' },  { validator: this.handleUsernameCheck }], validateTrigger: ['change', 'blur']}">
@@ -76,8 +81,8 @@ export default {
     return {
       registType: '2',
       form: null,
+      staffName: '',
       username: '',
-      supplierName: '',
       password: '',
       state: {
         time: 60,
@@ -183,10 +188,10 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$post('registSupplier', {
+          this.$post('registStaff', {
             username: this.username,
             password: this.password,
-            supplierName: this.supplierName
+            staffName: this.staffName
           }).then(() => {
             this.$message.success('注册成功')
             this.returnLogin()

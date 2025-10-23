@@ -27,7 +27,8 @@
           </a-button>
         </a-form-item>
         <div style="margin-top: 35px">
-         <a style="float: right" @click="regist">注册供应商</a>
+          <a style="float: right;margin-left: 25px" @click="registStaff">车主注册</a>
+          <a style="float: right" @click="regist">用户注册</a>
         </div>
       </a-form>
     </div>

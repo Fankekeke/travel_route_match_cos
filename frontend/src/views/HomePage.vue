@@ -31,7 +31,7 @@
                 <head-info title="供应商数量" :content="titleData.pharmacyNum" :center="false" :bordered="false"/>
               </a-col>
               <a-col :span="4">
-                <head-info title="员工数量" :content="titleData.staffNum" :center="false"/>
+                <head-info title="车主数量" :content="titleData.staffNum" :center="false"/>
               </a-col>
             </a-row>
           </div>
@@ -40,7 +40,7 @@
     </a-row>
 <!--    <supplier-home v-if="user.roleId == 76"></supplier-home>-->
 <!--    <home @setTitle="setTitleData"></home>-->
-    <a-row :gutter="8" class="count-info" style="margin-top: 15px" v-show="user.roleId == 74">
+    <a-row :gutter="8" class="count-info" style="margin-top: 15px" v-show="false">
       <a-col :span="12" class="visit-count-wrapper">
         <a-card class="visit-count" hoverable>
           <apexchart ref="count" type=bar height=300 :options="chartOptions" :series="series" />
