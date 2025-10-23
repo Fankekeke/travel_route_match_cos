@@ -1,7 +1,5 @@
 package com.fank.f1k2.system.service;
 
-import com.fank.f1k2.business.entity.StaffInfo;
-import com.fank.f1k2.business.entity.SupplierInfo;
 import com.fank.f1k2.common.domain.QueryRequest;
 import com.fank.f1k2.system.domain.User;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -85,38 +83,6 @@ public interface UserService extends IService<User> {
      * @param password 密码
      */
     void regist(String username, String password) throws Exception;
-
-    /**
-     * 注册员工
-     *
-     * @param username 用户名
-     * @param password 密码
-     * @param staffName 员工姓名
-     */
-    void registStaff(String username, String password, String staffName) throws Exception;
-
-    /**
-     * 注册供应商
-     *
-     * @param username 用户名
-     * @param password 密码
-     * @param supplierName 供应商名称
-     */
-    void registSupplier(String username, String password, String supplierName) throws Exception;
-
-    /**
-     * 注册员工
-     *
-     * @param staffInfo 员工信息
-     */
-    void registerStaff(StaffInfo staffInfo) throws Exception;
-
-    /**
-     * 注册供应商
-     *
-     * @param supplierInfo 供应商信息
-     */
-    void registerSupplier(SupplierInfo supplierInfo) throws Exception;
 
     /**
      * 重置密码
