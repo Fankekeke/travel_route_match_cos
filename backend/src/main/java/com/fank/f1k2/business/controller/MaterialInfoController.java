@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MaterialInfoController {
 
-    private final IMaterialInfoService bulletinInfoService;
+    private final IMaterialInfoService materialInfoService;
 
     /**
     * 分页获取物品积分
@@ -35,7 +35,7 @@ public class MaterialInfoController {
     */
     @GetMapping("/page")
     public R page(Page<MaterialInfo> page, MaterialInfo queryFrom) {
-        return R.ok();
+        return R.ok(materialInfoService.queryPage(page, queryFrom));
     }
 
     /**
@@ -46,7 +46,7 @@ public class MaterialInfoController {
     */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
-        return R.ok(bulletinInfoService.getById(id));
+        return R.ok(materialInfoService.getById(id));
     }
 
     /**
@@ -56,7 +56,7 @@ public class MaterialInfoController {
     */
     @GetMapping("/list")
     public R list() {
-        return R.ok(bulletinInfoService.list());
+        return R.ok(materialInfoService.list());
     }
 
     /**
@@ -68,7 +68,7 @@ public class MaterialInfoController {
     @PostMapping
     public R save(MaterialInfo addFrom) {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.save(addFrom));
+        return R.ok(materialInfoService.save(addFrom));
     }
 
     /**
@@ -79,7 +79,7 @@ public class MaterialInfoController {
     */
     @PutMapping
     public R edit(MaterialInfo editFrom) {
-        return R.ok(bulletinInfoService.updateById(editFrom));
+        return R.ok(materialInfoService.updateById(editFrom));
     }
 
     /**
@@ -90,7 +90,7 @@ public class MaterialInfoController {
     */
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
-        return R.ok(bulletinInfoService.removeByIds(ids));
+        return R.ok(materialInfoService.removeByIds(ids));
     }
 
 }

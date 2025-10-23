@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 价格规则 控制层
+ *
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
 @RestController
@@ -24,73 +25,73 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PriceRulesController {
 
-    private final IPriceRulesService bulletinInfoService;
+    private final IPriceRulesService priceRulesService;
 
     /**
-    * 分页获取价格规则
-    *
-    * @param page       分页对象
-    * @param queryFrom 价格规则
-    * @return 结果
-    */
+     * 分页获取价格规则
+     *
+     * @param page      分页对象
+     * @param queryFrom 价格规则
+     * @return 结果
+     */
     @GetMapping("/page")
     public R page(Page<PriceRules> page, PriceRules queryFrom) {
-        return R.ok();
+        return R.ok(priceRulesService.queryPage(page, queryFrom));
     }
 
     /**
-    * 查询价格规则详情
-    *
-    * @param id 主键ID
-    * @return 结果
-    */
+     * 查询价格规则详情
+     *
+     * @param id 主键ID
+     * @return 结果
+     */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
-        return R.ok(bulletinInfoService.getById(id));
+        return R.ok(priceRulesService.getById(id));
     }
 
     /**
-    * 查询价格规则列表
-    *
-    * @return 结果
-    */
+     * 查询价格规则列表
+     *
+     * @return 结果
+     */
     @GetMapping("/list")
     public R list() {
-        return R.ok(bulletinInfoService.list());
+        return R.ok(priceRulesService.list());
     }
 
     /**
-    * 新增价格规则
-    *
-    * @param addFrom 价格规则对象
-    * @return 结果
-    */
+     * 新增价格规则
+     *
+     * @param addFrom 价格规则对象
+     * @return 结果
+     */
     @PostMapping
     public R save(PriceRules addFrom) {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.save(addFrom));
+        return R.ok(priceRulesService.save(addFrom));
     }
 
     /**
-    * 修改价格规则
-    *
-    * @param editFrom 价格规则对象
-    * @return 结果
-    */
+     * 修改价格规则
+     *
+     * @param editFrom 价格规则对象
+     * @return 结果
+     */
     @PutMapping
     public R edit(PriceRules editFrom) {
-        return R.ok(bulletinInfoService.updateById(editFrom));
+        return R.ok(priceRulesService.updateById(editFrom));
     }
 
     /**
-    * 删除价格规则
-    *
-    * @param ids 删除的主键ID
-    * @return 结果
-    */
+     * 删除价格规则
+     *
+     * @param ids 删除的主键ID
+     * @return 结果
+     */
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
-        return R.ok(bulletinInfoService.removeByIds(ids));
+        return R.ok(priceRulesService.removeByIds(ids));
     }
 
 }

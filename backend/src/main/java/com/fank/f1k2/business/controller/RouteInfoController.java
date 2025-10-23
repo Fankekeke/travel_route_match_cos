@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RouteInfoController {
 
-    private final IRouteInfoService bulletinInfoService;
+    private final IRouteInfoService routeInfoService;
 
     /**
     * 分页获取用户路线
@@ -35,7 +35,7 @@ public class RouteInfoController {
     */
     @GetMapping("/page")
     public R page(Page<RouteInfo> page, RouteInfo queryFrom) {
-        return R.ok();
+        return R.ok(routeInfoService.queryPage(page, queryFrom));
     }
 
     /**
@@ -46,7 +46,7 @@ public class RouteInfoController {
     */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
-        return R.ok(bulletinInfoService.getById(id));
+        return R.ok(routeInfoService.getById(id));
     }
 
     /**
@@ -56,7 +56,7 @@ public class RouteInfoController {
     */
     @GetMapping("/list")
     public R list() {
-        return R.ok(bulletinInfoService.list());
+        return R.ok(routeInfoService.list());
     }
 
     /**
@@ -68,7 +68,7 @@ public class RouteInfoController {
     @PostMapping
     public R save(RouteInfo addFrom) {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.save(addFrom));
+        return R.ok(routeInfoService.save(addFrom));
     }
 
     /**
@@ -79,7 +79,7 @@ public class RouteInfoController {
     */
     @PutMapping
     public R edit(RouteInfo editFrom) {
-        return R.ok(bulletinInfoService.updateById(editFrom));
+        return R.ok(routeInfoService.updateById(editFrom));
     }
 
     /**
@@ -90,7 +90,7 @@ public class RouteInfoController {
     */
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
-        return R.ok(bulletinInfoService.removeByIds(ids));
+        return R.ok(routeInfoService.removeByIds(ids));
     }
 
 }

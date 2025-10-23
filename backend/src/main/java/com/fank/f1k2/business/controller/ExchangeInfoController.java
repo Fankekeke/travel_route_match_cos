@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExchangeInfoController {
 
-    private final IExchangeInfoService bulletinInfoService;
+    private final IExchangeInfoService exchangeInfoService;
 
     /**
     * 分页获取积分兑换
@@ -35,7 +35,7 @@ public class ExchangeInfoController {
     */
     @GetMapping("/page")
     public R page(Page<ExchangeInfo> page, ExchangeInfo queryFrom) {
-        return R.ok();
+        return R.ok(exchangeInfoService.queryPage(page, queryFrom));
     }
 
     /**
@@ -46,7 +46,7 @@ public class ExchangeInfoController {
     */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
-        return R.ok(bulletinInfoService.getById(id));
+        return R.ok(exchangeInfoService.getById(id));
     }
 
     /**
@@ -56,7 +56,7 @@ public class ExchangeInfoController {
     */
     @GetMapping("/list")
     public R list() {
-        return R.ok(bulletinInfoService.list());
+        return R.ok(exchangeInfoService.list());
     }
 
     /**
@@ -68,7 +68,7 @@ public class ExchangeInfoController {
     @PostMapping
     public R save(ExchangeInfo addFrom) {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.save(addFrom));
+        return R.ok(exchangeInfoService.save(addFrom));
     }
 
     /**
@@ -79,7 +79,7 @@ public class ExchangeInfoController {
     */
     @PutMapping
     public R edit(ExchangeInfo editFrom) {
-        return R.ok(bulletinInfoService.updateById(editFrom));
+        return R.ok(exchangeInfoService.updateById(editFrom));
     }
 
     /**
@@ -90,7 +90,7 @@ public class ExchangeInfoController {
     */
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
-        return R.ok(bulletinInfoService.removeByIds(ids));
+        return R.ok(exchangeInfoService.removeByIds(ids));
     }
 
 }

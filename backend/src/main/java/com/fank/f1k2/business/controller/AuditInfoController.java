@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuditInfoController {
 
-    private final IAuditInfoService bulletinInfoService;
+    private final IAuditInfoService auditInfoService;
 
     /**
      * 分页获取审核管理
@@ -36,7 +36,7 @@ public class AuditInfoController {
      */
     @GetMapping("/page")
     public R page(Page<AuditInfo> page, AuditInfo queryFrom) {
-        return R.ok();
+        return R.ok(auditInfoService.queryAuditPage(page, queryFrom));
     }
 
     /**
@@ -47,7 +47,7 @@ public class AuditInfoController {
      */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
-        return R.ok(bulletinInfoService.getById(id));
+        return R.ok(auditInfoService.getById(id));
     }
 
     /**
@@ -57,7 +57,7 @@ public class AuditInfoController {
      */
     @GetMapping("/list")
     public R list() {
-        return R.ok(bulletinInfoService.list());
+        return R.ok(auditInfoService.list());
     }
 
     /**
@@ -69,7 +69,7 @@ public class AuditInfoController {
     @PostMapping
     public R save(AuditInfo addFrom) {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.save(addFrom));
+        return R.ok(auditInfoService.save(addFrom));
     }
 
     /**
@@ -80,7 +80,7 @@ public class AuditInfoController {
      */
     @PutMapping
     public R edit(AuditInfo editFrom) {
-        return R.ok(bulletinInfoService.updateById(editFrom));
+        return R.ok(auditInfoService.updateById(editFrom));
     }
 
     /**
@@ -91,7 +91,7 @@ public class AuditInfoController {
      */
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
-        return R.ok(bulletinInfoService.removeByIds(ids));
+        return R.ok(auditInfoService.removeByIds(ids));
     }
 
 }
