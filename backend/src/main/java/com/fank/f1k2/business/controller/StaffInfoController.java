@@ -2,12 +2,14 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.StaffInfo;
 import com.fank.f1k2.business.service.IStaffInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -48,6 +50,17 @@ public class StaffInfoController {
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
         return R.ok(staffInfoService.getById(id));
+    }
+
+    /**
+     * 根据员工ID查询员工详情
+     *
+     * @param staffId 员工ID
+     * @return 详情
+     */
+    @GetMapping("/queryDetailByStaffId/{staffId}")
+    public R queryDetailByStaffId(@PathVariable("staffId") Integer staffId) {
+        return R.ok(staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, staffId)));
     }
 
     /**

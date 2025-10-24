@@ -53,6 +53,16 @@ public class ComplaintInfo implements Serializable {
     private String content;
 
     /**
+     * 处理内容
+     */
+    private String dealContent;
+
+    /**
+     * 处理时间
+     */
+    private String dealDate;
+
+    /**
      * 状态（0.未处理 1.已处理）
      */
     private String status;

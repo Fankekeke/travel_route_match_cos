@@ -2,6 +2,10 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.WithdrawInfo;
@@ -27,6 +31,8 @@ public class WithdrawInfoController {
 
     private final IWithdrawInfoService withdrawInfoService;
 
+    private final IStaffInfoService staffInfoService;
+
     /**
      * 分页获取提现记录
      *
@@ -37,6 +43,28 @@ public class WithdrawInfoController {
     @GetMapping("/page")
     public R page(Page<WithdrawInfo> page, WithdrawInfo queryFrom) {
         return R.ok(withdrawInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 新增提现记录信息
+     *
+     * @param withdrawInfo 提现记录信息
+     * @return 结果
+     */
+    @PostMapping
+    public R save(WithdrawInfo withdrawInfo) throws F1k2Exception {
+        // 校验此员工是否有提现正在审核中
+        int count = withdrawInfoService.count(Wrappers.<WithdrawInfo>lambdaQuery().eq(WithdrawInfo::getStatus, 0));
+        if (count > 0) {
+            throw new F1k2Exception("存在正在审核的提现记录！");
+        }
+        withdrawInfo.setCode("WD-" + System.currentTimeMillis());
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, withdrawInfo.getStaffId()));
+        if (staffInfo != null) {
+            withdrawInfo.setStaffId(staffInfo.getId());
+        }
+        withdrawInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        return R.ok(withdrawInfoService.save(withdrawInfo));
     }
 
     /**
@@ -58,18 +86,6 @@ public class WithdrawInfoController {
     @GetMapping("/list")
     public R list() {
         return R.ok(withdrawInfoService.list());
-    }
-
-    /**
-     * 新增提现记录
-     *
-     * @param addFrom 提现记录对象
-     * @return 结果
-     */
-    @PostMapping
-    public R save(WithdrawInfo addFrom) {
-        addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(withdrawInfoService.save(addFrom));
     }
 
     /**

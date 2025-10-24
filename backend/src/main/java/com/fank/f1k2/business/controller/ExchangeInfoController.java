@@ -2,6 +2,7 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.ExchangeInfo;
@@ -46,7 +47,7 @@ public class ExchangeInfoController {
     */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
-        return R.ok(exchangeInfoService.getById(id));
+        return R.ok(exchangeInfoService.exchangeDetail(id));
     }
 
     /**
@@ -66,9 +67,9 @@ public class ExchangeInfoController {
     * @return 结果
     */
     @PostMapping
-    public R save(ExchangeInfo addFrom) {
+    public R save(ExchangeInfo addFrom) throws F1k2Exception {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(exchangeInfoService.save(addFrom));
+        return R.ok(exchangeInfoService.addExchange(addFrom));
     }
 
     /**

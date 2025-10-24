@@ -21,4 +21,5 @@ public interface IUserInfoService extends IService<UserInfo> {
      * @return 结果
      */
     IPage<LinkedHashMap<String, Object>> queryPage(Page<UserInfo> page, UserInfo queryFrom);
+
 }
