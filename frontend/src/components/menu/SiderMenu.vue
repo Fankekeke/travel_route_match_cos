@@ -8,7 +8,7 @@
     <div :class="['logo', theme]">
       <router-link to="/">
         <img src="static/img/logo.gif" alt="">
-        <h1 class="animated fadeIn">{{systemName}}</h1>
+        <h1 class="animated fadeIn">“慧”出行</h1>
       </router-link>
     </div>
     <i-menu :theme="theme" :collapsed="collapsed" :menuData="menuData" @select="onSelect"/>
