@@ -2,6 +2,9 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.fank.f1k2.business.entity.UserInfo;
+import com.fank.f1k2.business.service.INotifyInfoService;
+import com.fank.f1k2.business.service.IUserInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.EvaluateInfo;
@@ -26,6 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class EvaluateInfoController {
 
     private final IEvaluateInfoService evaluateInfoService;
+
+    private final IUserInfoService userInfoService;
+
+    private final INotifyInfoService notifyInfoService;
 
     /**
      * 分页获取订单评价
@@ -68,6 +75,10 @@ public class EvaluateInfoController {
      */
     @PostMapping
     public R save(EvaluateInfo addFrom) {
+        UserInfo userInfo = userInfoService.getById(addFrom.getUserId());
+        // 添加车主消息通知
+        String content = "用户：" + userInfo.getName() + "评价了出行订单，评价内容：" + addFrom.getContent();
+        notifyInfoService.sendNotify(content, addFrom.getStaffId());
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
         return R.ok(evaluateInfoService.save(addFrom));
     }

@@ -28,6 +28,11 @@ public class WithdrawInfo implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer id;
 
+    /**
+     * 提现编号
+     */
+    private String code;
+
 
     /**
      * 车主ID

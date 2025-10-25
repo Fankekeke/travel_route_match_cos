@@ -1,6 +1,10 @@
 package com.fank.f1k2.system.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.entity.UserInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
+import com.fank.f1k2.business.service.IUserInfoService;
 import com.fank.f1k2.common.domain.F1k2Constant;
 import com.fank.f1k2.common.domain.QueryRequest;
 import com.fank.f1k2.common.service.CacheService;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +49,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserRoleService userRoleService;
     @Autowired
     private UserManager userManager;
+    @Autowired
+    private IUserInfoService userInfoService;
+    @Autowired
+    private IStaffInfoService staffInfoService;
 
     @Override
     public User findByName(String username) {
@@ -183,6 +192,83 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 将用户相关信息保存到 Redis中
         userManager.loadUserRedisCache(user);
 
+    }
+
+    /**
+     * 注册用户
+     *
+     * @param username 用户名
+     * @param password 密码
+     */
+    @Override
+    public void registUser(String username, String password) throws Exception {
+        User user = new User();
+        user.setPassword(MD5Util.encrypt(username, password));
+        user.setUsername(username);
+        user.setCreateTime(new Date());
+        user.setStatus(User.STATUS_VALID);
+        user.setSsex(User.SEX_UNKNOW);
+        user.setAvatar(User.DEFAULT_AVATAR);
+        user.setDescription("注册用户");
+        this.save(user);
+
+        UserRole ur = new UserRole();
+        ur.setUserId(user.getUserId());
+        ur.setRoleId(2L); // 注册用户角色 ID
+        this.userRoleMapper.insert(ur);
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(user.getUserId());
+        userInfo.setCode("UR-" + System.currentTimeMillis());
+        userInfo.setName("乘客");
+        userInfo.setIntegral(BigDecimal.ZERO);
+        userInfo.setSex("1");
+        userInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        userInfoService.save(userInfo);
+
+        // 创建用户默认的个性化配置
+        userConfigService.initDefaultUserConfig(String.valueOf(user.getUserId()));
+        // 将用户相关信息保存到 Redis中
+        userManager.loadUserRedisCache(user);
+    }
+
+    /**
+     * 注册车主
+     *
+     * @param username 用户名
+     * @param password 密码
+     */
+    @Override
+    public void registStaff(String username, String password) throws Exception {
+        User user = new User();
+        user.setPassword(MD5Util.encrypt(username, password));
+        user.setUsername(username);
+        user.setCreateTime(new Date());
+        user.setStatus(User.STATUS_VALID);
+        user.setSsex(User.SEX_UNKNOW);
+        user.setAvatar(User.DEFAULT_AVATAR);
+        user.setDescription("注册用户");
+        this.save(user);
+
+        UserRole ur = new UserRole();
+        ur.setUserId(user.getUserId());
+        ur.setRoleId(2L); // 注册用户角色 ID
+        this.userRoleMapper.insert(ur);
+
+        StaffInfo staffInfo = new StaffInfo();
+        staffInfo.setUserId(Math.toIntExact(user.getUserId()));
+        staffInfo.setCode("STF-" + System.currentTimeMillis());
+        staffInfo.setName("乘客");
+        staffInfo.setPrice(BigDecimal.ZERO);
+        staffInfo.setSex("1");
+        staffInfo.setStatus("-1");
+        staffInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        staffInfoService.save(staffInfo);
+
+        // 创建用户默认的个性化配置
+        userConfigService.initDefaultUserConfig(String.valueOf(user.getUserId()));
+        // 将用户相关信息保存到 Redis中
+        userManager.loadUserRedisCache(user);
     }
 
     @Override

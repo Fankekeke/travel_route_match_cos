@@ -2,6 +2,7 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.UserInfo;
@@ -37,6 +38,17 @@ public class UserInfoController {
     @GetMapping("/page")
     public R page(Page<UserInfo> page, UserInfo queryFrom) {
         return R.ok(userInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 获取用户ID获取用户详情
+     *
+     * @param userId 用户ID
+     * @return 结果
+     */
+    @GetMapping("/detailByUserId/{userId}")
+    public R detailByUserId(@PathVariable("userId") Integer userId) {
+        return R.ok(userInfoService.getOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, userId)));
     }
 
     /**

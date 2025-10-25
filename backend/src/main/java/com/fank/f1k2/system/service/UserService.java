@@ -85,6 +85,22 @@ public interface UserService extends IService<User> {
     void regist(String username, String password) throws Exception;
 
     /**
+     * 注册用户
+     *
+     * @param username 用户名
+     * @param password 密码
+     */
+    void registUser(String username, String password) throws Exception;
+
+    /**
+     * 注册车主
+     *
+     * @param username 用户名
+     * @param password 密码
+     */
+    void registStaff(String username, String password) throws Exception;
+
+    /**
      * 重置密码
      *
      * @param usernames 用户集合

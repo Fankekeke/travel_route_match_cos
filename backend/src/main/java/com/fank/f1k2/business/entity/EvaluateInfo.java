@@ -3,6 +3,8 @@ package com.fank.f1k2.business.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -57,6 +59,12 @@ public class EvaluateInfo implements Serializable {
      * 评价图片
      */
     private String images;
+
+    /**
+     * 评价所属车主
+     */
+    @TableField(exist = false)
+    private Integer staffId;
 
 
 }

@@ -41,12 +41,12 @@ public class StaffInfo implements Serializable {
     /**
      * 性别（1.男 2.女）
      */
-    private Integer sex;
+    private String sex;
 
     /**
-     * 状态（1.接单中 2.离开）
+     * 状态（-1.未审核 1.接单中 2.离开）
      */
-    private Integer status;
+    private String status;
 
     /**
      * 照片

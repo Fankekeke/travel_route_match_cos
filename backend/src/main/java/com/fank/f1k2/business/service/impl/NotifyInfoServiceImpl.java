@@ -1,5 +1,6 @@
 package com.fank.f1k2.business.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.NotifyInfo;
@@ -8,6 +9,7 @@ import com.fank.f1k2.business.service.INotifyInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 /**
@@ -26,5 +28,21 @@ public class NotifyInfoServiceImpl extends ServiceImpl<NotifyInfoMapper, NotifyI
     @Override
     public IPage<LinkedHashMap<String, Object>> queryPage(Page<NotifyInfo> page, NotifyInfo queryFrom) {
         return baseMapper.queryPage(page, queryFrom);
+    }
+
+    /**
+     * 发送消息通知
+     *
+     * @param content 消息内容
+     * @param userId  用户ID
+     */
+    @Override
+    public void sendNotify(String content, Integer userId) {
+        NotifyInfo notifyInfo = new NotifyInfo();
+        notifyInfo.setUserId(userId);
+        notifyInfo.setContent(content);
+        notifyInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        notifyInfo.setDelFlag(0);
+        this.save(notifyInfo);
     }
 }
