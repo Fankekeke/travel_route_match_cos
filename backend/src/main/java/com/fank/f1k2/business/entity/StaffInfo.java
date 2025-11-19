@@ -78,5 +78,38 @@ public class StaffInfo implements Serializable {
      */
     private BigDecimal price;
 
+    /**
+     * 身份证地址
+     */
+    private String address;
 
+    /**
+     * 民族
+     */
+    private String ethnicity;
+
+    /**
+     * 真实姓名
+     */
+    private String realName;
+
+    /**
+     * 身份证号码
+     */
+    private String idNumber;
+
+    /**
+     * 出生日期
+     */
+    private String birthDate;
+
+    /**
+     * 身份证正面
+     */
+    private String idCardFrontImages;
+
+    /**
+     * 身份证反面
+     */
+    private String idCardReverseImages;
 }

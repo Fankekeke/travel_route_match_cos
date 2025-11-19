@@ -42,6 +42,18 @@ public class StaffInfoController {
     }
 
     /**
+     * 审核员工 状态（-1.未审核 1.接单中 2.离开）
+     *
+     * @param staffId 员工ID
+     * @param status  审核状态
+     * @return 结果
+     */
+    @GetMapping("/queryAuditStaff")
+    public R queryAuditStaff(Integer staffId, String status) {
+        return R.ok(staffInfoService.update(Wrappers.<StaffInfo>lambdaUpdate().set(StaffInfo::getStatus, status).eq(StaffInfo::getUserId, staffId)));
+    }
+
+    /**
      * 查询车主管理详情
      *
      * @param id 主键ID
