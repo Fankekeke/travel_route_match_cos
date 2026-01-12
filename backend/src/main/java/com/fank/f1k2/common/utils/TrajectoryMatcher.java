@@ -114,11 +114,11 @@ public class TrajectoryMatcher {
      * @param roadCoordinates  道路坐标
      * @return 匹配率
      */
-    public static BigDecimal calculatePointMatchRate(List<HistoryPoint> historyPointList, JSONArray roadCoordinates) {
+    public static BigDecimal calculatePointMatchRate(JSONArray historyPointList, JSONArray roadCoordinates) {
         // 设置目标路线
         try {
             LineString targetPath = createTargetPath(roadCoordinates);
-            LineString actualTrajectory = createActualTrajectory(historyPointList);
+            LineString actualTrajectory = createTargetPath(historyPointList);
 
             // 1. 坐标转换
             LineString utmTarget = convertToUtm(targetPath);

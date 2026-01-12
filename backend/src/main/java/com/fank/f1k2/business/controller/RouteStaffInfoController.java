@@ -2,6 +2,7 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.RouteStaffInfo;
@@ -37,6 +38,28 @@ public class RouteStaffInfoController {
     @GetMapping("/page")
     public R page(Page<RouteStaffInfo> page, RouteStaffInfo queryFrom) {
         return R.ok(routeStaffInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 车找人
+     *
+     * @param staffRouteId 车主路线ID
+     * @return 结果
+     */
+    @GetMapping("/queryRouteUserList")
+    public R queryRouteUserList(Integer staffRouteId) throws F1k2Exception {
+        return R.ok(routeStaffInfoService.queryRouteUserList(staffRouteId));
+    }
+
+    /**
+     * 人找车
+     *
+     * @param userRouteId 用户路线ID
+     * @return 结果
+     */
+    @GetMapping("/queryRouteStaffList")
+    public R queryRouteStaffList(Integer userRouteId) throws F1k2Exception {
+        return R.ok(routeStaffInfoService.queryRouteStaffList(userRouteId));
     }
 
     /**

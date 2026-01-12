@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
@@ -21,4 +22,12 @@ public interface StaffInfoMapper extends BaseMapper<StaffInfo> {
      * @return 结果
      */
     IPage<LinkedHashMap<String, Object>> queryPage(Page<StaffInfo> page, @Param("queryFrom") StaffInfo queryFrom);
+
+    /**
+     * 根据ID查询车主信息
+     *
+     * @param staffIdList 车主ID列表
+     * @return 结果
+     */
+    List<LinkedHashMap<String, Object>> queryStaffByIds(@Param("staffIdList") List<Integer> staffIdList);
 }

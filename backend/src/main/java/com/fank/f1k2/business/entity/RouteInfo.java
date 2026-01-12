@@ -3,6 +3,9 @@ package com.fank.f1k2.business.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -59,6 +62,16 @@ public class RouteInfo implements Serializable {
     private BigDecimal endLatitude;
 
     /**
+     * 出发地
+     */
+    private String startAddress;
+
+    /**
+     * 目的地
+     */
+    private String endAddress;
+
+    /**
      * 最早出发时间
      */
     private String earliestTime;
@@ -108,5 +121,15 @@ public class RouteInfo implements Serializable {
      */
     private Integer orderId;
 
+    /**
+     * 匹配度
+     */
+    @TableField(exist = false)
+    private Integer matchRate;
 
+    /**
+     * 用户信息
+     */
+    @TableField(exist = false)
+    private LinkedHashMap<String, Object> userInfo;
 }
