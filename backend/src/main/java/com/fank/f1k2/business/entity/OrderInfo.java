@@ -59,14 +59,14 @@ public class OrderInfo implements Serializable {
     private String remark;
 
     /**
-     * 订单状态（0.未支付 1.已支付）
+     * 订单状态（-1.确认中 0.未支付 1.已接客 2.已送达 3.已支付 4.已拒绝）
      */
     private String status;
 
     /**
      * 车主ID
      */
-    private String staffId;
+    private Integer staffId;
 
     /**
      * 下单时间

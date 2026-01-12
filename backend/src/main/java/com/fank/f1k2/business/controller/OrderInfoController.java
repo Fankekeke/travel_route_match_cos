@@ -68,8 +68,31 @@ public class OrderInfoController {
      */
     @PostMapping
     public R save(OrderInfo addFrom) {
-        addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(orderInfoService.save(addFrom));
+        return R.ok(orderInfoService.orderAdd(addFrom));
+    }
+
+    /**
+     * 修改订单状态
+     *
+     * @param id     主键ID
+     * @param status 订单状态
+     * @return 订单信息
+     */
+    @PutMapping("/updateOrderStatus")
+    public R updateOrderStatus(Integer id, String status) {
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setId(id);
+        orderInfo.setStatus(status);
+        if ("3".equals(status)) {
+            orderInfo.setPayDate(DateUtil.formatDateTime(new Date()));
+        }
+        if ("1".equals(status)) {
+            orderInfo.setReceiveDate(DateUtil.formatDateTime(new Date()));
+        }
+        if ("2".equals(status)) {
+            orderInfo.setDeliveryDate(DateUtil.formatDateTime(new Date()));
+        }
+        return R.ok(orderInfoService.updateById(orderInfo));
     }
 
     /**
