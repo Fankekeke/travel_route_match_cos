@@ -40,4 +40,12 @@ public interface IRouteStaffInfoService extends IService<RouteStaffInfo> {
      * @return 结果
      */
     List<RouteStaffInfo> queryRouteStaffList(Integer userRouteId) throws F1k2Exception;
+
+    /**
+     * 添加车主路线
+     *
+     * @param routeStaffInfo 车主路线
+     * @return 结果
+     */
+    Boolean addRouteStaff(RouteStaffInfo routeStaffInfo);
 }

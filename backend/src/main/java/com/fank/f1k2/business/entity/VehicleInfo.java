@@ -114,5 +114,9 @@ public class VehicleInfo implements Serializable {
      */
     private BigDecimal dayPrice;
 
+    /**
+     * 座位数量
+     */
+    private Integer seatNum;
 
 }

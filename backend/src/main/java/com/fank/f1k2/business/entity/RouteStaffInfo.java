@@ -42,6 +42,16 @@ public class RouteStaffInfo implements Serializable {
     private String path;
 
     /**
+     * 路线距离
+     */
+    private BigDecimal distance;
+
+    /**
+     * 耗时分钟
+     */
+    private Integer duration;
+
+    /**
      * 出发地-经度
      */
     private BigDecimal startLongitude;
@@ -110,6 +120,11 @@ public class RouteStaffInfo implements Serializable {
      * 是否自动接单（0.否 1.是）
      */
     private String autoOrder;
+
+    /**
+     * 预计每人价格
+     */
+    private BigDecimal planPriceUnit;
 
     /**
      * 车辆ID

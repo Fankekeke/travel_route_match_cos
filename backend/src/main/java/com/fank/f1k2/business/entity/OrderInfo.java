@@ -118,5 +118,18 @@ public class OrderInfo implements Serializable {
      */
     private BigDecimal integral;
 
+    /**
+     * 预计分钟
+     */
+    private Integer planMinute;
 
+    /**
+     * 实际分钟
+     */
+    private Integer actualMinute;
+
+    /**
+     * AI价格备注
+     */
+    private String aiRemark;
 }

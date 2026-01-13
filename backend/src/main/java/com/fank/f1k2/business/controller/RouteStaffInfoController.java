@@ -52,6 +52,16 @@ public class RouteStaffInfoController {
     }
 
     /**
+     * 查询用户路线详情
+     *
+     * @return 详情
+     */
+    @GetMapping("/queryRouteUserDetail")
+    public R queryRouteUserDetail() {
+        return R.ok();
+    }
+
+    /**
      * 人找车
      *
      * @param userRouteId 用户路线ID
