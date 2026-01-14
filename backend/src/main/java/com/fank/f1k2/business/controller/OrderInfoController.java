@@ -72,6 +72,51 @@ public class OrderInfoController {
     }
 
     /**
+     * 查询用户行程订单信息详情
+     *
+     * @param routeId 行程ID
+     * @return 订单信息
+     */
+    @GetMapping("/queryRouteUserDetail")
+    public R queryRouteUserDetail(Integer routeId) {
+        return R.ok(orderInfoService.queryRouteUserDetail(routeId));
+    }
+
+    /**
+     * 查询车主行程订单信息详情
+     *
+     * @param routeId 行程ID
+     * @return 订单信息
+     */
+    @GetMapping("/queryRouteStaffDetail")
+    public R queryRouteStaffDetail(Integer routeId) {
+        return R.ok(orderInfoService.queryRouteStaffDetail(routeId));
+    }
+
+    /**
+     * 车主审核订单
+     *
+     * @param orderId 订单ID
+     * @param status  订单状态
+     * @return 订单信息
+     */
+    @GetMapping("/auditOrderByStaff")
+    public R auditOrderByStaff(Integer orderId, String status) {
+        return R.ok(orderInfoService.auditOrderByStaff(orderId, status));
+    }
+
+    /**
+     * 用户取消订单
+     *
+     * @param orderId 订单ID
+     * @return 订单信息
+     */
+    @GetMapping("/cancelOrder")
+    public R cancelOrder(Integer orderId) {
+        return R.ok(orderInfoService.cancelOrder(orderId));
+    }
+
+    /**
      * 修改订单状态
      *
      * @param id     主键ID

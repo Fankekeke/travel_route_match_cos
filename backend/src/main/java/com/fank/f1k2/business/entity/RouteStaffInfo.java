@@ -142,4 +142,17 @@ public class RouteStaffInfo implements Serializable {
      */
     @TableField(exist = false)
     private LinkedHashMap<String, Object> staffInfo;
+
+    /**
+     * 起点距离
+     */
+    @TableField(exist = false)
+    private double startDistance;
+
+    /**
+     * 终点距离
+     */
+    @TableField(exist = false)
+    private double endDistance;
+
 }

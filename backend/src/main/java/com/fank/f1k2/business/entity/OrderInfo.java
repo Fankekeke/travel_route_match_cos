@@ -3,6 +3,8 @@ package com.fank.f1k2.business.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -59,7 +61,7 @@ public class OrderInfo implements Serializable {
     private String remark;
 
     /**
-     * 订单状态（-1.确认中 0.未支付 1.已接客 2.已送达 3.已支付 4.已拒绝）
+     * 订单状态（-1.确认中 0.已确认 1.已接客 2.已送达 3.已支付 4.已拒绝 5.已取消）
      */
     private String status;
 
@@ -132,4 +134,27 @@ public class OrderInfo implements Serializable {
      * AI价格备注
      */
     private String aiRemark;
+
+    /**
+     * 配送排序
+     */
+    private Integer deliverIndexNo;
+
+    /**
+     * 用户路线信息
+     */
+    @TableField(exist = false)
+    private RouteInfo routeInfo;
+
+    /**
+     * 用户信息
+     */
+    @TableField(exist = false)
+    private UserInfo userInfo;
+
+    /**
+     * 评价信息
+     */
+    @TableField(exist = false)
+    private EvaluateInfo evaluateInfo;
 }

@@ -23,10 +23,43 @@ public interface IOrderInfoService extends IService<OrderInfo> {
     IPage<LinkedHashMap<String, Object>> queryPage(Page<OrderInfo> page, OrderInfo queryFrom);
 
     /**
-     * 添加订单信息
+     * 用户添加订单信息
      *
      * @param orderInfo 订单信息
      * @return 添加结果
      */
     Boolean orderAdd(OrderInfo orderInfo);
+
+    /**
+     * 车主审核订单
+     *
+     * @param orderId 订单ID
+     * @param status  订单状态
+     * @return 订单信息
+     */
+    Boolean auditOrderByStaff(Integer orderId, String status);
+
+    /**
+     * 用户取消订单
+     *
+     * @param orderId 订单ID
+     * @return 订单信息
+     */
+    Boolean cancelOrder(Integer orderId);
+
+    /**
+     * 查询用户行程订单信息详情
+     *
+     * @param routeId 行程ID
+     * @return 订单信息
+     */
+    LinkedHashMap<String, Object> queryRouteUserDetail(Integer routeId);
+
+    /**
+     * 获取车主行程订单信息详情
+     *
+     * @param routeId 行程ID
+     * @return 订单信息
+     */
+    LinkedHashMap<String, Object> queryRouteStaffDetail(Integer routeId);
 }

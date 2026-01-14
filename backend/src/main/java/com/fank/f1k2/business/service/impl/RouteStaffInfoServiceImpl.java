@@ -14,12 +14,14 @@ import com.fank.f1k2.business.entity.PriceRules;
 import com.fank.f1k2.business.entity.RouteInfo;
 import com.fank.f1k2.business.entity.RouteStaffInfo;
 import com.fank.f1k2.business.dao.RouteStaffInfoMapper;
+import com.fank.f1k2.business.entity.StaffInfo;
 import com.fank.f1k2.business.service.IPriceRulesService;
 import com.fank.f1k2.business.service.IRouteInfoService;
 import com.fank.f1k2.business.service.IRouteStaffInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fank.f1k2.business.service.IStaffIncomeService;
 import com.fank.f1k2.common.exception.F1k2Exception;
+import com.fank.f1k2.common.utils.DistanceUtil;
 import com.fank.f1k2.common.utils.TrajectoryMatcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +89,11 @@ public class RouteStaffInfoServiceImpl extends ServiceImpl<RouteStaffInfoMapper,
             JSONArray roadCoordinates = JSONUtil.parseArray(routeInfo.getPath());
             BigDecimal matchRate = TrajectoryMatcher.calculatePointMatchRate(historyTrack, roadCoordinates);
             routeInfo.setMatchRate(matchRate.intValue());
+            // 计算开始距离公里数
+            double startDistance = DistanceUtil.calculateDistanceInKilometer(routeStaffInfo.getStartLongitude().doubleValue(), routeStaffInfo.getStartLatitude().doubleValue(), routeInfo.getStartLongitude().doubleValue(), routeInfo.getStartLatitude().doubleValue());
+            double endDistance = DistanceUtil.calculateDistanceInKilometer(routeStaffInfo.getEndLongitude().doubleValue(), routeStaffInfo.getEndLatitude().doubleValue(), routeInfo.getStartLongitude().doubleValue(), routeInfo.getEndLatitude().doubleValue());
+            routeInfo.setStartDistance(startDistance);
+            routeInfo.setEndDistance(endDistance);
         }
         // 用户信息
         List<Integer> userIdList = routeInfoList.stream().map(RouteInfo::getUserId).distinct().collect(Collectors.toList());
@@ -124,6 +131,11 @@ public class RouteStaffInfoServiceImpl extends ServiceImpl<RouteStaffInfoMapper,
             JSONArray roadCoordinates = JSONUtil.parseArray(routeStaffInfo.getPath());
             BigDecimal matchRate = TrajectoryMatcher.calculatePointMatchRate(historyTrack, roadCoordinates);
             routeStaffInfo.setMatchRate(matchRate.intValue());
+            // 计算开始距离公里数
+            double startDistance = DistanceUtil.calculateDistanceInKilometer(routeStaffInfo.getStartLongitude().doubleValue(), routeStaffInfo.getStartLatitude().doubleValue(), routeInfo.getStartLongitude().doubleValue(), routeInfo.getStartLatitude().doubleValue());
+            double endDistance = DistanceUtil.calculateDistanceInKilometer(routeStaffInfo.getEndLongitude().doubleValue(), routeStaffInfo.getEndLatitude().doubleValue(), routeInfo.getStartLongitude().doubleValue(), routeInfo.getEndLatitude().doubleValue());
+            routeStaffInfo.setStartDistance(startDistance);
+            routeStaffInfo.setEndDistance(endDistance);
         }
         // 用户信息
         List<Integer> staffIdList = routeStaffInfoList.stream().map(RouteStaffInfo::getStaffId).distinct().collect(Collectors.toList());
@@ -141,13 +153,18 @@ public class RouteStaffInfoServiceImpl extends ServiceImpl<RouteStaffInfoMapper,
      * @return 结果
      */
     @Override
-    public Boolean addRouteStaff(RouteStaffInfo routeStaffInfo) {
+    public Boolean addRouteStaff(RouteStaffInfo routeStaffInfo) throws F1k2Exception {
+        // 获取车主信息
+        StaffInfo staffInfo = staffInfoMapper.selectOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, routeStaffInfo.getStaffId()));
+        if (staffInfo == null) {
+            throw new F1k2Exception("没有找到该车主信息");
+        }
+        routeStaffInfo.setStaffId(staffInfo.getId());
         routeStaffInfo.setStatus("0");
         // 计算预估价格
         BigDecimal estimatedPrice = calculateEstimatedPrice(routeStaffInfo);
         routeStaffInfo.setPlanPriceUnit(estimatedPrice);
-
-        return null;
+        return save(routeStaffInfo);
     }
 
     /**
@@ -158,32 +175,32 @@ public class RouteStaffInfoServiceImpl extends ServiceImpl<RouteStaffInfoMapper,
      */
     private BigDecimal calculateEstimatedPrice(RouteStaffInfo routeStaffInfo) {
         List<PriceRules> rulesList = priceRulesService.list();
-
         // 按照规则类型分类
-        PriceRules startRule = findRuleByCode(rulesList, "DIST_START");  // 起步价
-        PriceRules nearRule = findRuleByCode(rulesList, "DIST_NEAR");    // 近途单价
-        PriceRules midRule = findRuleByCode(rulesList, "DIST_MID");      // 中途单价
-        PriceRules farRule = findRuleByCode(rulesList, "DIST_FAR");      // 远途单价
-        PriceRules timeRule = findRuleByCode(rulesList, "TIME_WAIT");    // 时长费
-        PriceRules nightRule = findRuleByCode(rulesList, "NIGHT_RATIO"); // 夜间系数
+        // 起步价
+        PriceRules startRule = findRuleByCode(rulesList, "DIST_START");
+        // 近途单价
+        PriceRules nearRule = findRuleByCode(rulesList, "DIST_NEAR");
+        // 中途单价
+        PriceRules midRule = findRuleByCode(rulesList, "DIST_MID");
+        // 远途单价
+        PriceRules farRule = findRuleByCode(rulesList, "DIST_FAR");
+        // 时长费
+        PriceRules timeRule = findRuleByCode(rulesList, "TIME_WAIT");
+        // 夜间系数
+        PriceRules nightRule = findRuleByCode(rulesList, "NIGHT_RATIO");
 
         // 获取路线距离
         BigDecimal totalDistance = routeStaffInfo.getDistance() != null ? routeStaffInfo.getDistance() : BigDecimal.ZERO;
-
         // 获取预计用时（分钟）
         BigDecimal totalTime = routeStaffInfo.getDuration() != null ?
                 new BigDecimal(routeStaffInfo.getDuration()) : BigDecimal.ZERO;
-
         // 计算基础费用
         BigDecimal basePrice = calculateBasePrice(totalDistance, startRule, nearRule, midRule, farRule);
-
         // 计算等待时间费用
         BigDecimal waitPrice = timeRule != null ?
                 totalTime.multiply(timeRule.getUnitPrice()) : BigDecimal.ZERO;
-
         // 计算总费用
         BigDecimal totalPrice = basePrice.add(waitPrice);
-
         // 判断是否为夜间服务并应用系数
         DateTime departureEarliestTime = DateUtil.parse(routeStaffInfo.getEarliestTime());
         DateTime departureLatestTime = DateUtil.parse(routeStaffInfo.getEarliestTime());
@@ -195,7 +212,8 @@ public class RouteStaffInfoServiceImpl extends ServiceImpl<RouteStaffInfoMapper,
             totalPrice = totalPrice.multiply(nightRatio);
         }
 
-        return totalPrice.setScale(2, BigDecimal.ROUND_HALF_UP); // 保留两位小数
+        // 保留两位小数
+        return totalPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     /**

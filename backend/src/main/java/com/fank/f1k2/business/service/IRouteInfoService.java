@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.RouteInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.LinkedHashMap;
@@ -16,9 +17,17 @@ public interface IRouteInfoService extends IService<RouteInfo> {
     /**
      * 分页获取用户路线
      *
-     * @param page       分页对象
+     * @param page      分页对象
      * @param queryFrom 用户路线
      * @return 结果
      */
     IPage<LinkedHashMap<String, Object>> queryPage(Page<RouteInfo> page, RouteInfo queryFrom);
+
+    /**
+     * 添加用户路线
+     *
+     * @param routeInfo 用户路线
+     * @return 添加结果
+     */
+    Boolean addRouteUser(RouteInfo routeInfo) throws F1k2Exception;
 }

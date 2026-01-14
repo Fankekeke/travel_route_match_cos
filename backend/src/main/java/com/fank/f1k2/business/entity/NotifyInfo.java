@@ -38,6 +38,11 @@ public class NotifyInfo implements Serializable {
     private Integer userId;
 
     /**
+     * 车主ID
+     */
+    private Integer staffId;
+
+    /**
      * 消息内容
      */
     private String content;

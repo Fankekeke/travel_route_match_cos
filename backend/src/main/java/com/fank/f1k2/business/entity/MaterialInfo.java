@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 
 /**
- * 物品积分
+ * 优惠券积分
  *
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
@@ -29,12 +29,12 @@ public class MaterialInfo implements Serializable {
 
 
     /**
-     * 物品名称
+     * 优惠券名称
      */
     private String name;
 
     /**
-     * 物品介绍
+     * 优惠券介绍
      */
     private String content;
 

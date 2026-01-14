@@ -132,4 +132,16 @@ public class RouteInfo implements Serializable {
      */
     @TableField(exist = false)
     private LinkedHashMap<String, Object> userInfo;
+
+    /**
+     * 起点距离
+     */
+    @TableField(exist = false)
+    private double startDistance;
+
+    /**
+     * 终点距离
+     */
+    @TableField(exist = false)
+    private double endDistance;
 }

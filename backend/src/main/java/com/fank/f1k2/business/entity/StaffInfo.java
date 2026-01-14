@@ -3,6 +3,7 @@ package com.fank.f1k2.business.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -22,8 +23,8 @@ public class StaffInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-    * 主键ID
-    */
+     * 主键ID
+     */
     @TableId(type = IdType.AUTO)
     private Integer id;
 
@@ -112,4 +113,9 @@ public class StaffInfo implements Serializable {
      * 身份证反面
      */
     private String idCardReverseImages;
+
+    /**
+     * 服务评分
+     */
+    private BigDecimal serviceScore;
 }

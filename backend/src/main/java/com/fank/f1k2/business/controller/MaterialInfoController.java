@@ -16,7 +16,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 物品积分 控制层
+ * 优惠券积分 控制层
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
 @RestController
@@ -27,10 +27,10 @@ public class MaterialInfoController {
     private final IMaterialInfoService materialInfoService;
 
     /**
-    * 分页获取物品积分
+    * 分页获取优惠券积分
     *
     * @param page       分页对象
-    * @param queryFrom 物品积分
+    * @param queryFrom 优惠券积分
     * @return 结果
     */
     @GetMapping("/page")
@@ -39,7 +39,7 @@ public class MaterialInfoController {
     }
 
     /**
-    * 查询物品积分详情
+    * 查询优惠券积分详情
     *
     * @param id 主键ID
     * @return 结果
@@ -50,7 +50,7 @@ public class MaterialInfoController {
     }
 
     /**
-    * 查询物品积分列表
+    * 查询优惠券积分列表
     *
     * @return 结果
     */
@@ -60,9 +60,9 @@ public class MaterialInfoController {
     }
 
     /**
-    * 新增物品积分
+    * 新增优惠券积分
     *
-    * @param addFrom 物品积分对象
+    * @param addFrom 优惠券积分对象
     * @return 结果
     */
     @PostMapping
@@ -72,9 +72,9 @@ public class MaterialInfoController {
     }
 
     /**
-    * 修改物品积分
+    * 修改优惠券积分
     *
-    * @param editFrom 物品积分对象
+    * @param editFrom 优惠券积分对象
     * @return 结果
     */
     @PutMapping
@@ -83,7 +83,7 @@ public class MaterialInfoController {
     }
 
     /**
-    * 删除物品积分
+    * 删除优惠券积分
     *
     * @param ids 删除的主键ID
     * @return 结果

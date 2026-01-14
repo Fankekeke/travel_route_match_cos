@@ -57,7 +57,7 @@ public class ExchangeInfoServiceImpl extends ServiceImpl<ExchangeInfoMapper, Exc
     public boolean addExchange(ExchangeInfo exchangeInfo) throws F1k2Exception {
         // 获取所属用户
         UserInfo userInfo = userInfoService.getOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, exchangeInfo.getUserId()));
-        // 物品信息
+        // 优惠券信息
         MaterialInfo materialInfo = materialInfoService.getById(exchangeInfo.getMaterialId());
 
         if (userInfo == null || materialInfo == null) {
@@ -70,7 +70,7 @@ public class ExchangeInfoServiceImpl extends ServiceImpl<ExchangeInfoMapper, Exc
         exchangeInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
         this.save(exchangeInfo);
 
-        // 添加物品销量
+        // 添加优惠券销量
         materialInfo.setSaleNum(materialInfo.getSaleNum() + 1);
         materialInfoService.updateById(materialInfo);
 
@@ -103,7 +103,7 @@ public class ExchangeInfoServiceImpl extends ServiceImpl<ExchangeInfoMapper, Exc
         UserInfo userInfo = userInfoService.getById(exchangeInfo.getUserId());
         result.put("user", userInfo);
 
-        // 物品信息
+        // 优惠券信息
         MaterialInfo materialInfo = materialInfoService.getById(exchangeInfo.getMaterialId());
         result.put("material", materialInfo);
         return result;

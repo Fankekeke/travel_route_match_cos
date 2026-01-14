@@ -17,10 +17,10 @@ import java.util.LinkedHashMap;
 public class MaterialInfoServiceImpl extends ServiceImpl<MaterialInfoMapper, MaterialInfo> implements IMaterialInfoService {
 
     /**
-     * 分页获取物品积分
+     * 分页获取优惠券积分
      *
      * @param page       分页对象
-     * @param queryFrom 物品积分
+     * @param queryFrom 优惠券积分
      * @return 结果
      */
     @Override

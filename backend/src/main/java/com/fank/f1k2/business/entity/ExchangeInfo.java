@@ -29,7 +29,7 @@ public class ExchangeInfo implements Serializable {
 
 
     /**
-     * 物品ID
+     * 优惠券ID
      */
     private Integer materialId;
 

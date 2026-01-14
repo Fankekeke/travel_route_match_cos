@@ -47,5 +47,5 @@ public interface IRouteStaffInfoService extends IService<RouteStaffInfo> {
      * @param routeStaffInfo 车主路线
      * @return 结果
      */
-    Boolean addRouteStaff(RouteStaffInfo routeStaffInfo);
+    Boolean addRouteStaff(RouteStaffInfo routeStaffInfo) throws F1k2Exception;
 }
