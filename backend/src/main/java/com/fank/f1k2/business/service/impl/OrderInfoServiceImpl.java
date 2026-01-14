@@ -170,6 +170,33 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     /**
+     * 检查订单状态
+     *
+     * @param orderId 订单ID
+     */
+    @Override
+    public void checkOrderStatus(Integer orderId) {
+        OrderInfo orderInfo = this.getById(orderId);
+        // 获取车主路线
+        RouteStaffInfo routeStaffInfo = routeStaffInfoService.getById(orderInfo.getStaffRouteId());
+        // 获取用户路线
+        RouteInfo routeInfo = routeInfoService.getById(orderInfo.getUserRouteId());
+        if ("4".equals(orderInfo.getStatus()) || "5".equals(orderInfo.getStatus())) {
+            routeInfo.setStatus("-1");
+        } else {
+            routeInfo.setStatus(orderInfo.getStatus());
+        }
+        routeInfoService.updateById(routeInfo);
+
+        List<OrderInfo> orderInfoList = this.list(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getStaffRouteId, routeStaffInfo.getId()));
+        // 校验状态是否已经全部支付
+        if (orderInfoList.size() == orderInfoList.stream().filter(order -> "3".equals(order.getStatus())).count()) {
+            routeStaffInfo.setStatus("1");
+        }
+        routeStaffInfoService.updateById(routeStaffInfo);
+    }
+
+    /**
      * 查询用户行程订单信息详情
      *
      * @param routeId 行程ID

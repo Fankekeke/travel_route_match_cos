@@ -48,6 +48,13 @@ public interface IOrderInfoService extends IService<OrderInfo> {
     Boolean cancelOrder(Integer orderId);
 
     /**
+     * 检查订单状态
+     *
+     * @param orderId 订单ID
+     */
+    void checkOrderStatus(Integer orderId);
+
+    /**
      * 查询用户行程订单信息详情
      *
      * @param routeId 行程ID

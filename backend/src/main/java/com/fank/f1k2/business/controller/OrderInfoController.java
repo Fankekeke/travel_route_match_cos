@@ -102,7 +102,9 @@ public class OrderInfoController {
      */
     @GetMapping("/auditOrderByStaff")
     public R auditOrderByStaff(Integer orderId, String status) {
-        return R.ok(orderInfoService.auditOrderByStaff(orderId, status));
+        orderInfoService.auditOrderByStaff(orderId, status);
+        orderInfoService.checkOrderStatus(orderId);
+        return R.ok(true);
     }
 
     /**
@@ -113,7 +115,9 @@ public class OrderInfoController {
      */
     @GetMapping("/cancelOrder")
     public R cancelOrder(Integer orderId) {
-        return R.ok(orderInfoService.cancelOrder(orderId));
+        orderInfoService.cancelOrder(orderId);
+        orderInfoService.checkOrderStatus(orderId);
+        return R.ok(true);
     }
 
     /**
@@ -137,7 +141,9 @@ public class OrderInfoController {
         if ("2".equals(status)) {
             orderInfo.setDeliveryDate(DateUtil.formatDateTime(new Date()));
         }
-        return R.ok(orderInfoService.updateById(orderInfo));
+        orderInfoService.updateById(orderInfo);
+        orderInfoService.checkOrderStatus(id);
+        return R.ok(true);
     }
 
     /**
