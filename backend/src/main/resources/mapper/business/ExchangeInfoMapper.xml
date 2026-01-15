@@ -2,4 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.ExchangeInfoMapper">
 
+    <!-- 分页获取积分兑换 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        ei.id,
+        ei.material_id,
+        ei.user_id,
+        ei.integral,
+        ei.create_date,
+
+        ui.NAME as userName,
+        ui.phone as userPhone,
+        ui.images as userImages,
+
+        mi.name as materialName,
+        mi.content,
+        mi.images as materialImages,
+        mi.integral as materialIntegral
+
+        FROM
+        exchange_info ei
+        LEFT JOIN material_info mi ON (mi.id = ei.material_id)
+        LEFT JOIN user_info ui ON (ui.id = ei.user_id)
+        WHERE
+        1 = 1
+        <if test="queryFrom.materialName != null and queryFrom.materialName != ''">
+            AND mi.NAME LIKE CONCAT('%',#{queryFrom.materialName},'%')
+        </if>
+        <if test="queryFrom.userName != null and queryFrom.userName != ''">
+            AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
+        </if>
+        ORDER BY
+        ei.create_date DESC
+    </select>
+
 </mapper>

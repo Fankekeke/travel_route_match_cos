@@ -3,7 +3,7 @@
 <mapper namespace="com.fank.f1k2.business.dao.DiscountInfoMapper">
 
     <!-- 分页获取投诉记录 -->
-    <select id="queryComplaintPage" resultType="java.util.LinkedHashMap">
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
         select
         di.id,
         di.code,
