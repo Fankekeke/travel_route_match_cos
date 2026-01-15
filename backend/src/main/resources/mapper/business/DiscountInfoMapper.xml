@@ -2,4 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.DiscountInfoMapper">
 
+    <!-- 分页获取投诉记录 -->
+    <select id="queryComplaintPage" resultType="java.util.LinkedHashMap">
+        select
+        di.id,
+        di.code,
+        di.discount_price,
+        di.threshold,
+        di.user_id,
+        di.coupon_name,
+        di.`type`,
+        di.create_date,
+        di.status,
+        di.content,
+        di.rebate,
+
+        ui.NAME as userName,
+        ui.phone as userPhone,
+        ui.images as userImages,
+
+        from
+        discount_info di
+        left join user_info ui on (ui.id = di.user_id)
+        where 1 = 1
+        <if test="queryFrom.code != null and queryFrom.code != ''">
+            AND di.code LIKE CONCAT('%',#{queryFrom.code},'%')
+        </if>
+        <if test="queryFrom.status != null and queryFrom.status != ''">
+            AND di.STATUS = #{queryFrom.orderCode}
+        </if>
+        <if test="queryFrom.userName != null and queryFrom.userName != ''">
+            AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
+        </if>
+        order by di.create_date desc
+    </select>
 </mapper>

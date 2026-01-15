@@ -8,6 +8,8 @@ import com.fank.f1k2.business.service.IAuditInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
+
 /**
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
@@ -22,7 +24,7 @@ public class AuditInfoServiceImpl extends ServiceImpl<AuditInfoMapper, AuditInfo
      * @return 结果
      */
     @Override
-    public IPage<AuditInfo> queryAuditPage(Page<AuditInfo> page, AuditInfo queryFrom) {
+    public IPage<LinkedHashMap<String, Object>> queryAuditPage(Page<AuditInfo> page, AuditInfo queryFrom) {
         return baseMapper.queryAuditPage(page, queryFrom);
     }
 }

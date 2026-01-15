@@ -6,6 +6,8 @@ import com.fank.f1k2.business.entity.AuditInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.LinkedHashMap;
+
 /**
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
@@ -18,5 +20,5 @@ public interface AuditInfoMapper extends BaseMapper<AuditInfo> {
      * @param queryFrom 审核管理
      * @return 结果
      */
-    IPage<AuditInfo> queryAuditPage(Page<AuditInfo> page, @Param("queryFrom") AuditInfo queryFrom);
+    IPage<LinkedHashMap<String, Object>> queryAuditPage(Page<AuditInfo> page, @Param("queryFrom") AuditInfo queryFrom);
 }

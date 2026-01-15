@@ -2,4 +2,55 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.ComplaintInfoMapper">
 
+    <!-- 分页获取投诉记录 -->
+    <select id="queryComplaintPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        ci.id,
+        ci.user_id,
+        ci.order_code,
+        ci.create_date,
+        ci.staff_id,
+        ci.content,
+        ci.STATUS,
+        ci.deal_content,
+        ci.deal_date,
+
+        si.NAME as staffName,
+        si.images as staffImages,
+        si.phone as staffPhone,
+        ui.NAME as userName,
+        ui.phone as userPhone,
+        ui.images as userImages,
+
+        oi.order_name,
+        oi.order_price,
+        oi.receive_date,
+        oi.delivery_date,
+        oi.kilometre,
+        oi.after_order_price,
+        oi.plan_minute,
+        oi.actual_minute,
+        oi.ai_remark
+        FROM
+        complaint_info ci
+        LEFT JOIN staff_info si ON (si.id = ci.staff_id)
+        LEFT JOIN user_info ui ON (si.user_id = ui.id)
+        LEFT JOIN order_info oi ON (oi.CODE = ci.order_code)
+        WHERE
+        1 = 1
+        <if test="queryFrom.orderCode != null and queryFrom.orderCode != ''">
+            AND ci.order_code LIKE CONCAT('%',#{queryFrom.orderCode},'%')
+        </if>
+        <if test="queryFrom.status != null and queryFrom.status != ''">
+            AND ci.STATUS = #{queryFrom.orderCode}
+        </if>
+        <if test="queryFrom.staffName != null and queryFrom.staffName != ''">
+            AND si.NAME LIKE CONCAT('%',#{queryFrom.staffName},'%')
+        </if>
+        <if test="queryFrom.userName != null and queryFrom.userName != ''">
+            AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
+        </if>
+        ORDER BY
+        ci.create_date DESC
+    </select>
 </mapper>

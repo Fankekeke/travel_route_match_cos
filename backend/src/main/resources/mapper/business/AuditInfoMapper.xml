@@ -2,4 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.AuditInfoMapper">
 
+    <!-- 分页获取审核管理 -->
+    <select id="queryAuditPage" resultType="java.util.LinkedHashMap">
+        select
+        ai.id,
+        ai.user_id,
+        ai.images,
+        ai.create_date,
+        ai.audit_status,
+        ai.status_date,
+        ai.introduction,
+        ai.tag,
+
+        si.code,
+        si.name,
+        si.sex,
+        si.images,
+        si.create_date,
+        si.phone,
+        si.address,
+        si.ethnicity,
+        si.real_name,
+        si.id_number,
+        si.birth_date,
+        si.id_card_front_images,
+        si.id_card_reverse_images,
+        si.service_score
+        from
+        audit_info ai
+        left join staff_info si on (ai.user_id = si.id)
+        where 1 = 1
+        <if test="queryFrom.name != null and queryFrom.name != ''">
+            AND si.name LIKE CONCAT('%',#{queryFrom.name},'%')
+        </if>
+        <if test="queryFrom.idNumber != null and queryFrom.idNumber != ''">
+            AND si.id_number LIKE CONCAT('%',#{queryFrom.idNumber},'%')
+        </if>
+        <if test="queryFrom.phone != null and queryFrom.phone != ''">
+            AND si.phone LIKE CONCAT('%',#{queryFrom.phone},'%')
+        </if>
+        order by ai.create_date desc
+    </select>
 </mapper>
