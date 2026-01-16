@@ -2,4 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.MaterialInfoMapper">
 
+    <!-- 分页获取积分兑换 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        id,
+        NAME,
+        content,
+        images,
+        integral,
+        create_date,
+        sale_num,
+        CODE
+        FROM
+        material_info
+        WHERE
+        1 = 1
+        <if test="queryFrom.name != null and queryFrom.name != ''">
+            AND name LIKE CONCAT('%',#{queryFrom.name},'%')
+        </if>
+        ORDER create_time DESC
+    </select>
 </mapper>

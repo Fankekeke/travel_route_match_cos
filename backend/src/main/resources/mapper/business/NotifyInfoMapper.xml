@@ -2,4 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.NotifyInfoMapper">
 
+    <!-- 分页获取消息通知 -->
+    <select id="queryPageStaff" resultType="java.util.LinkedHashMap">
+        SELECT
+        ni.id,
+        ni.user_code,
+        ni.user_id,
+        ni.content,
+        ni.del_flag,
+        ni.create_date,
+        ni.NAME,
+        ni.staff_id,
+
+        si.NAME as staffName,
+        si.images as staffImages,
+        si.phone as staffPhone
+
+        FROM
+        notify_info ni
+        LEFT JOIN staff_info si ON (si.id = ni.staff_id)
+        WHERE
+        1 = 1
+        AND ni.staff_id IS NOT NULL
+        <if test="queryFrom.staffName != null and queryFrom.staffName != ''">
+            AND si.NAME LIKE CONCAT('%',#{queryFrom.staffName},'%')
+        </if>
+        ORDER BY
+        ni.create_date DESC
+    </select>
+
+    <!-- 分页获取消息通知 -->
+    <select id="queryPageUser" resultType="java.util.LinkedHashMap">
+        SELECT
+        ni.id,
+        ni.user_code,
+        ni.user_id,
+        ni.content,
+        ni.del_flag,
+        ni.create_date,
+        ni.NAME,
+        ni.staff_id,
+
+        ui.NAME as userName,
+        ui.phone as userPhone,
+        ui.images as userImages
+        FROM
+        notify_info ni
+        LEFT JOIN user_info ui ON (ui.id = ni.user_id)
+        WHERE
+        1 = 1
+        AND ni.user_id IS NOT NULL
+        <if test="queryFrom.userName != null and queryFrom.userName != ''">
+            AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
+        </if>
+        ORDER BY
+        ni.create_date DESC
+    </select>
+
 </mapper>

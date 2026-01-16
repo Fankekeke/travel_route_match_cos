@@ -20,5 +20,14 @@ public interface NotifyInfoMapper extends BaseMapper<NotifyInfo> {
      * @param queryFrom 消息通知
      * @return 结果
      */
-    IPage<LinkedHashMap<String, Object>> queryPage(Page<NotifyInfo> page, @Param("queryFrom") NotifyInfo queryFrom);
+    IPage<LinkedHashMap<String, Object>> queryPageStaff(Page<NotifyInfo> page, @Param("queryFrom") NotifyInfo queryFrom);
+
+    /**
+     * 分页获取消息通知
+     *
+     * @param page      分页对象
+     * @param queryFrom 消息通知
+     * @return 结果
+     */
+    IPage<LinkedHashMap<String, Object>> queryPageUser(Page<NotifyInfo> page, @Param("queryFrom") NotifyInfo queryFrom);
 }
