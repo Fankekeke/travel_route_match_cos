@@ -40,14 +40,14 @@ public class TrajectoryMatcher {
      *
      * @return 结果
      */
-    private static LineString createActualTrajectory(List<HistoryPoint> historyPointList) {
-        Coordinate[] coords = new Coordinate[historyPointList.size()];
-        for (int i = 0; i < historyPointList.size(); i++) {
-            HistoryPoint point = historyPointList.get(i);
-            coords[i] = new Coordinate(point.getLongitude(), point.getLatitude());
-        }
-        return new GeometryFactory().createLineString(coords);
-    }
+//    private static LineString createActualTrajectory(List<HistoryPoint> historyPointList) {
+//        Coordinate[] coords = new Coordinate[historyPointList.size()];
+//        for (int i = 0; i < historyPointList.size(); i++) {
+//            HistoryPoint point = historyPointList.get(i);
+//            coords[i] = new Coordinate(point.getLongitude(), point.getLatitude());
+//        }
+//        return new GeometryFactory().createLineString(coords);
+//    }
 
     /**
      * 计算匹配率

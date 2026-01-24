@@ -28,7 +28,7 @@
                 <head-info title="采购总支出" :content="titleData.orderPrice" :center="false" :bordered="false"/>
               </a-col>
               <a-col :span="4">
-                <head-info title="供应商数量" :content="titleData.pharmacyNum" :center="false" :bordered="false"/>
+                <head-info title="车主数量" :content="titleData.pharmacyNum" :center="false" :bordered="false"/>
               </a-col>
               <a-col :span="4">
                 <head-info title="车主数量" :content="titleData.staffNum" :center="false"/>

@@ -44,11 +44,11 @@
     <div style="font-size: 13px;font-family: SimHei" v-if="supplierInfo !== null">
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col style="margin-bottom: 15px"><span
-          class="view-title">供应商信息</span></a-col>
-        <a-col :span="8"><b>供应商名称：</b>
+          class="view-title">车主信息</span></a-col>
+        <a-col :span="8"><b>车主名称：</b>
           {{ supplierInfo.name }}
         </a-col>
-        <a-col :span="8"><b>供应商编号：</b>
+        <a-col :span="8"><b>车主编号：</b>
           {{ supplierInfo.code }}
         </a-col>
         <a-col :span="8"><b>详细地址：</b>
@@ -100,7 +100,7 @@
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col style="margin-bottom: 15px"><span
-          class="view-title">供应商图片</span></a-col>
+          class="view-title">车主图片</span></a-col>
         <a-col :span="24">
           <a-upload
             name="avatar"
@@ -214,7 +214,7 @@ export default {
         auditContent: this.content,
         supplierId: this.moduleData.supplierId
       }
-      this.$put('/business/supplier-audit-record/supplierAudit', {
+      this.$put('/business/audit-info/supplierAudit', {
         ...param
       }).then((r) => {
         this.$emit('success')

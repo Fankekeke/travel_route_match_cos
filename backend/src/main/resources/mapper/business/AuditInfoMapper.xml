@@ -41,6 +41,9 @@
         <if test="queryFrom.phone != null and queryFrom.phone != ''">
             AND si.phone LIKE CONCAT('%',#{queryFrom.phone},'%')
         </if>
+        <if test="queryFrom.auditStatus != null and queryFrom.auditStatus != ''">
+            AND ai.audit_status = #{queryFrom.auditStatus}
+        </if>
         order by ai.create_date desc
     </select>
 </mapper>

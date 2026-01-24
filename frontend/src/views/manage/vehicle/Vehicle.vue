@@ -7,29 +7,18 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="车主姓名"
+                label="车牌号码"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
+                <a-input v-model="queryParams.vehicleNo"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="车主编号"
+                label="所属配送员工"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.code"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="车主状态"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-select v-model="queryParams.status" allowClear>
-                  <a-select-option value="1">接单中</a-select-option>
-                  <a-select-option value="2">离开</a-select-option>
-                </a-select>
+                <a-input v-model="queryParams.merchantName"/>
               </a-form-item>
             </a-col>
           </div>
@@ -42,8 +31,8 @@
     </div>
     <div>
       <div class="operator">
-<!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
-<!--        <a-button @click="batchDelete">删除</a-button>-->
+        <a-button type="primary" ghost @click="add">新增</a-button>
+        <a-button @click="batchDelete">删除</a-button>
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -67,43 +56,54 @@
         </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>
+          <a-icon type="file-search" @click="handlevehicleViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
     </div>
-    <staff-add
-      v-if="staffAdd.visiable"
-      @close="handlestaffAddClose"
-      @success="handlestaffAddSuccess"
-      :staffAddVisiable="staffAdd.visiable">
-    </staff-add>
-    <staff-edit
-      ref="staffEdit"
-      @close="handlestaffEditClose"
-      @success="handlestaffEditSuccess"
-      :staffEditVisiable="staffEdit.visiable">
-    </staff-edit>
+    <vehicle-add
+      v-if="vehicleAdd.visiable"
+      @close="handlevehicleAddClose"
+      @success="handlevehicleAddSuccess"
+      :vehicleAddVisiable="vehicleAdd.visiable">
+    </vehicle-add>
+    <vehicle-edit
+      ref="vehicleEdit"
+      @close="handlevehicleEditClose"
+      @success="handlevehicleEditSuccess"
+      :vehicleEditVisiable="vehicleEdit.visiable">
+    </vehicle-edit>
+    <vehicle-view
+      @close="handlevehicleViewClose"
+      :vehicleShow="vehicleView.visiable"
+      :vehicleData="vehicleView.data">
+    </vehicle-view>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
-import staffAdd from './StaffAdd'
-import staffEdit from './StaffEdit'
+import vehicleAdd from './VehicleAdd'
+import vehicleEdit from './VehicleEdit'
+import vehicleView from './VehicleView'
 import {mapState} from 'vuex'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
-  name: 'staff',
-  components: {staffAdd, staffEdit, RangeDate},
+  name: 'vehicle',
+  components: {vehicleAdd, vehicleEdit, vehicleView, RangeDate},
   data () {
     return {
       advanced: false,
-      staffAdd: {
+      vehicleAdd: {
         visiable: false
       },
-      staffEdit: {
+      vehicleEdit: {
         visiable: false
+      },
+      vehicleView: {
+        visiable: false,
+        data: null
       },
       queryParams: {},
       filteredInfo: null,
@@ -120,7 +120,7 @@ export default {
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
-      userList: []
+      brandList: []
     }
   },
   computed: {
@@ -129,25 +129,43 @@ export default {
     }),
     columns () {
       return [{
-        title: '车主姓名',
-        dataIndex: 'name'
+        title: '车辆编号',
+        dataIndex: 'vehicleCode',
+        ellipsis: true
       }, {
-        title: '车主编号',
-        ellipsis: true,
-        dataIndex: 'code'
+        title: '车牌号码',
+        dataIndex: 'vehicleNo',
+        ellipsis: true
       }, {
-        title: '性别',
-        dataIndex: 'sex',
+        title: '车辆名称',
+        dataIndex: 'name',
+        ellipsis: true
+      }, {
+        title: '车辆类型',
+        dataIndex: 'vehicleType',
         customRender: (text, row, index) => {
           switch (text) {
-            case 1:
-              return <a-tag>男</a-tag>
-            case 2:
-              return <a-tag>女</a-tag>
+            case '1':
+              return <a-tag>大型车</a-tag>
+            case '2':
+              return <a-tag>中型车</a-tag>
+            case '3':
+              return <a-tag>小型车</a-tag>
             default:
               return '- -'
           }
         }
+      }, {
+        title: '发动机编号',
+        dataIndex: 'engineNo',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
       }, {
         title: '照片',
         dataIndex: 'images',
@@ -161,68 +179,57 @@ export default {
           </a-popover>
         }
       }, {
-        title: '状态',
-        dataIndex: 'status',
+        title: '燃料类型',
+        dataIndex: 'fuelType',
         customRender: (text, row, index) => {
           switch (text) {
-            case 1:
-              return <a-tag color="green">接单中</a-tag>
-            case 2:
-              return <a-tag color="red">离开</a-tag>
+            case '1':
+              return <a-tag>燃油</a-tag>
+            case '2':
+              return <a-tag>柴油</a-tag>
+            case '3':
+              return <a-tag>油电混动</a-tag>
+            case '4':
+              return <a-tag>电能</a-tag>
             default:
               return '- -'
           }
         }
       }, {
-        title: '余额',
-        dataIndex: 'price',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text + '元'
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '年龄',
-        dataIndex: 'birthDate',
-        customRender: (text, row, index) => {
-          if (text) {
-            const birthYear = new Date(text).getFullYear();
-            const currentYear = new Date().getFullYear();
-            return currentYear - birthYear;
-          } else {
-            return '- -';
-          }
-        }
-      }, {
-        title: '服务评分',
-        dataIndex: 'serviceScore',
-        customRender: (text, row, index) => {
-          if (text !== null && text !== undefined) {
-            // 使用Rate组件显示评分，支持半星显示
-            return <a-rate
-              value={text}
-              count={5}
-              allowHalf
-              disabled
-              style={{ fontSize: '14px' }}
-            />;
-          } else {
-            return '- -';
-          }
-        }
-      }, {
-        title: '创建时间',
-        dataIndex: 'createDate',
-        ellipsis: true,
+        title: '所属配送员工',
+        dataIndex: 'merchantName',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
           } else {
             return '- -'
           }
+        },
+        ellipsis: true
+      }, {
+        title: '运营状态',
+        dataIndex: 'operationState',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return <a-tag>未运营</a-tag>
+            case '1':
+              return <a-tag>运营中</a-tag>
+            default:
+              return '- -'
+          }
         }
+      }, {
+        title: '创建时间',
+        dataIndex: 'createDate',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -234,8 +241,20 @@ export default {
     this.fetch()
   },
   methods: {
+    handlevehicleViewClose () {
+      this.vehicleView.visiable = false
+    },
+    handlevehicleViewOpen (row) {
+      this.vehicleView.data = row
+      this.vehicleView.visiable = true
+    },
+    selectShopList () {
+      this.$get(`/cos/brand-info/list`).then((r) => {
+        this.brandList = r.data.data
+      })
+    },
     editStatus (row, status) {
-      this.$post('/business/staff-info/account/status', { staffId: row.id, status }).then((r) => {
+      this.$post('/cos/vehicle-info/account/status', { vehicleId: row.id, status }).then((r) => {
         this.$message.success('修改成功')
         this.fetch()
       })
@@ -247,26 +266,26 @@ export default {
       this.advanced = !this.advanced
     },
     add () {
-      this.staffAdd.visiable = true
+      this.vehicleAdd.visiable = true
     },
-    handlestaffAddClose () {
-      this.staffAdd.visiable = false
+    handlevehicleAddClose () {
+      this.vehicleAdd.visiable = false
     },
-    handlestaffAddSuccess () {
-      this.staffAdd.visiable = false
-      this.$message.success('新增车主成功')
+    handlevehicleAddSuccess () {
+      this.vehicleAdd.visiable = false
+      this.$message.success('新增车辆成功')
       this.search()
     },
     edit (record) {
-      this.$refs.staffEdit.setFormValues(record)
-      this.staffEdit.visiable = true
+      this.$refs.vehicleEdit.setFormValues(record)
+      this.vehicleEdit.visiable = true
     },
-    handlestaffEditClose () {
-      this.staffEdit.visiable = false
+    handlevehicleEditClose () {
+      this.vehicleEdit.visiable = false
     },
-    handlestaffEditSuccess () {
-      this.staffEdit.visiable = false
-      this.$message.success('修改车主成功')
+    handlevehicleEditSuccess () {
+      this.vehicleEdit.visiable = false
+      this.$message.success('修改车辆成功')
       this.search()
     },
     handleDeptChange (value) {
@@ -284,7 +303,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/business/staff-info/' + ids).then(() => {
+          that.$delete('/cos/vehicle-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -354,10 +373,10 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.status === undefined) {
-        delete params.status
+      if (params.brand === undefined) {
+        delete params.brand
       }
-      this.$get('/business/staff-info/page', {
+      this.$get('/cos/vehicle-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

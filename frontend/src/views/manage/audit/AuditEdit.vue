@@ -127,7 +127,7 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
-          this.$put('/business/supplier-audit-record', {
+          this.$put('/business/audit-info', {
             ...values
           }).then((r) => {
             this.reset()

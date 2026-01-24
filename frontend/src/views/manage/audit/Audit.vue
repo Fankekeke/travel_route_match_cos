@@ -7,7 +7,7 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="供应商名称"
+                label="车主名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.supplierName"/>
@@ -164,7 +164,7 @@ export default {
           }
         }
       }, {
-        title: '供应商名称',
+        title: '车主名称',
         dataIndex: 'supplierName',
         ellipsis: true,
         customRender: (text, row, index) => {
@@ -197,7 +197,7 @@ export default {
           }
         }
       }, {
-        title: '供应商图片',
+        title: '车主图片',
         dataIndex: 'supplierImages',
         customRender: (text, record, index) => {
           if (!record.supplierImages) return <a-avatar shape="square" icon="user"/>
@@ -306,7 +306,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/business/supplier-audit-record/' + ids).then(() => {
+          that.$delete('/business/audit-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -379,7 +379,7 @@ export default {
       if (params.status === undefined) {
         delete params.status
       }
-      this.$get('/business/supplier-audit-record/page', {
+      this.$get('/business/audit-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

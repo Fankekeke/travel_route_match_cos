@@ -102,17 +102,12 @@ public class VehicleInfo implements Serializable {
     /**
      * 创建时间
      */
-    private LocalDateTime createDate;
+    private String createDate;
 
     /**
      * 所属车主
      */
     private Integer staffId;
-
-    /**
-     * 每日租金
-     */
-    private BigDecimal dayPrice;
 
     /**
      * 座位数量

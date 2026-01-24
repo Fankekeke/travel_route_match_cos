@@ -17,6 +17,7 @@ import darabonba.core.TeaPair;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
 
 public class RecognizeIdcardController {
 

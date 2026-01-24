@@ -27,7 +27,7 @@ public class NotifyInfoServiceImpl extends ServiceImpl<NotifyInfoMapper, NotifyI
      */
     @Override
     public IPage<LinkedHashMap<String, Object>> queryPage(Page<NotifyInfo> page, NotifyInfo queryFrom) {
-        return baseMapper.queryPage(page, queryFrom);
+        return baseMapper.queryPageStaff(page, queryFrom);
     }
 
     /**
