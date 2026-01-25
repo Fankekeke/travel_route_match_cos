@@ -26,7 +26,7 @@ import java.io.IOException;
  * 人脸识别
  */
 @RestController
-@RequestMapping("/cos/face")
+@RequestMapping("/business/face")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FaceRecognitionController {
 

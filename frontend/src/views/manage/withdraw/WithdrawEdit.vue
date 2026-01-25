@@ -229,7 +229,7 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
-          this.$put('/cos/withdraw-info', {
+          this.$put('/business/withdraw-info', {
             ...values
           }).then((r) => {
             this.reset()

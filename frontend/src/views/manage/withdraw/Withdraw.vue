@@ -288,7 +288,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/withdraw-info/' + ids).then(() => {
+          that.$delete('/business/withdraw-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -361,7 +361,7 @@ export default {
       if (params.status === undefined) {
         delete params.status
       }
-      this.$get('/cos/withdraw-info/page', {
+      this.$get('/business/withdraw-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

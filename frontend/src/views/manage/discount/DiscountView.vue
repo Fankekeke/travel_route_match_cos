@@ -53,16 +53,16 @@
         <a-col :span="8"><b>所属用户：</b>
           {{ discountData.userName }}
         </a-col>
-        <a-col :span="8"><b>邮箱地址：</b>
-          {{ discountData.mail }}
+        <a-col :span="8"><b>用户编号：</b>
+          {{ discountData.userCode }}
         </a-col>
         <a-col :span="8"><b>联系方式：</b>
-          {{ discountData.phone }}
+          {{ discountData.userPhone }}
         </a-col>
       </a-row>
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">图册</span></a-col>
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">用户头像</span></a-col>
         <a-col :span="24">
           <a-upload
             name="avatar"
@@ -130,7 +130,7 @@ export default {
   watch: {
     discountShow: function (value) {
       if (value) {
-        this.imagesInit(this.discountData.images)
+        this.imagesInit(this.discountData.userImages)
       }
     }
   },

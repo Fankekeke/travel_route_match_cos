@@ -406,6 +406,9 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         values.idCardFrontImages = idCardFrontImages.length > 0 ? idCardFrontImages.join(',') : null
         values.idCardReverseImages = idCardReverseImages.length > 0 ? idCardReverseImages.join(',') : null
+        if (values.birthDate) {
+          values.birthDate = moment(values.birthDate).format('YYYY-MM-DD')
+        }
         if (!err) {
           this.loading = true
           this.$put('/business/staff-info', {

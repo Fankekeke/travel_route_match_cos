@@ -130,7 +130,7 @@ export default {
       console.log(this.discountType)
     },
     selectUserList () {
-      this.$get(`/cos/user-info/list`).then((r) => {
+      this.$get(`/business/user-info/list`).then((r) => {
         this.userList = r.data.data
       })
     },
@@ -164,7 +164,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          this.$post('/cos/discount-info', {
+          this.$post('/business/discount-info', {
             ...values
           }).then((r) => {
             this.reset()

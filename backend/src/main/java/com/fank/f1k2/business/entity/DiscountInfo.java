@@ -3,6 +3,8 @@ package com.fank.f1k2.business.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -77,6 +79,12 @@ public class DiscountInfo implements Serializable {
      * 折扣
      */
     private BigDecimal rebate;
+
+    /**
+     * 用户名
+     */
+    @TableField(exist = false)
+    private BigDecimal userName;
 
 
 }

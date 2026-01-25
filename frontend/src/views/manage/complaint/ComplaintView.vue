@@ -139,7 +139,7 @@ export default {
       }
     },
     check (type) {
-      this.$put('/cos/audit-info/check', {auditId: this.auditData.id, type: type}).then((r) => {
+      this.$put('/business/audit-info/check', {auditId: this.auditData.id, type: type}).then((r) => {
         this.$emit('checkClose')
       })
     },

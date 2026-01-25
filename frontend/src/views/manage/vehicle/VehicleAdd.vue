@@ -188,7 +188,7 @@ export default {
   },
   methods: {
     selectShopList () {
-      this.$get(`/cos/merchant-info/list`).then((r) => {
+      this.$get(`/business/merchant-info/list`).then((r) => {
         this.shopList = r.data.data
       })
     },
@@ -226,7 +226,7 @@ export default {
             values.factoryDate = moment(values.factoryDate).format('YYYY-MM-DD')
           }
           this.loading = true
-          this.$post('/cos/vehicle-info', {
+          this.$post('/business/vehicle-info', {
             ...values
           }).then((r) => {
             this.reset()

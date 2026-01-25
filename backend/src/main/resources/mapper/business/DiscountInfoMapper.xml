@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.DiscountInfoMapper">
 
-    <!-- 分页获取投诉记录 -->
+    <!-- 分页获取优惠券管理 -->
     <select id="queryPage" resultType="java.util.LinkedHashMap">
         select
         di.id,
@@ -17,9 +17,10 @@
         di.content,
         di.rebate,
 
+        ui.code as userCode,
         ui.NAME as userName,
         ui.phone as userPhone,
-        ui.images as userImages,
+        ui.images as userImages
 
         from
         discount_info di

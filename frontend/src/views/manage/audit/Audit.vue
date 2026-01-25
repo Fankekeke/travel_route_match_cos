@@ -15,10 +15,10 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="审核编号"
+                label="联系方式"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.code"/>
+                <a-input v-model="queryParams.phone"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
@@ -26,7 +26,7 @@
                 label="完成状态"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-select v-model="queryParams.status" allowClear>
+                <a-select v-model="queryParams.auditStatus" allowClear>
                   <a-select-option value="0">未审核</a-select-option>
                   <a-select-option value="1">通过</a-select-option>
                   <a-select-option value="2">驳回</a-select-option>
@@ -132,121 +132,166 @@ export default {
       currentUser: state => state.account.user
     }),
     columns () {
-      return [{
-        title: '审核编号',
-        dataIndex: 'code',
-        ellipsis: true
-      }, {
-        title: '审核备注',
-        dataIndex: 'content',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+      return [
+        {
+          title: '头像',
+          dataIndex: 'userImages',
+          customRender: (text, record, index) => {
+            if (!text) return <a-avatar shape="circle" icon="user" />
+            return (
+              <a-popover>
+                <template slot="content">
+                  <a-avatar
+                    shape="circle"
+                    size={132}
+                    icon="user"
+                    src={`http://127.0.0.1:9527/imagesWeb/${text}`}
+                  />
+                </template>
+                <a-avatar
+                  shape="circle"
+                  size="small"
+                  icon="user"
+                  src={`http://127.0.0.1:9527/imagesWeb/${text}`}
+                />
+              </a-popover>
+            )
           }
-        }
-      }, {
-        title: '审核状态',
-        dataIndex: 'status',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag>未审核</a-tag>
-            case '1':
-              return <a-tag color="green">通过</a-tag>
-            case '2':
-              return <a-tag color="red">驳回</a-tag>
-            default:
+        },
+        {
+          title: '申请时间',
+          dataIndex: 'createDate',
+          ellipsis: true,
+          customRender: (text, row, index) => {
+            if (text !== null) {
+              return text
+            } else {
               return '- -'
+            }
           }
-        }
-      }, {
-        title: '车主名称',
-        dataIndex: 'supplierName',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+        },
+        {
+          title: '审核状态',
+          dataIndex: 'auditStatus',
+          ellipsis: true,
+          customRender: (text, row, index) => {
+            switch (text) {
+              case 0:
+                return <a-tag>未审核</a-tag>
+              case 1:
+                return <a-tag color="green">通过</a-tag>
+              case 2:
+                return <a-tag color="red">驳回</a-tag>
+              default:
+                return '- -'
+            }
           }
-        }
-      }, {
-        title: '负责人',
-        dataIndex: 'chargePerson',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+        },
+        {
+          title: '申请内容',
+          dataIndex: 'introduction',
+          ellipsis: true,
+          customRender: (text, row, index) => {
+            if (text !== null) {
+              return text
+            } else {
+              return '- -'
+            }
           }
-        }
-      }, {
-        title: '联系方式',
-        dataIndex: 'phone',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+        },
+        {
+          title: '用户名',
+          dataIndex: 'name',
+          ellipsis: true
+        },
+        {
+          title: '性别',
+          dataIndex: 'sex',
+          ellipsis: true,
+          customRender: (text, row, index) => {
+            if (text === 1) {
+              return '男'
+            } else if (text === 0) {
+              return '女'
+            } else {
+              return '- -'
+            }
           }
-        }
-      }, {
-        title: '车主图片',
-        dataIndex: 'supplierImages',
-        customRender: (text, record, index) => {
-          if (!record.supplierImages) return <a-avatar shape="square" icon="user"/>
-          return <a-popover>
-            <template slot="content">
-              <a-avatar shape="square" size={132} icon="user"
-                src={'http://127.0.0.1:9527/imagesWeb/' + record.supplierImages.split(',')[0]}/>
-            </template>
-            <a-avatar shape="square" icon="user"
-              src={'http://127.0.0.1:9527/imagesWeb/' + record.supplierImages.split(',')[0]}/>
-          </a-popover>
-        }
-      }, {
-        title: '可供类型',
-        dataIndex: 'supplyType',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+        },
+        {
+          title: '联系方式',
+          dataIndex: 'phone',
+          ellipsis: true
+        },
+        {
+          title: '年龄',
+          dataIndex: 'birthDate',
+          customRender: (text, row, index) => {
+            if (text) {
+              const birthYear = new Date(text).getFullYear()
+              const currentYear = new Date().getFullYear()
+              return currentYear - birthYear
+            } else {
+              return '- -'
+            }
           }
-        }
-      }, {
-        title: '审核时间',
-        dataIndex: 'auditDate',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+        },
+        {
+          title: '身份证正面',
+          dataIndex: 'idCardFrontImages',
+          customRender: (text, record, index) => {
+            if (!text) return <a-avatar shape="square" icon="idcard" />
+            return (
+              <a-popover>
+                <template slot="content">
+                  <a-avatar
+                    shape="square"
+                    size={132}
+                    icon="idcard"
+                    src={`http://127.0.0.1:9527/imagesWeb/${text}`}
+                  />
+                </template>
+                <a-avatar
+                  shape="square"
+                  size="small"
+                  icon="idcard"
+                  src={`http://127.0.0.1:9527/imagesWeb/${text}`}
+                />
+              </a-popover>
+            )
           }
-        }
-      }, {
-        title: '创建时间',
-        dataIndex: 'createDate',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
+        },
+        {
+          title: '身份证反面',
+          dataIndex: 'idCardReverseImages',
+          customRender: (text, record, index) => {
+            if (!text) return <a-avatar shape="square" icon="idcard" />
+            return (
+              <a-popover>
+                <template slot="content">
+                  <a-avatar
+                    shape="square"
+                    size={132}
+                    icon="idcard"
+                    src={`http://127.0.0.1:9527/imagesWeb/${text}`}
+                  />
+                </template>
+                <a-avatar
+                  shape="square"
+                  size="small"
+                  icon="idcard"
+                  src={`http://127.0.0.1:9527/imagesWeb/${text}`}
+                />
+              </a-popover>
+            )
           }
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          scopedSlots: { customRender: 'operation' }
         }
-      }, {
-        title: '操作',
-        dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'}
-      }]
+      ]
     }
   },
   mounted () {
@@ -376,8 +421,8 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.status === undefined) {
-        delete params.status
+      if (params.auditStatus === undefined) {
+        delete params.auditStatus
       }
       this.$get('/business/audit-info/page', {
         ...params

@@ -112,7 +112,7 @@ export default {
   },
   methods: {
     changeDetail (id) {
-      this.$get(`/cos/exchange-info/${id}`).then((r) => {
+      this.$get(`/business/exchange-info/${id}`).then((r) => {
         this.userInfo = r.data.user
         this.exchangeInfo = r.data.exchange
         this.materialInfo = r.data.material

@@ -143,7 +143,7 @@ export default {
       // driving.search(new BMap.Point(this.nowPoint.lng,this.nowPoint.lat), new BMap.Point(scenic.point.split(",")[0],scenic.point.split(",")[1]));
     },
     dataInit (vehicleNo) {
-      this.$get(`/cos/vehicle-info/detail/${vehicleNo}`).then((r) => {
+      this.$get(`/business/vehicle-info/detail/${vehicleNo}`).then((r) => {
         this.vehicleInfo = r.data.vehicle
         this.shopInfo = r.data.shop
         this.brandInfo = r.data.brand

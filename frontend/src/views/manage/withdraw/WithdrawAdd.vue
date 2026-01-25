@@ -80,7 +80,7 @@ export default {
   },
   methods: {
     getStaff () {
-      this.$get(`/cos/staff-info/detail/${this.currentUser.userId}`).then((r) => {
+      this.$get(`/business/staff-info/detail/${this.currentUser.userId}`).then((r) => {
         this.staffInfo = r.data.data
         this.form.setFieldsValue({'accountPrice': this.staffInfo.price})
       })
@@ -118,7 +118,7 @@ export default {
         if (!err) {
           this.loading = true
           values.staffId = this.currentUser.userId
-          this.$post('/cos/withdraw-info', {
+          this.$post('/business/withdraw-info', {
             ...values
           }).then((r) => {
             this.reset()

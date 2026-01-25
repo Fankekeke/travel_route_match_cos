@@ -249,12 +249,12 @@ export default {
       this.vehicleView.visiable = true
     },
     selectShopList () {
-      this.$get(`/cos/brand-info/list`).then((r) => {
+      this.$get(`/business/brand-info/list`).then((r) => {
         this.brandList = r.data.data
       })
     },
     editStatus (row, status) {
-      this.$post('/cos/vehicle-info/account/status', { vehicleId: row.id, status }).then((r) => {
+      this.$post('/business/vehicle-info/account/status', { vehicleId: row.id, status }).then((r) => {
         this.$message.success('修改成功')
         this.fetch()
       })
@@ -303,7 +303,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/vehicle-info/' + ids).then(() => {
+          that.$delete('/business/vehicle-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -376,7 +376,7 @@ export default {
       if (params.brand === undefined) {
         delete params.brand
       }
-      this.$get('/cos/vehicle-info/page', {
+      this.$get('/business/vehicle-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

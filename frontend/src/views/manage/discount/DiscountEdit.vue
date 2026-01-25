@@ -130,7 +130,7 @@ export default {
       this.discountType = value
     },
     selectUserList () {
-      this.$get(`/cos/user-info/list`).then((r) => {
+      this.$get(`/business/user-info/list`).then((r) => {
         this.userList = r.data.data
       })
     },
@@ -192,7 +192,7 @@ export default {
         values.id = this.rowId
         if (!err) {
           this.loading = true
-          this.$put('/cos/discount-info', {
+          this.$put('/business/discount-info', {
             ...values
           }).then((r) => {
             this.reset()

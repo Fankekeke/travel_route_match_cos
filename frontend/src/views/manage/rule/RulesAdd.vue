@@ -127,7 +127,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          this.$post('/cos/price-rules', {
+          this.$post('/business/price-rules', {
             ...values
           }).then((r) => {
             this.reset()

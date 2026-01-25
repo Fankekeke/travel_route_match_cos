@@ -265,7 +265,7 @@ export default {
   },
   methods: {
     dataInit (orderId) {
-      this.$get(`/cos/order-info/evaluate/${orderId}`).then((r) => {
+      this.$get(`/business/order-info/evaluate/${orderId}`).then((r) => {
         this.userInfo = r.data.user
         this.orderInfo = r.data.order
         this.startAddressInfo = r.data.startAddress

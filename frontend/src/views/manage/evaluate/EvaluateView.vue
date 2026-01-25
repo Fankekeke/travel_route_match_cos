@@ -83,7 +83,7 @@
         </a-col>
       </a-row>
       <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;">  
+      <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col :span="6"><b>联系电话：</b>
           {{ vehicleInfo.phone }}
         </a-col>
@@ -165,7 +165,7 @@ export default {
   },
   methods: {
     dataInit (id) {
-      this.$get(`/cos/vehicle-info/evaluate/detail/${id}`).then((r) => {
+      this.$get(`/business/vehicle-info/evaluate/detail/${id}`).then((r) => {
         this.userInfo = r.data.user
         this.orderInfo = r.data.order
         this.vehicleInfo = r.data.vehicle

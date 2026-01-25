@@ -210,7 +210,7 @@ export default {
   methods: {
     view (row) {
       row.status = 1
-      this.$put('/cos/complaint-info', row).then((r) => {
+      this.$put('/business/complaint-info', row).then((r) => {
         this.$message.success('处理完成')
         this.search()
       })
@@ -244,7 +244,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/complaint-info/' + ids).then(() => {
+          that.$delete('/business/complaint-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -317,7 +317,7 @@ export default {
       if (params.auditStatus === undefined) {
         delete params.auditStatus
       }
-      this.$get('/cos/complaint-info/page', {
+      this.$get('/business/complaint-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

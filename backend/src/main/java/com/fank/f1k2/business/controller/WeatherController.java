@@ -18,7 +18,7 @@ import java.io.InputStream;
  * @author FanK
  */
 @RestController
-@RequestMapping("/cos/weather-info")
+@RequestMapping("/business/weather-info")
 public class WeatherController {
 
     /**
