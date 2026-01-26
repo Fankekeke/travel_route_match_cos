@@ -1,39 +1,60 @@
+
 <template>
-  <a-modal v-model="show" title="提现记录详情" @cancel="onClose" :width="700">
+  <a-modal v-model="show" title="提现记录详情" @cancel="onClose" :width="800"
+           :body-style="{ padding: '0' }">
     <template slot="footer">
-      <a-button key="back" @click="onClose" type="danger">
+      <a-button key="back" @click="onClose" type="default">
         关闭
       </a-button>
     </template>
-    <div style="font-size: 13px;font-family: SimHei" v-if="withdrawData !== null">
-      <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">基础信息</span></a-col>
-        <a-col :span="8"><b>车主编号：</b>
-          {{ withdrawData.code }}
-        </a-col>
-        <a-col :span="8"><b>车主姓名：</b>
-          {{ withdrawData.name ? withdrawData.name : '- -' }}
-        </a-col>
-        <a-col :span="8"><b>联系方式：</b>
-          {{ withdrawData.phone ? withdrawData.phone : '- -' }}
-        </a-col>
-      </a-row>
-      <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="8"><b>提现金额：</b>
-          {{ withdrawData.withdrawPrice }} 元
-        </a-col>
-        <a-col :span="8"><b>提现后余额：</b>
-          {{ withdrawData.accountPrice }} 元
-        </a-col>
-        <a-col :span="8"><b>申请时间：</b>
-          {{ withdrawData.createDate }}
-        </a-col>
-      </a-row>
-      <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">图册</span></a-col>
-        <a-col :span="24">
+
+    <div class="withdraw-detail-container" v-if="withdrawData !== null">
+      <!-- 基础信息区域 -->
+      <div class="info-section">
+        <div class="section-header">
+          <h3 class="section-title">基础信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">车主编号：</span>
+            <span class="value">{{ withdrawData.code }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">车主姓名：</span>
+            <span class="value">{{ withdrawData.name ? withdrawData.name : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">联系方式：</span>
+            <span class="value">{{ withdrawData.phone ? withdrawData.phone : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">提现金额：</span>
+            <span class="value amount">¥{{ withdrawData.withdrawPrice }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">提现后余额：</span>
+            <span class="value balance">¥{{ withdrawData.accountPrice }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">申请时间：</span>
+            <span class="value date">{{ withdrawData.createDate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 附件凭证区域 -->
+      <div class="attachment-section">
+        <div class="section-header">
+          <h3 class="section-title">附件凭证</h3>
+        </div>
+
+        <div class="attachment-content">
           <a-upload
             name="avatar"
             action="http://127.0.0.1:9527/file/fileUpload/"
@@ -41,19 +62,19 @@
             :file-list="fileList"
             @preview="handlePreview"
             @change="picHandleChange"
+            :disabled="true"
           >
           </a-upload>
           <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
             <img alt="example" style="width: 100%" :src="previewImage" />
           </a-modal>
-        </a-col>
-      </a-row>
+        </div>
+      </div>
     </div>
   </a-modal>
 </template>
 
-<script>
-import baiduMap from '@/utils/map/baiduMap'
+<script>import baiduMap from '@/utils/map/baiduMap'
 import moment from 'moment'
 moment.locale('zh-cn')
 function getBase64 (file) {
@@ -144,6 +165,97 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped>.withdraw-detail-container {
+  padding: 0;
+}
 
+.info-section,
+.attachment-section {
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-section:last-child,
+.attachment-section:last-child {
+  border-bottom: none;
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1d;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1890ff;
+  display: inline-block;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.info-item .label {
+  font-weight: 500;
+  color: #595959;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.info-item .value {
+  font-size: 14px;
+  color: #262626;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.info-item .amount {
+  color: #f5222d;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.info-item .balance {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.info-item .date {
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.attachment-content {
+  background-color: #fafafa;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-section,
+  .attachment-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+}
 </style>

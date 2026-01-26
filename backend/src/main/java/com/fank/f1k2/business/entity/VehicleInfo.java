@@ -1,9 +1,8 @@
 package com.fank.f1k2.business.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -55,11 +54,6 @@ public class VehicleInfo implements Serializable {
     private String engineNo;
 
     /**
-     * 载客数量
-     */
-    private Integer carryPassengers;
-
-    /**
      * 所属品牌
      */
     private String brand;
@@ -72,12 +66,12 @@ public class VehicleInfo implements Serializable {
     /**
      * 出场日期
      */
-    private LocalDate factoryDate;
+    private String factoryDate;
 
     /**
      * 车辆类型（1.轿车 2.商务车 3.大巴）
      */
-    private Integer useType;
+    private String useType;
 
     /**
      * 排放标准
@@ -113,5 +107,11 @@ public class VehicleInfo implements Serializable {
      * 座位数量
      */
     private Integer seatNum;
+
+    /**
+     * 车主名称
+     */
+    @TableField(exist = false)
+    private String staffName;
 
 }

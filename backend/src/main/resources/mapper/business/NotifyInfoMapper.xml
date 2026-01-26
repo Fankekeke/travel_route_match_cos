@@ -27,6 +27,9 @@
         <if test="queryFrom.staffName != null and queryFrom.staffName != ''">
             AND si.NAME LIKE CONCAT('%',#{queryFrom.staffName},'%')
         </if>
+        <if test="queryFrom.content != null and queryFrom.content != ''">
+            AND ni.content LIKE CONCAT('%',#{queryFrom.content},'%')
+        </if>
         ORDER BY
         ni.create_date DESC
     </select>
@@ -54,6 +57,9 @@
         AND ni.user_id IS NOT NULL
         <if test="queryFrom.userName != null and queryFrom.userName != ''">
             AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
+        </if>
+        <if test="queryFrom.content != null and queryFrom.content != ''">
+            AND ni.content LIKE CONCAT('%',#{queryFrom.content},'%')
         </if>
         ORDER BY
         ni.create_date DESC

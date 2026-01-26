@@ -7,30 +7,18 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="车主编号"
+                label="车主名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.code"/>
+                <a-input v-model="queryParams.userName"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="车主姓名"
+                label="消息内容"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.staffName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="提现状态"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-select v-model="queryParams.status" allowClear>
-                  <a-select-option value="0">待审核</a-select-option>
-                  <a-select-option value="1">通过</a-select-option>
-                  <a-select-option value="2">驳回</a-select-option>
-                </a-select>
+                <a-input v-model="queryParams.content"/>
               </a-form-item>
             </a-col>
           </div>
@@ -43,7 +31,7 @@
     </div>
     <div>
       <div class="operator">
-<!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
+        <!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
         <a-button @click="batchDelete">删除</a-button>
       </div>
       <!-- 表格区域 -->
@@ -56,68 +44,49 @@
                :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                :scroll="{ x: 900 }"
                @change="handleTableChange">
+        <template slot="avatarShow" slot-scope="text, record">
+          <template>
+            <img alt="头像" :src="'static/avatar/' + text">
+          </template>
+        </template>
+        <template slot="contentShow" slot-scope="text, record">
+          <template>
+            <a-tooltip>
+              <template slot="title">
+                {{ record.content }}
+              </template>
+              {{ record.content.slice(0, 30) }} ...
+            </a-tooltip>
+          </template>
+        </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon v-if="record.status == 0" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="withdrawAuditOpen(record)" title="审 核"></a-icon>
-          <a-icon type="file-search" @click="withdrawViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
     </div>
-    <withdraw-add
-      v-if="withdrawAdd.visiable"
-      @close="handlewithdrawAddClose"
-      @success="handlewithdrawAddSuccess"
-      :withdrawAddVisiable="withdrawAdd.visiable">
-    </withdraw-add>
-    <withdraw-edit
-      ref="withdrawEdit"
-      @close="handlewithdrawEditClose"
-      @success="handlewithdrawEditSuccess"
-      :withdrawEditVisiable="withdrawEdit.visiable">
-    </withdraw-edit>
-    <withdraw-view
-      @close="handlewithdrawViewClose"
-      :withdrawShow="withdrawView.visiable"
-      :withdrawData="withdrawView.data">
-    </withdraw-view>
-    <withdraw-audit
-      @close="handlewithdrawAuditClose"
-      @auditSuccess="handlewithdrawViewSuccess"
-      :withdrawShow="withdrawAudit.visiable"
-      :withdrawData="withdrawAudit.data">
-    </withdraw-audit>
+    <user-view
+      @close="handleUserViewClose"
+      :userShow="userView.visiable"
+      :userData="userView.data">
+    </user-view>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
-import withdrawAdd from './WithdrawAdd'
-import withdrawEdit from './WithdrawEdit'
-import withdrawView from './WithdrawView.vue'
-import withdrawAudit from './WithdrawAudit.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
-  name: 'withdraw',
-  components: {withdrawAdd, withdrawEdit, withdrawView, RangeDate, withdrawAudit},
+  name: 'User',
+  components: {RangeDate},
   data () {
     return {
+      userView: {
+        visiable: false,
+        data: null
+      },
       advanced: false,
-      withdrawAdd: {
-        visiable: false
-      },
-      withdrawEdit: {
-        visiable: false
-      },
-      withdrawView: {
-        visiable: false,
-        data: null
-      },
-      withdrawAudit: {
-        visiable: false,
-        data: null
-      },
       queryParams: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -142,86 +111,40 @@ export default {
     }),
     columns () {
       return [{
-        title: '车主编号',
-        ellipsis: true,
-        dataIndex: 'code'
-      }, {
-        title: '车主姓名',
-        ellipsis: true,
-        dataIndex: 'name'
-      }, {
         title: '照片',
-        dataIndex: 'images',
+        dataIndex: 'staffImages',
         customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
+          if (!record.staffImages) return <a-avatar shape="square" icon="user" />
           return <a-popover>
             <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.staffImages.split(',')[0] } />
             </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.staffImages.split(',')[0] } />
           </a-popover>
         }
       }, {
-        title: '联系方式',
-        dataIndex: 'phone',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
+        title: '车主名称',
+        dataIndex: 'staffName'
       }, {
-        title: '提现金额',
-        dataIndex: 'withdrawPrice',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '账户余额',
-        dataIndex: 'accountPrice',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '审核状态',
-        dataIndex: 'status',
+        title: '消息状态',
+        dataIndex: 'delFlag',
         customRender: (text, row, index) => {
           switch (text) {
-            case '0':
-              return <a-tag>待审核</a-tag>
-            case '1':
-              return <a-tag color="green">通过</a-tag>
-            case '2':
-              return <a-tag color="red">驳回</a-tag>
+            case 0:
+              return <a-tag>未读</a-tag>
+            case 1:
+              return <a-tag color="blue">已读</a-tag>
             default:
               return '- -'
           }
         }
       }, {
-        title: '创建时间',
-        dataIndex: 'createDate',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
+        title: '消息内容',
+        dataIndex: 'content',
+        width: 750
       }, {
-        title: '操作',
-        dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'}
+        title: '发送时间',
+        dataIndex: 'createDate'
       }]
     }
   },
@@ -229,53 +152,18 @@ export default {
     this.fetch()
   },
   methods: {
-    withdrawAuditOpen (row) {
-      this.withdrawAudit.data = row
-      this.withdrawAudit.visiable = true
+    view (row) {
+      this.userView.data = row
+      this.userView.visiable = true
     },
-    withdrawViewOpen (row) {
-      this.withdrawView.data = row
-      this.withdrawView.visiable = true
-    },
-    handlewithdrawViewClose () {
-      this.withdrawView.visiable = false
-    },
-    handlewithdrawAuditClose () {
-      this.withdrawAudit.visiable = false
-    },
-    handlewithdrawViewSuccess () {
-      this.withdrawAudit.visiable = false
-      this.$message.success('审核成功')
-      this.search()
+    handleUserViewClose () {
+      this.userView.visiable = false
     },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
-    },
-    add () {
-      this.withdrawAdd.visiable = true
-    },
-    handlewithdrawAddClose () {
-      this.withdrawAdd.visiable = false
-    },
-    handlewithdrawAddSuccess () {
-      this.withdrawAdd.visiable = false
-      this.$message.success('新增提现记录成功')
-      this.search()
-    },
-    edit (record) {
-      this.$refs.withdrawEdit.setFormValues(record)
-      this.withdrawEdit.visiable = true
-    },
-    handlewithdrawEditClose () {
-      this.withdrawEdit.visiable = false
-    },
-    handlewithdrawEditSuccess () {
-      this.withdrawEdit.visiable = false
-      this.$message.success('修改提现记录成功')
-      this.search()
     },
     handleDeptChange (value) {
       this.queryParams.deptId = value || ''
@@ -292,7 +180,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/business/withdraw-info/' + ids).then(() => {
+          that.$delete('/business/notify-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -362,10 +250,10 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.status === undefined) {
-        delete params.status
+      if (params.readStatus === undefined) {
+        delete params.readStatus
       }
-      this.$get('/business/withdraw-info/page', {
+      this.$get('/business/notify-info/page/user', {
         ...params
       }).then((r) => {
         let data = r.data.data

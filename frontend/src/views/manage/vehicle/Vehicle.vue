@@ -15,10 +15,10 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="所属配送员工"
+                label="所属车主"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.merchantName"/>
+                <a-input v-model="queryParams.staffName"/>
               </a-form-item>
             </a-col>
           </div>
@@ -129,10 +129,6 @@ export default {
     }),
     columns () {
       return [{
-        title: '车辆编号',
-        dataIndex: 'vehicleCode',
-        ellipsis: true
-      }, {
         title: '车牌号码',
         dataIndex: 'vehicleNo',
         ellipsis: true
@@ -142,22 +138,22 @@ export default {
         ellipsis: true
       }, {
         title: '车辆类型',
-        dataIndex: 'vehicleType',
+        dataIndex: 'useType',
         customRender: (text, row, index) => {
           switch (text) {
             case '1':
-              return <a-tag>大型车</a-tag>
+              return <a-tag>轿车</a-tag>
             case '2':
-              return <a-tag>中型车</a-tag>
+              return <a-tag>商务车</a-tag>
             case '3':
-              return <a-tag>小型车</a-tag>
+              return <a-tag>大巴</a-tag>
             default:
               return '- -'
           }
         }
       }, {
-        title: '发动机编号',
-        dataIndex: 'engineNo',
+        title: '座位数量',
+        dataIndex: 'seatNum',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -196,8 +192,8 @@ export default {
           }
         }
       }, {
-        title: '所属配送员工',
-        dataIndex: 'merchantName',
+        title: '所属车主',
+        dataIndex: 'staffName',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -207,18 +203,9 @@ export default {
         },
         ellipsis: true
       }, {
-        title: '运营状态',
-        dataIndex: 'operationState',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag>未运营</a-tag>
-            case '1':
-              return <a-tag>运营中</a-tag>
-            default:
-              return '- -'
-          }
-        }
+        title: '车辆品牌',
+        dataIndex: 'brand',
+        ellipsis: true
       }, {
         title: '创建时间',
         dataIndex: 'createDate',

@@ -40,6 +40,18 @@ public class NotifyInfoController {
     }
 
     /**
+     * 分页获取消息通知
+     *
+     * @param page      分页对象
+     * @param queryFrom 消息通知
+     * @return 结果
+     */
+    @GetMapping("/page/user")
+    public R queryPageUser(Page<NotifyInfo> page, NotifyInfo queryFrom) {
+        return R.ok(notifyInfoService.queryPageUser(page, queryFrom));
+    }
+
+    /**
      * 查询消息通知详情
      *
      * @param id 主键ID

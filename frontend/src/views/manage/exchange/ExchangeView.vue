@@ -1,63 +1,85 @@
+
 <template>
-  <a-modal v-model="show" title="兑换详情" @cancel="onClose" :width="1000">
+  <a-modal v-model="show" title="兑换详情" @cancel="onClose" :width="800"
+           :body-style="{ padding: '0' }">
     <template slot="footer">
-      <a-button key="back" @click="onClose" type="danger">
+      <a-button key="back" @click="onClose" type="default">
         关闭
       </a-button>
     </template>
-    <div style="font-size: 13px;font-family: SimHei">
-      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="exchangeData !== null">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">兑换信息</span></a-col>
-        <a-col :span="8"><b>兑换时间：</b>
-          {{ exchangeData.createDate }}
-        </a-col>
-        <a-col :span="8"><b>消耗积分：</b>
-          {{ exchangeData.integral ? exchangeData.integral : '- -' }}
-        </a-col>
-      </a-row>
-      <br/>
-      <div v-if="userInfo != null">
-        <a-row style="padding-left: 24px;padding-right: 24px;">
-          <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">用户信息</span></a-col>
-          <a-col :span="8"><b>用户编号：</b>
-            {{ userInfo.code }}
-          </a-col>
-          <a-col :span="8"><b>用户名称：</b>
-            {{ userInfo.name ? userInfo.name : '- -' }}
-          </a-col>
-          <a-col :span="8"><b>联系方式：</b>
-            {{ userInfo.phone ? userInfo.phone : '- -' }}
-          </a-col>
-        </a-row>
-        <br/>
-        <a-row style="padding-left: 24px;padding-right: 24px;">
-          <a-col :span="8"><b>收货地址：</b>
-            {{ userInfo.address }}
-          </a-col>
-        </a-row>
+
+    <div class="exchange-detail-container">
+      <!-- 兑换信息区域 -->
+      <div class="info-section exchange-info" v-if="exchangeData !== null">
+        <div class="section-header">
+          <h3 class="section-title">兑换信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">兑换时间：</span>
+            <span class="value date">{{ exchangeData.createDate }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">消耗积分：</span>
+            <span class="value integral">{{ exchangeData.integral ? exchangeData.integral : '- -' }}</span>
+          </div>
+        </div>
       </div>
-      <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="materialInfo != null">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">物品信息</span></a-col>
-        <a-col :span="8"><b>物品名称：</b>
-          {{ materialInfo.name }}
-        </a-col>
-        <a-col :span="8"><b>物品编号：</b>
-          {{ materialInfo.code ? materialInfo.code : '- -' }}
-        </a-col>
-        <br/>
-        <br/>
-        <a-col :span="24"><b></b>
-          {{ materialInfo.content ? materialInfo.content : '- -' }}
-        </a-col>
-      </a-row>
-      <br/>
+
+      <!-- 用户信息区域 -->
+      <div class="info-section user-info" v-if="userInfo != null">
+        <div class="section-header">
+          <h3 class="section-title">用户信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">用户编号：</span>
+            <span class="value">{{ userInfo.code }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">用户名称：</span>
+            <span class="value">{{ userInfo.name ? userInfo.name : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">联系方式：</span>
+            <span class="value phone">{{ userInfo.phone ? userInfo.phone : '- -' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 优惠券信息区域 -->
+      <div class="info-section coupon-info" v-if="materialInfo != null">
+        <div class="section-header">
+          <h3 class="section-title">优惠券信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">优惠券名称：</span>
+            <span class="value">{{ materialInfo.name }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">优惠券编号：</span>
+            <span class="value">{{ materialInfo.code ? materialInfo.code : '- -' }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">优惠券备注：</span>
+            <span class="value content">{{ materialInfo.content ? materialInfo.content : '- -' }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </a-modal>
 </template>
 
-<script>
-import baiduMap from '@/utils/map/baiduMap'
+<script>import baiduMap from '@/utils/map/baiduMap'
 import moment from 'moment'
 moment.locale('zh-cn')
 function getBase64 (file) {
@@ -158,6 +180,112 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped>.exchange-detail-container {
+  padding: 0;
+}
 
+.info-section {
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.exchange-info {
+  background-color: #f9f9f9;
+}
+
+.user-info {
+  background-color: #fafafa;
+}
+
+.coupon-info {
+  background-color: #f8f9ff;
+}
+
+.info-section:last-child {
+  border-bottom: none;
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1d;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1890ff;
+  display: inline-block;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.info-item.full-width {
+  grid-column: span 2;
+}
+
+.info-item .label {
+  font-weight: 500;
+  color: #595959;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.info-item .value {
+  font-size: 14px;
+  color: #262626;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.info-item .value.date {
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.info-item .value.integral {
+  color: #fa8c16;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.info-item .value.phone {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.info-item .value.content {
+  color: #595959;
+  line-height: 1.6;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item.full-width {
+    grid-column: span 1;
+  }
+
+  .info-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+}
 </style>

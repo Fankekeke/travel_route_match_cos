@@ -50,7 +50,7 @@
         <a-col :span="6">
           <a-form-item label='车辆品牌' v-bind="formItemLayout">
             <a-input v-decorator="[
-            'vehicleBrand'
+            'brand'
             ]"/>
           </a-form-item>
         </a-col>
@@ -68,36 +68,51 @@
           </a-form-item>
         </a-col>
         <a-col :span="6">
-          <a-form-item label='所属配送员工' v-bind="formItemLayout">
+          <a-form-item label='所属车主' v-bind="formItemLayout">
             <a-select v-decorator="[
-              'merchantId',
-              { rules: [{ required: true, message: '请输入所属所属配送员工!' }] }
+              'staffId',
+              { rules: [{ required: true, message: '请输入所属所属车主!' }] }
               ]">
               <a-select-option :value="item.id" v-for="(item, index) in shopList" :key="index">{{ item.name }}</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="6">
-          <a-form-item label='运营状态' v-bind="formItemLayout">
+          <a-form-item label='车辆类型' v-bind="formItemLayout">
             <a-select v-decorator="[
-              'operationState',
-              { rules: [{ required: true, message: '请输入运营状态!' }] }
+              'useType',
+              { rules: [{ required: true, message: '请输入车辆类型!' }] }
               ]">
-              <a-select-option value="0">未运营</a-select-option>
-              <a-select-option value="1">运营中</a-select-option>
+              <a-select-option value="1">轿车</a-select-option>
+              <a-select-option value="2">商务车</a-select-option>
+              <a-select-option value="3">大巴</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="6">
-          <a-form-item label='车辆状态' v-bind="formItemLayout">
-            <a-select v-decorator="[
-              'vehicleType',
-              { rules: [{ required: true, message: '请输入车辆状态!' }] }
-              ]">
-              <a-select-option value="1">大型车</a-select-option>
-              <a-select-option value="2">中型车</a-select-option>
-              <a-select-option value="3">小型车</a-select-option>
-            </a-select>
+          <a-form-item label='联系电话' v-bind="formItemLayout">
+            <a-input v-decorator="[
+    'phone',
+    { rules: [{ required: true, message: '请输入联系电话!' }] }
+    ]"/>
+          </a-form-item>
+        </a-col>
+        <a-col :span="6">
+          <a-form-item label='出厂日期' v-bind="formItemLayout">
+            <a-date-picker
+              v-decorator="['factoryDate', { rules: [{ required: true, message: '请选择出厂日期!' }] }]"
+              placeholder="请选择出厂日期"      style="width: 100%"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="6">
+          <a-form-item label='座位数量' v-bind="formItemLayout">
+            <a-input-number
+              v-decorator="['seatNum', { rules: [{ required: true, message: '请输入座位数量!' }] }]"
+              :min="1"
+              :max="99"
+              style="width: 100%"
+            />
           </a-form-item>
         </a-col>
         <a-col :span="24">
@@ -188,7 +203,7 @@ export default {
   },
   methods: {
     selectShopList () {
-      this.$get(`/business/merchant-info/list`).then((r) => {
+      this.$get(`/business/staff-info/list`).then((r) => {
         this.shopList = r.data.data
       })
     },

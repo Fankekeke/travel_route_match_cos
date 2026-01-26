@@ -20,6 +20,9 @@
         <if test="queryFrom.name != null and queryFrom.name != ''">
             AND name LIKE CONCAT('%',#{queryFrom.name},'%')
         </if>
-        ORDER create_time DESC
+        <if test="queryFrom.code != null and queryFrom.code != ''">
+            AND code LIKE CONCAT('%',#{queryFrom.code},'%')
+        </if>
+        ORDER BY create_date DESC
     </select>
 </mapper>

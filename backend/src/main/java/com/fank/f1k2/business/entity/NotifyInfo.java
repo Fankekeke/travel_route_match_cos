@@ -2,6 +2,8 @@ package com.fank.f1k2.business.entity;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -58,6 +60,12 @@ public class NotifyInfo implements Serializable {
     private String createDate;
 
     private String name;
+
+    @TableField(exist = false)
+    private String userName;
+
+    @TableField(exist = false)
+    private String staffName;
 
 
 }

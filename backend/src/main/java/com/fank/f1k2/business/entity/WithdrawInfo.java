@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -58,6 +59,12 @@ public class WithdrawInfo implements Serializable {
      * 审核状态（0.待审核 1.通过 2.驳回）
      */
     private String status;
+
+    /**
+     * 车主名称
+     */
+    @TableField(exist = false)
+    private String staffName;
 
 
 }

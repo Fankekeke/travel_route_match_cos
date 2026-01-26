@@ -7,14 +7,6 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="记录编号"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.code"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
                 label="用户名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
@@ -23,7 +15,7 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="物品名称"
+                label="优惠券名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.materialName"/>
@@ -112,7 +104,7 @@ export default {
     columns () {
       return [{
         title: '用户编号',
-        dataIndex: 'code'
+        dataIndex: 'userCode'
       }, {
         title: '兑换用户',
         dataIndex: 'userName',
@@ -136,8 +128,8 @@ export default {
           </a-popover>
         }
       }, {
-        title: '邮箱地址',
-        dataIndex: 'mail',
+        title: '联系方式',
+        dataIndex: 'userPhone',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -156,7 +148,7 @@ export default {
           }
         }
       }, {
-        title: '兑换物品',
+        title: '兑换优惠券',
         dataIndex: 'materialName',
         customRender: (text, row, index) => {
           if (text !== null) {

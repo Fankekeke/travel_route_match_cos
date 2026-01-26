@@ -15,7 +15,7 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="客户名称"
+                label="用户名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.userName"/>
@@ -115,7 +115,7 @@ export default {
           </a-popover>
         }
       }, {
-        title: '客户名称',
+        title: '用户名称',
         dataIndex: 'userName',
         customRender: (text, row, index) => {
           if (text !== null) {

@@ -11,6 +11,7 @@
         ei.integral,
         ei.create_date,
 
+        ui.code as userCode,
         ui.NAME as userName,
         ui.phone as userPhone,
         ui.images as userImages,
