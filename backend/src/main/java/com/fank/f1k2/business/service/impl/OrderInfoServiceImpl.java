@@ -2,6 +2,8 @@ package com.fank.f1k2.business.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -392,5 +396,316 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         public RouteInfo getRouteInfo() {
             return routeInfo;
         }
+    }
+
+    /**
+     * 获取主页统计数据
+     *
+     * @return 结果
+     */
+    @Override
+    public LinkedHashMap<String, Object> homeData(Integer userId) {
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>() {
+            {
+                put("orderNum", 0);
+                put("orderPrice", 0);
+                put("staffNum", 0);
+                put("memberNum", 0);
+            }
+        };
+
+        if (userId != null) {
+            // 获取企业信息
+            EnterpriseInfo enterpriseInfo = enterpriseInfoService.getOne(Wrappers.<EnterpriseInfo>lambdaQuery().eq(EnterpriseInfo::getUserId, userId));
+            if (enterpriseInfo != null) {
+                userId = enterpriseInfo.getId();
+            }
+        }
+
+        // 本月预约数量
+        List<ReserveInfo> orderMonthList = baseMapper.selectOrderByMonth(userId);
+        result.put("monthOrderNum", CollectionUtil.isEmpty(orderMonthList) ? 0 : orderMonthList.size());
+        // 获取本月面试投递
+        List<InterviewInfo> interviewMonthList = baseMapper.selectInterviewByMonth(userId);
+        result.put("monthOrderTotal", CollectionUtil.isEmpty(interviewMonthList) ? 0 : interviewMonthList.size());
+
+        // 本年预约数量
+        List<ReserveInfo> orderYearList = baseMapper.selectOrderByYear(userId);
+        result.put("yearOrderNum", CollectionUtil.isEmpty(orderYearList) ? 0 : orderYearList.size());
+        // 本年面试投递
+        List<InterviewInfo> interviewYearList = baseMapper.selectInterviewByYear(userId);
+        result.put("yearOrderTotal", CollectionUtil.isEmpty(interviewYearList) ? 0 : interviewYearList.size());
+
+        // 近十天预约统计
+        result.put("orderNumDayList", baseMapper.selectOrderNumWithinDays(userId));
+        // 近十天面试统计
+        result.put("priceDayList", baseMapper.selectOrderPriceWithinDays(userId));
+
+        // 公告信息
+        result.put("bulletinInfoList", bulletinInfoService.list(Wrappers.<BulletinInfo>lambdaQuery().eq(BulletinInfo::getRackUp, 1)));
+
+        return result;
+    }
+
+    /**
+     * 年统计订单及收益
+     *
+     * @param date 年份
+     * @return 结果
+     */
+    @Override
+    public LinkedHashMap<String, Object> selectStoreStatisticsByYear(String date) {
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        int year =  DateUtil.year(new Date());
+        if (StrUtil.isNotEmpty(date)) {
+            year = Integer.parseInt(date);
+        }
+
+        List<InterviewInfo> scenicOrderList = this.list(new LambdaQueryWrapper<InterviewInfo>().apply("DATE_FORMAT(create_date, '%Y') = {0}", year));
+        for (InterviewInfo scenicOrder : scenicOrderList) {
+            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
+        }
+        Map<Integer, List<InterviewInfo>> orderOutMonthMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getMonth));
+        List<AiInterview> hotelOrderList = aiInterviewService.list(new LambdaQueryWrapper<AiInterview>().apply("DATE_FORMAT(completion_time, '%Y') = {0}", year));
+        for (AiInterview orderInfo : hotelOrderList) {
+            // 提取AI分数
+            if (StrUtil.isNotEmpty(orderInfo.getAiRemark())) {
+                // 使用预编译的正则表达式常量
+                Matcher matcher = MATCH_SCORE_PATTERN.matcher(orderInfo.getAiRemark());
+                if (matcher.find()) {
+                    try {
+                        int score = Integer.parseInt(matcher.group(1));
+                        orderInfo.setScore(score);
+                    } catch (NumberFormatException e) {
+                        // 处理解析分数时可能出现的异常
+                        orderInfo.setScore(0);
+                    }
+                }
+            } else {
+                orderInfo.setScore(0);
+            }
+            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCompletionTime())) + 1);
+        }
+        Map<Integer, List<AiInterview>> orderPutMonthMap = hotelOrderList.stream().collect(Collectors.groupingBy(AiInterview::getMonth));
+
+        result.put("orderNum", scenicOrderList.size());
+        BigDecimal totalPrice = BigDecimal.valueOf(scenicOrderList.stream().filter(e -> (4 == e.getStatus() || 5 == e.getStatus())).count());
+        result.put("totalPrice", totalPrice);
+        result.put("putNum", hotelOrderList.size());
+        // 计算平均分
+        double averageScore = hotelOrderList.stream()
+                .mapToInt(AiInterview::getScore)
+                .average()
+                .orElse(0.0);
+        result.put("outlayPrice", BigDecimal.valueOf(averageScore));
+
+        List<Integer> orderNumList = new ArrayList<>();
+        List<BigDecimal> orderPriceList = new ArrayList<>();
+        List<Integer> outlayNumList = new ArrayList<>();
+        List<BigDecimal> outlayPriceList = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+
+            List<InterviewInfo> currentMonthOutList = orderOutMonthMap.get(i);
+            if (CollectionUtil.isEmpty(currentMonthOutList)) {
+                orderNumList.add(0);
+                orderPriceList.add(BigDecimal.ZERO);
+            } else {
+                orderNumList.add(currentMonthOutList.size());
+                BigDecimal currentMonthOutPrice = BigDecimal.valueOf(currentMonthOutList.stream().filter(e -> (4 == e.getStatus() || 5 == e.getStatus())).count());
+                orderPriceList.add(currentMonthOutPrice);
+            }
+
+            List<AiInterview> currentMonthPutList = orderPutMonthMap.get(i);
+            if (CollectionUtil.isEmpty(currentMonthPutList)) {
+                outlayNumList.add(0);
+                outlayPriceList.add(BigDecimal.ZERO);
+            } else {
+                outlayNumList.add(currentMonthPutList.size());
+                double currentMonthPutPrice = currentMonthPutList.stream()
+                        .mapToInt(AiInterview::getScore)
+                        .average()
+                        .orElse(0.0);
+                outlayPriceList.add(BigDecimal.valueOf(currentMonthPutPrice));
+            }
+
+        }
+        result.put("orderPriceList", orderPriceList);
+        result.put("orderNumList", orderNumList);
+        result.put("outlayPriceList", outlayPriceList);
+        result.put("outlayNumList", orderNumList);
+//        result.put("outlayNumList", outlayNumList);
+
+        // 岗位销量排行
+        List<LinkedHashMap<String, Object>> saleRank = new ArrayList<>();
+        List<LinkedHashMap<String, Object>> salePriceRank = new ArrayList<>();
+        LinkedHashMap<String, Integer> saleTypeRankMap = new LinkedHashMap<>();
+
+        Map<Integer, List<InterviewInfo>> recordInfoMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getBaseId));
+
+        // 岗位信息
+        Set<Integer> scenicCodeList = recordInfoMap.keySet();
+        List<PostInfo> scenicInfoList = postInfoService.list(Wrappers.<PostInfo>lambdaQuery().in(CollectionUtil.isNotEmpty(scenicCodeList), PostInfo::getId, scenicCodeList));
+        Map<Integer, PostInfo> scenicMap = scenicInfoList.stream().collect(Collectors.toMap(PostInfo::getId, e -> e));
+        List<String> scenicTypeList = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8");
+
+        recordInfoMap.forEach((key, value) -> {
+            PostInfo scenic= scenicMap.get(key);
+            if (scenic != null) {
+                saleRank.add(new LinkedHashMap<String, Object>() {
+                    {
+                        put("name", scenic.getPostName());
+                        put("num", value.size());
+                    }
+                });
+                salePriceRank.add(new LinkedHashMap<String, Object>() {
+                    {
+                        put("name", scenic.getPostName());
+                        put("num", value.stream().filter(e -> (4 == e.getStatus() || 5 == e.getStatus())).count());
+                    }
+                });
+
+                saleTypeRankMap.merge(StrUtil.toString(scenic.getAcademic()), value.size(), Integer::sum);
+            }
+        });
+        result.put("saleRank", saleRank);
+        result.put("salePriceRank", salePriceRank);
+        // 销售岗位分类
+        LinkedHashMap<String, Integer> saleTypeRankMapCopy = new LinkedHashMap<>();
+        for (String level : scenicTypeList) {
+            saleTypeRankMapCopy.put(level, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
+        }
+        result.put("saleTypeRankMapCopy", saleTypeRankMapCopy);
+        return result;
+    }
+
+    /**
+     * 月统计订单及收益
+     *
+     * @param dateStr 日期
+     * @return 结果
+     */
+    @Override
+    public LinkedHashMap<String, Object> selectStoreStatisticsByMonth(String dateStr) {
+        String date = dateStr + "-01";
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        int year =  DateUtil.year(new Date());
+        int month =  DateUtil.month(new Date()) + 1;
+        if (StrUtil.isNotEmpty(date)) {
+            year = DateUtil.year(DateUtil.parseDate(date));
+            month = DateUtil.month(DateUtil.parseDate(date)) + 1;
+        }
+
+        List<InterviewInfo> scenicOrderList = this.list(new LambdaQueryWrapper<InterviewInfo>().apply("DATE_FORMAT(create_date, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
+        for (InterviewInfo scenicOrder : scenicOrderList) {
+            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
+            scenicOrder.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(scenicOrder.getCreateDate())));
+        }
+        Map<Integer, List<InterviewInfo>> orderOutDayMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getDay));
+        List<AiInterview> hotelOrderList = aiInterviewService.list(new LambdaQueryWrapper<AiInterview>().apply("DATE_FORMAT(completion_time, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
+        for (AiInterview orderInfo : hotelOrderList) {
+            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCompletionTime())) + 1);
+            orderInfo.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(orderInfo.getCompletionTime())));
+        }
+        Map<Integer, List<AiInterview>> orderPutDayMap = hotelOrderList.stream().collect(Collectors.groupingBy(AiInterview::getDay));
+
+        // 本月订单量
+        result.put("orderNum", scenicOrderList.size());
+        // 本月总收益
+        BigDecimal totalPrice = BigDecimal.valueOf(scenicOrderList.stream().filter(e -> 4 == e.getStatus() || 5 == e.getStatus()).count());
+        result.put("totalPrice", totalPrice);
+        result.put("putNum", hotelOrderList.size());
+        // 计算平均分
+        double averageScore = hotelOrderList.stream()
+                .mapToInt(AiInterview::getScore)
+                .average()
+                .orElse(0.0);
+        result.put("outlayPrice", averageScore);
+
+        List<Integer> orderNumList = new ArrayList<>();
+        List<BigDecimal> orderPriceList = new ArrayList<>();
+        List<Integer> outlayNumList = new ArrayList<>();
+        List<BigDecimal> outlayPriceList = new ArrayList<>();
+        int days = DateUtil.getLastDayOfMonth(DateUtil.parseDate(date));
+
+        // 本月日期
+        List<String> dateTimeList = new ArrayList<>();
+
+        for (int i = 1; i <= days; i++) {
+            dateTimeList.add(month + "月" + i + "日");
+            List<InterviewInfo> currentDayOutList = orderOutDayMap.get(i);
+            if (CollectionUtil.isEmpty(currentDayOutList)) {
+                orderNumList.add(0);
+                orderPriceList.add(BigDecimal.ZERO);
+            } else {
+                orderNumList.add(currentDayOutList.size());
+                BigDecimal currentDayOutPrice = BigDecimal.valueOf(currentDayOutList.stream().filter(e -> 4 == e.getStatus() || 5 == e.getStatus()).count());
+                orderPriceList.add(currentDayOutPrice);
+            }
+
+            // 本天入库
+            List<AiInterview> currentDayPutList = orderPutDayMap.get(i);
+            if (CollectionUtil.isEmpty(currentDayPutList)) {
+                outlayNumList.add(0);
+                outlayPriceList.add(BigDecimal.ZERO);
+            } else {
+                outlayNumList.add(currentDayPutList.size());
+                BigDecimal currentDayPutPrice = BigDecimal.valueOf(currentDayPutList.stream().filter(e -> e.getScore() > 80).count());
+                outlayPriceList.add(currentDayPutPrice);
+            }
+
+        }
+        result.put("orderPriceList", orderPriceList);
+        result.put("orderNumList", orderNumList);
+        result.put("outlayPriceList", outlayPriceList);
+        result.put("outlayNumList", orderNumList);
+//        result.put("outlayNumList", outlayNumList);
+
+        result.put("dateList", dateTimeList);
+        // 岗位销量排行
+        List<LinkedHashMap<String, Object>> saleRank = new ArrayList<>();
+        List<LinkedHashMap<String, Object>> salePriceRank = new ArrayList<>();
+        LinkedHashMap<String, Integer> saleTypeRankMap = new LinkedHashMap<>();
+
+        Map<Integer, List<InterviewInfo>> recordInfoMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getBaseId));
+
+        // 岗位信息
+        Set<Integer> scenicIdList = recordInfoMap.keySet();
+        List<PostInfo> scenicInfoList = postInfoService.list(Wrappers.<PostInfo>lambdaQuery().in(CollectionUtil.isNotEmpty(scenicIdList), PostInfo::getId, scenicIdList));
+        Map<Integer, PostInfo> scenicMap = scenicInfoList.stream().collect(Collectors.toMap(PostInfo::getId, e -> e));
+
+        recordInfoMap.forEach((key, value) -> {
+            PostInfo scenicInfo = scenicMap.get(key);
+            if (scenicInfo != null) {
+                saleRank.add(new LinkedHashMap<String, Object>() {
+                    {
+                        put("name", scenicInfo.getPostName());
+                        put("num", value.size());
+                    }
+                });
+                salePriceRank.add(new LinkedHashMap<String, Object>() {
+                    {
+                        put("name", scenicInfo.getPostName());
+                        put("num", value.stream().filter(e -> 4 == e.getStatus() || 5 == e.getStatus()).count());
+                    }
+                });
+
+                saleTypeRankMap.merge(StrUtil.toString(scenicInfo.getAcademic()), value.size(), Integer::sum);
+            }
+        });
+        result.put("saleRank", saleRank);
+        result.put("salePriceRank", salePriceRank);
+        // 销售岗位分类
+        LinkedHashMap<String, Integer> saleTypeRankMapCopy = new LinkedHashMap<>();
+        List<String> scenicTypeList = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8");
+        for (String level : scenicTypeList) {
+            saleTypeRankMapCopy.put(level, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
+        }
+        result.put("saleTypeRankMapCopy", saleTypeRankMapCopy);
+        return result;
     }
 }

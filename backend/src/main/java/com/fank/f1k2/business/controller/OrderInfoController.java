@@ -2,6 +2,8 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.fank.f1k2.business.entity.StaffIncome;
+import com.fank.f1k2.business.service.IStaffIncomeService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.OrderInfo;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderInfoController {
 
     private final IOrderInfoService orderInfoService;
+
+    private final IStaffIncomeService staffIncomeService;
 
     /**
      * 分页获取订单信息
@@ -121,6 +125,38 @@ public class OrderInfoController {
     }
 
     /**
+     * 查询首页数据
+     *
+     * @return 订单信息
+     */
+    @GetMapping("/queryHomeData")
+    public R queryHomeData() {
+        return R.ok(orderInfoService.homeData(null));
+    }
+
+    /**
+     * 年统计
+     *
+     * @param date 年份
+     * @return 结果
+     */
+    @GetMapping("/statistics/year")
+    public R selectStoreStatisticsByYear(String date) {
+        return R.ok(orderInfoService.selectStoreStatisticsByYear(date));
+    }
+
+    /**
+     * 月统计
+     *
+     * @param date 日期
+     * @return 结果
+     */
+    @GetMapping("/statistics/month")
+    public R selectStoreStatisticsByMonth(String date) {
+        return R.ok(orderInfoService.selectStoreStatisticsByMonth(date));
+    }
+
+    /**
      * 修改订单状态
      *
      * @param id     主键ID
@@ -134,6 +170,14 @@ public class OrderInfoController {
         orderInfo.setStatus(status);
         if ("3".equals(status)) {
             orderInfo.setPayDate(DateUtil.formatDateTime(new Date()));
+            OrderInfo orderInfo1 = orderInfoService.getById(id);
+            // 更新车主收益
+            StaffIncome staffIncome = new StaffIncome();
+            staffIncome.setStaffId(orderInfo1.getStaffId());
+            staffIncome.setOrderId(id);
+            staffIncome.setTotalPrice(orderInfo1.getAfterOrderPrice());
+            staffIncome.setCreateDate(DateUtil.formatDateTime(new Date()));
+            staffIncomeService.save(staffIncome);
         }
         if ("1".equals(status)) {
             orderInfo.setReceiveDate(DateUtil.formatDateTime(new Date()));

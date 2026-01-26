@@ -53,7 +53,7 @@ public class WithdrawInfoController {
      */
     @PostMapping
     public R save(WithdrawInfo withdrawInfo) throws F1k2Exception {
-        // 校验此员工是否有提现正在审核中
+        // 校验此车主是否有提现正在审核中
         int count = withdrawInfoService.count(Wrappers.<WithdrawInfo>lambdaQuery().eq(WithdrawInfo::getStatus, 0));
         if (count > 0) {
             throw new F1k2Exception("存在正在审核的提现记录！");

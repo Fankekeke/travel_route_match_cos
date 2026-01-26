@@ -42,9 +42,9 @@ public class StaffInfoController {
     }
 
     /**
-     * 审核员工 状态（-1.未审核 1.接单中 2.离开）
+     * 审核车主 状态（-1.未审核 1.接单中 2.离开）
      *
-     * @param staffId 员工ID
+     * @param staffId 车主ID
      * @param status  审核状态
      * @return 结果
      */
@@ -65,9 +65,9 @@ public class StaffInfoController {
     }
 
     /**
-     * 根据员工ID查询员工详情
+     * 根据车主ID查询车主详情
      *
-     * @param staffId 员工ID
+     * @param staffId 车主ID
      * @return 详情
      */
     @GetMapping("/queryDetailByStaffId/{staffId}")

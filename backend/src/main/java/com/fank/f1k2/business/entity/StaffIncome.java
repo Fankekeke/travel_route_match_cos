@@ -29,7 +29,7 @@ public class StaffIncome implements Serializable {
 
 
     /**
-     * 员工ID
+     * 车主ID
      */
     private Integer staffId;
 

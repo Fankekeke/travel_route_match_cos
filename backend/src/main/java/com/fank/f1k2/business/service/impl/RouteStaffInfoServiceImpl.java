@@ -159,6 +159,13 @@ public class RouteStaffInfoServiceImpl extends ServiceImpl<RouteStaffInfoMapper,
         if (staffInfo == null) {
             throw new F1k2Exception("没有找到该车主信息");
         }
+        // 判断当前是否存在未完成的订单
+        List<RouteStaffInfo> unfinishedOrder = this.list(Wrappers.<RouteStaffInfo>lambdaQuery().eq(RouteStaffInfo::getStaffId, staffInfo.getId()).ne(RouteStaffInfo::getStatus, 1));
+        if (CollectionUtil.isEmpty(unfinishedOrder)) {
+            if (CollectionUtil.isNotEmpty(unfinishedOrder)) {
+                throw new F1k2Exception("当前有未完成订单，请等待完成");
+            }
+        }
         routeStaffInfo.setStaffId(staffInfo.getId());
         routeStaffInfo.setStatus("0");
         // 计算预估价格

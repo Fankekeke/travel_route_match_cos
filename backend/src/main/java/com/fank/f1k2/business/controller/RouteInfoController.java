@@ -2,6 +2,7 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.RouteInfo;
@@ -66,9 +67,9 @@ public class RouteInfoController {
     * @return 结果
     */
     @PostMapping
-    public R save(RouteInfo addFrom) {
+    public R save(RouteInfo addFrom) throws F1k2Exception {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(routeInfoService.save(addFrom));
+        return R.ok(routeInfoService.addRouteUser(addFrom));
     }
 
     /**

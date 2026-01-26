@@ -69,4 +69,27 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @return 订单信息
      */
     LinkedHashMap<String, Object> queryRouteStaffDetail(Integer routeId);
+
+    /**
+     * 获取主页统计数据
+     *
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> homeData(Integer userId);
+
+    /**
+     * 年统计
+     *
+     * @param date 年份
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> selectStoreStatisticsByYear(String date);
+
+    /**
+     * 月统计
+     *
+     * @param date 日期
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> selectStoreStatisticsByMonth(String date);
 }
