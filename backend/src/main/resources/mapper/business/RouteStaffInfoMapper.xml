@@ -2,4 +2,35 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.RouteStaffInfoMapper">
 
+    <!-- 分页获取车主路线 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        rsi.*,
+
+        si.code as staffCode,
+        si.name as staffName,
+        si.images as staffImages,
+        si.phone as staffPhone,
+
+        vi.vehicle_no,
+        vi.brand,
+        vi.useType
+        FROM
+        route_staff_info rsi
+        LEFT JOIN staff_info si ON (si.id = rsi.staff_id)
+        LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)
+        WHERE
+        1 = 1
+        <if test="queryParam.staffName != null and queryParam.staffName != ''">
+            AND si.name LIKE CONCAT('%',#{queryParam.staffName},'%')
+        </if>
+        <if test="queryParam.status != null and queryParam.status != ''">
+            AND rsi.type = #{queryParam.status}
+        </if>
+        <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
+            AND si.user_id = #{queryFrom.staffId}
+        </if>
+        ORDER BY
+        ri.create_date DESC
+    </select>
 </mapper>

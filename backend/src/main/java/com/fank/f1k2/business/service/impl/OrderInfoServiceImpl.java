@@ -603,18 +603,18 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 //            month = DateUtil.month(DateUtil.parseDate(date)) + 1;
 //        }
 //
-//        List<InterviewInfo> scenicOrderList = this.list(new LambdaQueryWrapper<InterviewInfo>().apply("DATE_FORMAT(create_date, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
-//        for (InterviewInfo scenicOrder : scenicOrderList) {
+//        List<RouteInfo> scenicOrderList = routeInfoService.list(new LambdaQueryWrapper<RouteInfo>().apply("DATE_FORMAT(create_date, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
+//        for (RouteInfo scenicOrder : scenicOrderList) {
 //            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
 //            scenicOrder.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(scenicOrder.getCreateDate())));
 //        }
-//        Map<Integer, List<InterviewInfo>> orderOutDayMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getDay));
-//        List<AiInterview> hotelOrderList = aiInterviewService.list(new LambdaQueryWrapper<AiInterview>().apply("DATE_FORMAT(completion_time, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
-//        for (AiInterview orderInfo : hotelOrderList) {
-//            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCompletionTime())) + 1);
-//            orderInfo.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(orderInfo.getCompletionTime())));
+//        Map<Integer, List<RouteInfo>> orderOutDayMap = scenicOrderList.stream().collect(Collectors.groupingBy(RouteInfo::getDay));
+//        List<RouteStaffInfo> hotelOrderList = routeStaffInfoService.list(new LambdaQueryWrapper<RouteStaffInfo>().apply("DATE_FORMAT(completion_time, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
+//        for (RouteStaffInfo orderInfo : hotelOrderList) {
+//            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCreateDate())) + 1);
+//            orderInfo.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(orderInfo.getCreateDate())));
 //        }
-//        Map<Integer, List<AiInterview>> orderPutDayMap = hotelOrderList.stream().collect(Collectors.groupingBy(AiInterview::getDay));
+//        Map<Integer, List<RouteStaffInfo>> orderPutDayMap = hotelOrderList.stream().collect(Collectors.groupingBy(RouteStaffInfo::getDay));
 //
 //        // 本月订单量
 //        result.put("orderNum", scenicOrderList.size());

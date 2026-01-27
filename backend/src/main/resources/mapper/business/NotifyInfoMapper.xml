@@ -30,6 +30,9 @@
         <if test="queryFrom.content != null and queryFrom.content != ''">
             AND ni.content LIKE CONCAT('%',#{queryFrom.content},'%')
         </if>
+        <if test="queryFrom.userId != null and queryFrom.userId != ''">
+            AND si.user_id = #{queryFrom.userId}
+        </if>
         ORDER BY
         ni.create_date DESC
     </select>
@@ -60,6 +63,9 @@
         </if>
         <if test="queryFrom.content != null and queryFrom.content != ''">
             AND ni.content LIKE CONCAT('%',#{queryFrom.content},'%')
+        </if>
+        <if test="queryFrom.userId != null and queryFrom.userId != ''">
+            AND ui.user_id = #{queryFrom.userId}
         </if>
         ORDER BY
         ni.create_date DESC

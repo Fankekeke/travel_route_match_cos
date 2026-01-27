@@ -66,5 +66,15 @@ public class EvaluateInfo implements Serializable {
     @TableField(exist = false)
     private Integer staffId;
 
+    /**
+     * 车主名称
+     */
+    @TableField(exist = false)
+    private String staffName;
 
+    /**
+     * 用户名称
+     */
+    @TableField(exist = false)
+    private String userName;
 }

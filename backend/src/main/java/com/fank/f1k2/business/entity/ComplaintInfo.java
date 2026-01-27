@@ -2,6 +2,8 @@ package com.fank.f1k2.business.entity;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -66,6 +68,18 @@ public class ComplaintInfo implements Serializable {
      * 状态（0.未处理 1.已处理）
      */
     private String status;
+
+    /**
+     * 车主名称
+     */
+    @TableField(exist = false)
+    private String staffName;
+
+    /**
+     * 用户名称
+     */
+    @TableField(exist = false)
+    private String userName;
 
 
 }

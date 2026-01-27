@@ -2,4 +2,59 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.StaffIncomeMapper">
 
+    <!-- 分页获取车主收益 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        sin.*,
+
+        ui.code as userCode,
+        ui.NAME as userName,
+        ui.phone as userPhone,
+        ui.images as userImages,
+
+        oi.code,
+        oi.order_name,
+        oi.order_price,
+        oi.remark,
+        oi.status,
+        oi.kilometre,
+        oi.plan_minute,
+        oi.ai_remark,
+
+        si.code as staffCode,
+        si.name as staffName,
+        si.images as staffImages,
+        si.phone as staffPhone,
+
+        rsi.earliest_time as staffEarliestTime,
+        rsi.latest_time as staffLatestTime,
+        rsi.ride_num,
+        rsi.remark as staffRemark,
+        rsi.start_address as staffStartAddress,
+        rsi.end_address as staffEndAddress,
+
+        vi.vehicle_no,
+        vi.brand,
+        vi.useType
+        FROM
+        staff_income sin
+        LEFT JOIN order_info oi ON (oi.id = sin.order_id)
+        LEFT JOIN user_info ui (ui.id = oi.user_id)
+        LEFT JOIN staff_info si ON (si.id = oi.staff_id)
+        LEFT JOIN route_staff_info rsi ON (rsi.id = oi.staff_route_id)
+        LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)
+        WHERE
+        1 = 1
+        <if test="queryParam.staffName != null and queryParam.staffName != ''">
+            AND si.name LIKE CONCAT('%',#{queryParam.staffName},'%')
+        </if>
+        <if test="queryParam.userName != null and queryParam.userName != ''">
+            AND ui.name LIKE CONCAT('%',#{queryParam.userName},'%')
+        </if>
+        <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
+            AND si.user_id = #{queryFrom.staffId}
+        </if>
+        ORDER BY
+        sin.create_date DESC
+    </select>
 </mapper>

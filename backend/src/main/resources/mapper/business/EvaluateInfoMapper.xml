@@ -46,6 +46,12 @@
         <if test="queryFrom.userName != null and queryFrom.userName != ''">
             AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
         </if>
+        <if test="queryFrom.userId != null and queryFrom.userId != ''">
+            AND ui.user_id = #{queryFrom.userId}
+        </if>
+        <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
+            AND si.user_id = #{queryFrom.staffId}
+        </if>
         order by ei.create_date desc
     </select>
 </mapper>
