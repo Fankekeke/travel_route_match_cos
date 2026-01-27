@@ -20,5 +20,5 @@ public interface PaymentRecordMapper extends BaseMapper<PaymentRecord> {
      * @param queryFrom 付款记录
      * @return 结果
      */
-    IPage<LinkedHashMap<String, Object>> queryPage(Page<PaymentRecord> page, @Param("queryFrom") PaymentRecord queryFrom);
+    IPage<LinkedHashMap<String, Object>> queryPage(Page<PaymentRecord> page, @Param("queryParam") PaymentRecord queryFrom);
 }

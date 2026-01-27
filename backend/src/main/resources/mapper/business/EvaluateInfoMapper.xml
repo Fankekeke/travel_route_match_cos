@@ -21,21 +21,21 @@
         ui.images as userImages,
 
         oi.code,
-        oi.order_name
-        oi.order_price
-        oi.receive_date
-        oi.delivery_date
-        oi.kilometre
-        oi.after_order_price
-        oi.plan_minute
-        oi.actual_minute
+        oi.order_name,
+        oi.order_price,
+        oi.receive_date,
+        oi.delivery_date,
+        oi.kilometre,
+        oi.after_order_price,
+        oi.plan_minute,
+        oi.actual_minute,
         oi.ai_remark
 
         from
         evaluate_info ei
         LEFT JOIN user_info ui ON (ei.user_id = ui.id)
         LEFT JOIN order_info oi ON (oi.id = ei.order_id)
-        LEFT JOIN staff_info si ON (si.id = ci.staff_id)
+        LEFT JOIN staff_info si ON (si.id = oi.staff_id)
         where 1 = 1
         <if test="queryFrom.code != null and queryFrom.code != ''">
             AND oi.code LIKE CONCAT('%',#{queryFrom.code},'%')

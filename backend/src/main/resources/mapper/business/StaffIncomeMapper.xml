@@ -45,11 +45,11 @@
         LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)
         WHERE
         1 = 1
-        <if test="queryParam.staffName != null and queryParam.staffName != ''">
-            AND si.name LIKE CONCAT('%',#{queryParam.staffName},'%')
+        <if test="queryFrom.staffName != null and queryFrom.staffName != ''">
+            AND si.name LIKE CONCAT('%',#{queryFrom.staffName},'%')
         </if>
-        <if test="queryParam.userName != null and queryParam.userName != ''">
-            AND ui.name LIKE CONCAT('%',#{queryParam.userName},'%')
+        <if test="queryFrom.userName != null and queryFrom.userName != ''">
+            AND ui.name LIKE CONCAT('%',#{queryFrom.userName},'%')
         </if>
         <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
             AND si.user_id = #{queryFrom.staffId}

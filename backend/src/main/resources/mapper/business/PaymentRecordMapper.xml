@@ -35,11 +35,11 @@
 
         vi.vehicle_no,
         vi.brand,
-        vi.useType
+        vi.use_type
         FROM
         payment_record pr
         LEFT JOIN order_info oi ON (oi.code = pr.order_code)
-        LEFT JOIN user_info ui (ui.id = oi.user_id)
+        LEFT JOIN user_info ui ON (ui.id = oi.user_id)
         LEFT JOIN staff_info si ON (si.id = oi.staff_id)
         LEFT JOIN route_staff_info rsi ON (rsi.id = oi.staff_route_id)
         LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)
@@ -51,11 +51,11 @@
         <if test="queryParam.userName != null and queryParam.userName != ''">
             AND ui.name LIKE CONCAT('%',#{queryParam.userName},'%')
         </if>
-        <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
-            AND si.user_id = #{queryFrom.staffId}
+        <if test="queryParam.staffId != null and queryParam.staffId != ''">
+            AND si.user_id = #{queryParam.staffId}
         </if>
-        <if test="queryFrom.userId != null and queryFrom.userId != ''">
-            AND ui.user_id = #{queryFrom.userId}
+        <if test="queryParam.userId != null and queryParam.userId != ''">
+            AND ui.user_id = #{queryParam.userId}
         </if>
         ORDER BY
         pr.create_date DESC

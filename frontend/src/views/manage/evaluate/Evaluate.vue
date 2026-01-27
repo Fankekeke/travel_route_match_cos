@@ -18,7 +18,7 @@
                 label="订单编号"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.orderCode"/>
+                <a-input v-model="queryParams.code"/>
               </a-form-item>
             </a-col>
           </div>
@@ -115,6 +115,7 @@ export default {
       return [{
         title: '评价用户',
         dataIndex: 'userName',
+        ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -136,7 +137,8 @@ export default {
         }
       }, {
         title: '订单编号',
-        dataIndex: 'orderCode',
+        dataIndex: 'code',
+        ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -147,6 +149,7 @@ export default {
       }, {
         title: '折后价格',
         dataIndex: 'afterOrderPrice',
+        ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
             return text + '元'
@@ -181,8 +184,9 @@ export default {
           </a-popover>
         }
       }, {
-        title: '获得积分',
-        dataIndex: 'integral',
+        title: '订单名称',
+        dataIndex: 'orderName',
+        ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -193,6 +197,7 @@ export default {
       }, {
         title: '评价时间',
         dataIndex: 'createDate',
+        ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
             return text

@@ -3,6 +3,8 @@ package com.fank.f1k2.business.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -52,6 +54,17 @@ public class PaymentRecord implements Serializable {
      * 所属车主
      */
     private Integer staffId;
+
+    @TableField(exist = false)
+    private String staffName;
+
+    @TableField(exist = false)
+    private String userName;
+
+    @TableField(exist = false)
+    private Integer userId;
+
+
 
 
 }
