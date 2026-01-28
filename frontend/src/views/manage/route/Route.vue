@@ -64,7 +64,7 @@
       v-if="vehicleAdd.visiable"
       @close="handlevehicleAddClose"
       @success="handlevehicleAddSuccess"
-      :vehicleAddVisiable="vehicleAdd.visiable">
+      :routeAddVisiable="vehicleAdd.visiable">
     </vehicle-add>
     <vehicle-edit
       ref="vehicleEdit"

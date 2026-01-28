@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/cos/ai/")
+@RequestMapping("/business/ai/")
 public class AliAliController {
 
     @Resource

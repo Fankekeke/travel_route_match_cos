@@ -31,8 +31,8 @@
         <if test="queryParam.vehicleNo != null and queryParam.vehicleNo != ''">
             AND vi.vehicle_no LIKE CONCAT('%',#{queryParam.vehicleNo},'%')
         </if>
-        <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
-            AND si.user_id = #{queryFrom.staffId}
+        <if test="queryParam.staffId != null and queryParam.staffId != ''">
+            AND si.user_id = #{queryParam.staffId}
         </if>
         ORDER BY
         vi.create_date DESC

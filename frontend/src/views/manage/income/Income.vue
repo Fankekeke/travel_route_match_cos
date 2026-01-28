@@ -144,19 +144,19 @@ export default {
         }
       }, {
         title: '头像',
-        dataIndex: 'images',
+        dataIndex: 'staffImages',
         customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
+          if (!record.staffImages) return <a-avatar shape="square" icon="user" />
           return <a-popover>
             <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.staffImages.split(',')[0] } />
             </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.staffImages.split(',')[0] } />
           </a-popover>
         }
       }, {
         title: '订单编号',
-        dataIndex: 'orderCode',
+        dataIndex: 'code',
         ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -178,7 +178,7 @@ export default {
         }
       }, {
         title: '联系方式',
-        dataIndex: 'phone',
+        dataIndex: 'staffPhone',
         ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -189,7 +189,7 @@ export default {
         }
       }, {
         title: '订单收益',
-        dataIndex: 'income',
+        dataIndex: 'orderPrice',
         ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -199,23 +199,12 @@ export default {
           }
         }
       }, {
-        title: '配送费用',
-        dataIndex: 'deliveryPrice',
+        title: '公里数',
+        dataIndex: 'kilometre',
         ellipsis: true,
         customRender: (text, row, index) => {
           if (text !== null) {
-            return text + '元'
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '总收益',
-        dataIndex: 'totalPrice',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text + '元'
+            return text + '公里'
           } else {
             return '- -'
           }

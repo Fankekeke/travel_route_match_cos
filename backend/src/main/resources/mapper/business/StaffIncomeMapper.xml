@@ -35,11 +35,11 @@
 
         vi.vehicle_no,
         vi.brand,
-        vi.useType
+        vi.use_type
         FROM
         staff_income sin
         LEFT JOIN order_info oi ON (oi.id = sin.order_id)
-        LEFT JOIN user_info ui (ui.id = oi.user_id)
+        LEFT JOIN user_info ui ON (ui.id = oi.user_id)
         LEFT JOIN staff_info si ON (si.id = oi.staff_id)
         LEFT JOIN route_staff_info rsi ON (rsi.id = oi.staff_route_id)
         LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)

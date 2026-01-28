@@ -155,4 +155,10 @@ public class RouteInfo implements Serializable {
 
     @TableField(exist = false)
     private Integer day;
+
+    @TableField(exist = false)
+    private String staffName;
+
+    @TableField(exist = false)
+    private String userName;
 }
