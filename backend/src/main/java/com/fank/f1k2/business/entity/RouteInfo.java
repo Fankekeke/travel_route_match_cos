@@ -42,6 +42,11 @@ public class RouteInfo implements Serializable {
     private String path;
 
     /**
+     * 路线距离
+     */
+    private BigDecimal distance;
+
+    /**
      * 出发地-经度
      */
     private BigDecimal startLongitude;
@@ -144,4 +149,10 @@ public class RouteInfo implements Serializable {
      */
     @TableField(exist = false)
     private double endDistance;
+
+    @TableField(exist = false)
+    private Integer month;
+
+    @TableField(exist = false)
+    private Integer day;
 }

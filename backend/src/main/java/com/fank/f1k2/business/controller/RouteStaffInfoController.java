@@ -100,9 +100,9 @@ public class RouteStaffInfoController {
      * @return 结果
      */
     @PostMapping
-    public R save(RouteStaffInfo addFrom) {
+    public R save(RouteStaffInfo addFrom) throws F1k2Exception {
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(routeStaffInfoService.save(addFrom));
+        return R.ok(routeStaffInfoService.addRouteStaff(addFrom));
     }
 
     /**

@@ -155,4 +155,9 @@ public class RouteStaffInfo implements Serializable {
     @TableField(exist = false)
     private double endDistance;
 
+    @TableField(exist = false)
+    private Integer month;
+
+    @TableField(exist = false)
+    private Integer day;
 }

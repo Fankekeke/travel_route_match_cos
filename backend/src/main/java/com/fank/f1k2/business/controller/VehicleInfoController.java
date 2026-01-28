@@ -2,6 +2,9 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.VehicleInfo;
@@ -27,6 +30,8 @@ public class VehicleInfoController {
 
     private final IVehicleInfoService vehicleInfoService;
 
+    private final IStaffInfoService staffInfoService;
+
     /**
      * 分页获取车辆管理
      *
@@ -37,6 +42,18 @@ public class VehicleInfoController {
     @GetMapping("/page")
     public R page(Page<VehicleInfo> page, VehicleInfo queryFrom) {
         return R.ok(vehicleInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 查询车辆管理详情
+     *
+     * @param userId 车主ID
+     * @return 详情
+     */
+    @GetMapping("/queryVehicleByStaff")
+    public R queryVehicleByStaff(Integer userId) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+        return R.ok(vehicleInfoService.list(Wrappers.<VehicleInfo>lambdaQuery().eq(VehicleInfo::getStaffId, staffInfo.getId())));
     }
 
     /**

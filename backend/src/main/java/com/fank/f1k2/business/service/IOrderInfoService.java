@@ -92,4 +92,25 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @return 结果
      */
     LinkedHashMap<String, Object> selectStoreStatisticsByMonth(String date);
+
+    /**
+     * 订单成功率
+     *
+     * @return 订单成功率
+     */
+    LinkedHashMap<String, Object> orderSuccessRate();
+
+    /**
+     * 订单拼成率
+     *
+     * @return 订单拼成率
+     */
+    LinkedHashMap<String, Object> assemblyRate();
+
+    /**
+     * 平均顺路程度
+     *
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> queryConvenience();
 }

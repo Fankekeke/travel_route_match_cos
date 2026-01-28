@@ -405,48 +405,179 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
      */
     @Override
     public LinkedHashMap<String, Object> homeData(Integer userId) {
-        return null;
-//        // 返回数据
-//        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>() {
-//            {
-//                put("orderNum", 0);
-//                put("orderPrice", 0);
-//                put("staffNum", 0);
-//                put("memberNum", 0);
-//            }
-//        };
-//
-//        if (userId != null) {
-//            // 获取企业信息
-//            EnterpriseInfo enterpriseInfo = enterpriseInfoService.getOne(Wrappers.<EnterpriseInfo>lambdaQuery().eq(EnterpriseInfo::getUserId, userId));
-//            if (enterpriseInfo != null) {
-//                userId = enterpriseInfo.getId();
-//            }
-//        }
-//
-//        // 本月预约数量
-//        List<ReserveInfo> orderMonthList = baseMapper.selectOrderByMonth(userId);
-//        result.put("monthOrderNum", CollectionUtil.isEmpty(orderMonthList) ? 0 : orderMonthList.size());
-//        // 获取本月面试投递
-//        List<InterviewInfo> interviewMonthList = baseMapper.selectInterviewByMonth(userId);
-//        result.put("monthOrderTotal", CollectionUtil.isEmpty(interviewMonthList) ? 0 : interviewMonthList.size());
-//
-//        // 本年预约数量
-//        List<ReserveInfo> orderYearList = baseMapper.selectOrderByYear(userId);
-//        result.put("yearOrderNum", CollectionUtil.isEmpty(orderYearList) ? 0 : orderYearList.size());
-//        // 本年面试投递
-//        List<InterviewInfo> interviewYearList = baseMapper.selectInterviewByYear(userId);
-//        result.put("yearOrderTotal", CollectionUtil.isEmpty(interviewYearList) ? 0 : interviewYearList.size());
-//
-//        // 近十天预约统计
-//        result.put("orderNumDayList", baseMapper.selectOrderNumWithinDays(userId));
-//        // 近十天面试统计
-//        result.put("priceDayList", baseMapper.selectOrderPriceWithinDays(userId));
-//
-//        // 公告信息
-//        result.put("bulletinInfoList", bulletinInfoService.list(Wrappers.<BulletinInfo>lambdaQuery().eq(BulletinInfo::getRackUp, 1)));
-//
-//        return result;
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        // 实时在线车主数
+        result.put("onlineStaffData", getOnlineStaffCount());
+
+        // 实时发单量和接单量
+        result.put("realtimeOrderData", getRealtimeOrderStats());
+
+        // 当前月度交易分析
+        String currentMonth = DateUtil.format(new Date(), "yyyy-MM");
+        result.put("monthlyTransactionData", monthlyTransactionAnalysis(currentMonth));
+        return result;
+    }
+
+    /**
+     * 获取实时在线车主数
+     *
+     * @return 实时在线车主数
+     */
+    public LinkedHashMap<String, Object> getOnlineStaffCount() {
+        List<StaffInfo> onlineStaffs = staffInfoService.list(
+                new LambdaQueryWrapper<StaffInfo>()
+                        .eq(StaffInfo::getStatus, "1")
+        );
+
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("onlineStaffCount", onlineStaffs.size()); // 实时在线车主数
+        result.put("timestamp", new Date()); // 当前时间戳
+        result.put("description", "实时在线车主数，评估平台当前的履约能力");
+
+        return result;
+    }
+
+    /**
+     * 获取实时发单量和接单量统计
+     *
+     * @return 发单量和接单量数据
+     */
+    public LinkedHashMap<String, Object> getRealtimeOrderStats() {
+        int currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        Date today = new Date();
+
+        // 查询今日发单量（乘客）
+        List<RouteInfo> todayPassengerOrders = routeInfoService.list(
+                new LambdaQueryWrapper<RouteInfo>()
+                        .apply("DATE(create_date) = DATE({0})", today)
+        );
+
+        // 查询今日接单量（车主）
+        List<OrderInfo> todayStaffOrders = this.list(
+                new LambdaQueryWrapper<OrderInfo>()
+                        .apply("DATE(create_date) = DATE({0})", today)
+        );
+
+        // 按小时统计发单量和接单量
+        List<Integer> hourlyPassengerOrders = new ArrayList<>();
+        List<Integer> hourlyStaffOrders = new ArrayList<>();
+
+        for (int hour = 0; hour < 24; hour++) {
+            int finalHour = hour;
+            int passengerCount = (int) todayPassengerOrders.stream()
+                    .filter(order -> DateUtil.hour(DateUtil.parseDate(order.getCreateDate()), true) == finalHour)
+                    .count();
+            hourlyPassengerOrders.add(passengerCount);
+
+            int staffCount = (int) todayStaffOrders.stream()
+                    .filter(order -> DateUtil.hour(DateUtil.parseDate(order.getCreateDate()), true) == finalHour)
+                    .count();
+            hourlyStaffOrders.add(staffCount);
+        }
+
+        // 计算供需比
+        double supplyDemandRatio = todayStaffOrders.size() > 0 ?
+                (double) todayPassengerOrders.size() / todayStaffOrders.size() : Double.MAX_VALUE;
+
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("todayPassengerOrders", todayPassengerOrders.size()); // 今日发单量
+        result.put("todayStaffOrders", todayStaffOrders.size());       // 今日接单量
+        result.put("supplyDemandRatio", supplyDemandRatio);           // 供需比
+        result.put("hourlyPassengerOrders", hourlyPassengerOrders);   // 按小时统计的发单量
+        result.put("hourlyStaffOrders", hourlyStaffOrders);          // 按小时统计的接单量
+        result.put("timestamp", new Date());                         // 当前时间戳
+
+        // 判断是否需要调度补贴
+        boolean needsSubsidy = supplyDemandRatio > 2.0; // 当供需比超过2:1时，考虑发放调度补贴
+        result.put("needsSubsidy", needsSubsidy);
+        result.put("subsidyRecommendation", needsSubsidy ?
+                "供需失衡，建议发放调度补贴吸引车主接单" : "供需平衡，无需调度补贴");
+
+        return result;
+    }
+
+    /**
+     * 月度交易分析
+     *
+     * @param dateStr 日期字符串（YYYY-MM格式）
+     * @return 月度交易分析数据
+     */
+    public LinkedHashMap<String, Object> monthlyTransactionAnalysis(String dateStr) {
+        String date = dateStr + "-01";
+        Date analysisDate = DateUtil.parseDate(date);
+        int year = DateUtil.year(analysisDate);
+        int month = DateUtil.month(analysisDate) + 1;
+
+        // 查询指定月份的交易数据
+        List<RouteInfo> transactions = routeInfoService.list(
+                new LambdaQueryWrapper<RouteInfo>()
+                        .apply("DATE_FORMAT(create_date, '%Y%m') = {0}",
+                                year + "" + ((month < 10) ? "0" + month : month))
+        );
+
+        // 计算交易总额
+        BigDecimal totalAmount = transactions.stream()
+                .filter(e -> "-1".equals(e.getStatus()) && e.getDistance() != null)
+                .map(e -> e.getDistance())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 按公里数区间统计
+        Map<String, Integer> distanceRangeCount = new LinkedHashMap<>();
+        Map<String, BigDecimal> distanceRangeAmount = new LinkedHashMap<>();
+
+        // 初始化各区间
+        String[] ranges = {"0-100", "100-300", "300-500", "500-800", "800-1500", "1500+"};
+        for (String range : ranges) {
+            distanceRangeCount.put(range, 0);
+            distanceRangeAmount.put(range, BigDecimal.ZERO);
+        }
+
+        // 统计各区间数据
+        for (RouteInfo transaction : transactions) {
+            if (transaction.getDistance() != null) {
+                double distance = transaction.getDistance().doubleValue();
+                String range = getDistanceRange(distance);
+
+                distanceRangeCount.put(range, distanceRangeCount.get(range) + 1);
+                if ("-1".equals(transaction.getStatus())) {
+                    distanceRangeAmount.put(range,
+                            distanceRangeAmount.get(range).add(transaction.getDistance()));
+                }
+            }
+        }
+
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("year", year);
+        result.put("month", month);
+        result.put("totalTransactions", transactions.size()); // 总交易数
+        result.put("totalAmount", totalAmount);              // 交易总额
+        result.put("distanceRangeCount", distanceRangeCount); // 各区间交易次数
+        result.put("distanceRangeAmount", distanceRangeAmount); // 各区间交易金额
+
+        return result;
+    }
+
+    /**
+     * 根据距离获取所属区间
+     *
+     * @param distance 距离
+     * @return 区间字符串
+     */
+    private String getDistanceRange(double distance) {
+        if (distance < 100) {
+            return "0-100";
+        } else if (distance < 300) {
+            return "100-300";
+        } else if (distance < 500) {
+            return "300-500";
+        } else if (distance < 800) {
+            return "500-800";
+        } else if (distance < 1500) {
+            return "800-1500";
+        } else {
+            return "1500+";
+        }
     }
 
     /**
@@ -457,130 +588,140 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
      */
     @Override
     public LinkedHashMap<String, Object> selectStoreStatisticsByYear(String date) {
-        return null;
-//        // 返回数据
-//        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-//
-//        int year =  DateUtil.year(new Date());
-//        if (StrUtil.isNotEmpty(date)) {
-//            year = Integer.parseInt(date);
-//        }
-//
-//        List<InterviewInfo> scenicOrderList = this.list(new LambdaQueryWrapper<InterviewInfo>().apply("DATE_FORMAT(create_date, '%Y') = {0}", year));
-//        for (InterviewInfo scenicOrder : scenicOrderList) {
-//            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
-//        }
-//        Map<Integer, List<InterviewInfo>> orderOutMonthMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getMonth));
-//        List<AiInterview> hotelOrderList = aiInterviewService.list(new LambdaQueryWrapper<AiInterview>().apply("DATE_FORMAT(completion_time, '%Y') = {0}", year));
-//        for (AiInterview orderInfo : hotelOrderList) {
-//            // 提取AI分数
-//            if (StrUtil.isNotEmpty(orderInfo.getAiRemark())) {
-//                // 使用预编译的正则表达式常量
-//                Matcher matcher = MATCH_SCORE_PATTERN.matcher(orderInfo.getAiRemark());
-//                if (matcher.find()) {
-//                    try {
-//                        int score = Integer.parseInt(matcher.group(1));
-//                        orderInfo.setScore(score);
-//                    } catch (NumberFormatException e) {
-//                        // 处理解析分数时可能出现的异常
-//                        orderInfo.setScore(0);
-//                    }
-//                }
-//            } else {
-//                orderInfo.setScore(0);
-//            }
-//            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCompletionTime())) + 1);
-//        }
-//        Map<Integer, List<AiInterview>> orderPutMonthMap = hotelOrderList.stream().collect(Collectors.groupingBy(AiInterview::getMonth));
-//
-//        result.put("orderNum", scenicOrderList.size());
-//        BigDecimal totalPrice = BigDecimal.valueOf(scenicOrderList.stream().filter(e -> (4 == e.getStatus() || 5 == e.getStatus())).count());
-//        result.put("totalPrice", totalPrice);
-//        result.put("putNum", hotelOrderList.size());
-//        // 计算平均分
-//        double averageScore = hotelOrderList.stream()
-//                .mapToInt(AiInterview::getScore)
-//                .average()
-//                .orElse(0.0);
-//        result.put("outlayPrice", BigDecimal.valueOf(averageScore));
-//
-//        List<Integer> orderNumList = new ArrayList<>();
-//        List<BigDecimal> orderPriceList = new ArrayList<>();
-//        List<Integer> outlayNumList = new ArrayList<>();
-//        List<BigDecimal> outlayPriceList = new ArrayList<>();
-//        for (int i = 1; i <= 12; i++) {
-//
-//            List<InterviewInfo> currentMonthOutList = orderOutMonthMap.get(i);
-//            if (CollectionUtil.isEmpty(currentMonthOutList)) {
-//                orderNumList.add(0);
-//                orderPriceList.add(BigDecimal.ZERO);
-//            } else {
-//                orderNumList.add(currentMonthOutList.size());
-//                BigDecimal currentMonthOutPrice = BigDecimal.valueOf(currentMonthOutList.stream().filter(e -> (4 == e.getStatus() || 5 == e.getStatus())).count());
-//                orderPriceList.add(currentMonthOutPrice);
-//            }
-//
-//            List<AiInterview> currentMonthPutList = orderPutMonthMap.get(i);
-//            if (CollectionUtil.isEmpty(currentMonthPutList)) {
-//                outlayNumList.add(0);
-//                outlayPriceList.add(BigDecimal.ZERO);
-//            } else {
-//                outlayNumList.add(currentMonthPutList.size());
-//                double currentMonthPutPrice = currentMonthPutList.stream()
-//                        .mapToInt(AiInterview::getScore)
-//                        .average()
-//                        .orElse(0.0);
-//                outlayPriceList.add(BigDecimal.valueOf(currentMonthPutPrice));
-//            }
-//
-//        }
-//        result.put("orderPriceList", orderPriceList);
-//        result.put("orderNumList", orderNumList);
-//        result.put("outlayPriceList", outlayPriceList);
-//        result.put("outlayNumList", orderNumList);
-////        result.put("outlayNumList", outlayNumList);
-//
-//        // 岗位销量排行
-//        List<LinkedHashMap<String, Object>> saleRank = new ArrayList<>();
-//        List<LinkedHashMap<String, Object>> salePriceRank = new ArrayList<>();
-//        LinkedHashMap<String, Integer> saleTypeRankMap = new LinkedHashMap<>();
-//
-//        Map<Integer, List<InterviewInfo>> recordInfoMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getBaseId));
-//
-//        // 岗位信息
-//        Set<Integer> scenicCodeList = recordInfoMap.keySet();
-//        List<PostInfo> scenicInfoList = postInfoService.list(Wrappers.<PostInfo>lambdaQuery().in(CollectionUtil.isNotEmpty(scenicCodeList), PostInfo::getId, scenicCodeList));
-//        Map<Integer, PostInfo> scenicMap = scenicInfoList.stream().collect(Collectors.toMap(PostInfo::getId, e -> e));
-//        List<String> scenicTypeList = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8");
-//
-//        recordInfoMap.forEach((key, value) -> {
-//            PostInfo scenic= scenicMap.get(key);
-//            if (scenic != null) {
-//                saleRank.add(new LinkedHashMap<String, Object>() {
-//                    {
-//                        put("name", scenic.getPostName());
-//                        put("num", value.size());
-//                    }
-//                });
-//                salePriceRank.add(new LinkedHashMap<String, Object>() {
-//                    {
-//                        put("name", scenic.getPostName());
-//                        put("num", value.stream().filter(e -> (4 == e.getStatus() || 5 == e.getStatus())).count());
-//                    }
-//                });
-//
-//                saleTypeRankMap.merge(StrUtil.toString(scenic.getAcademic()), value.size(), Integer::sum);
-//            }
-//        });
-//        result.put("saleRank", saleRank);
-//        result.put("salePriceRank", salePriceRank);
-//        // 销售岗位分类
-//        LinkedHashMap<String, Integer> saleTypeRankMapCopy = new LinkedHashMap<>();
-//        for (String level : scenicTypeList) {
-//            saleTypeRankMapCopy.put(level, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
-//        }
-//        result.put("saleTypeRankMapCopy", saleTypeRankMapCopy);
-//        return result;
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        int year = DateUtil.year(new Date());
+        if (StrUtil.isNotEmpty(date)) {
+            year = Integer.parseInt(date);
+        }
+
+        List<RouteInfo> scenicOrderList = routeInfoService.list(new LambdaQueryWrapper<RouteInfo>()
+                .apply("DATE_FORMAT(create_date, '%Y') = {0}", year));
+
+        for (RouteInfo scenicOrder : scenicOrderList) {
+            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
+        }
+
+        Map<Integer, List<RouteInfo>> orderOutMonthMap = scenicOrderList.stream()
+                .collect(Collectors.groupingBy(RouteInfo::getMonth));
+
+        // 按月统计的其他数据（如司机路线信息）
+        List<RouteStaffInfo> hotelOrderList = routeStaffInfoService.list(
+                new LambdaQueryWrapper<RouteStaffInfo>().apply("DATE_FORMAT(create_date, '%Y') = {0}", year));
+
+        for (RouteStaffInfo orderInfo : hotelOrderList) {
+            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCreateDate())) + 1);
+        }
+
+        Map<Integer, List<RouteStaffInfo>> orderPutMonthMap = hotelOrderList.stream()
+                .collect(Collectors.groupingBy(RouteStaffInfo::getDay));
+
+        // 本年订单量
+        result.put("orderNum", scenicOrderList.size());
+
+        // 本年总收益
+        BigDecimal totalPrice = scenicOrderList.stream()
+                .filter(e -> "-1".equals(e.getStatus()))
+                .map(e -> e.getDistance() != null ? e.getDistance() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        result.put("totalPrice", totalPrice);
+
+        // 统计 highwayTolls 字段分布
+        Map<String, Long> highwayTollsCountMap = scenicOrderList.stream()
+                .filter(e -> e.getHighwayTolls() != null)
+                .collect(Collectors.groupingBy(RouteInfo::getHighwayTolls, Collectors.counting()));
+        result.put("highwayTollsCountMap", highwayTollsCountMap);
+
+        // 统计 type 字段分布
+        Map<String, Long> typeCountMap = scenicOrderList.stream()
+                .filter(e -> e.getType() != null)
+                .collect(Collectors.groupingBy(RouteInfo::getType, Collectors.counting()));
+        result.put("typeCountMap", typeCountMap);
+
+        result.put("putNum", hotelOrderList.size());
+
+        // 计算平均距离
+        double averageDistance = hotelOrderList.stream()
+                .filter(item -> item != null && item.getDistance() != null)
+                .mapToDouble(item -> item.getDistance().doubleValue())
+                .average()
+                .orElse(0.0);
+        result.put("outlayPrice", averageDistance);
+
+        List<Integer> orderNumList = new ArrayList<>();
+        List<BigDecimal> orderPriceList = new ArrayList<>();
+        List<Integer> outlayNumList = new ArrayList<>();
+        List<BigDecimal> outlayPriceList = new ArrayList<>();
+
+        // 月度 highwayTolls 和 type 分布
+        List<Map<String, Integer>> monthlyHighwayTollsDistribution = new ArrayList<>();
+        List<Map<String, Integer>> monthlyTypeDistribution = new ArrayList<>();
+
+        for (int i = 1; i <= 12; i++) {
+            List<RouteInfo> currentMonthOutList = orderOutMonthMap.get(i);
+
+            if (CollectionUtil.isEmpty(currentMonthOutList)) {
+                orderNumList.add(0);
+                orderPriceList.add(BigDecimal.ZERO);
+
+                // 添加空的月度分布数据
+                monthlyHighwayTollsDistribution.add(new HashMap<>());
+                monthlyTypeDistribution.add(new HashMap<>());
+            } else {
+                orderNumList.add(currentMonthOutList.size());
+
+                BigDecimal currentMonthOutPrice = currentMonthOutList.stream()
+                        .filter(e -> e != null && e.getStatus() != null && !"-1".equals(e.getStatus()))
+                        .map(e -> e.getDistance() != null ? e.getDistance() : BigDecimal.ZERO)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                orderPriceList.add(currentMonthOutPrice);
+
+                // 统计当月的 highwayTolls 分布
+                Map<String, Long> monthlyHighwayTollsCount = currentMonthOutList.stream()
+                        .filter(e -> e.getHighwayTolls() != null)
+                        .collect(Collectors.groupingBy(RouteInfo::getHighwayTolls, Collectors.counting()));
+                Map<String, Integer> monthlyHighwayTollsMap = new HashMap<>();
+                for (Map.Entry<String, Long> entry : monthlyHighwayTollsCount.entrySet()) {
+                    monthlyHighwayTollsMap.put(entry.getKey(), entry.getValue().intValue());
+                }
+                monthlyHighwayTollsDistribution.add(monthlyHighwayTollsMap);
+
+                // 统计当月的 type 分布
+                Map<String, Long> monthlyTypeCount = currentMonthOutList.stream()
+                        .filter(e -> e.getType() != null)
+                        .collect(Collectors.groupingBy(RouteInfo::getType, Collectors.counting()));
+                Map<String, Integer> monthlyTypeMap = new HashMap<>();
+                for (Map.Entry<String, Long> entry : monthlyTypeCount.entrySet()) {
+                    monthlyTypeMap.put(entry.getKey(), entry.getValue().intValue());
+                }
+                monthlyTypeDistribution.add(monthlyTypeMap);
+            }
+
+            List<RouteStaffInfo> currentMonthPutList = orderPutMonthMap.get(i);
+            if (CollectionUtil.isEmpty(currentMonthPutList)) {
+                outlayNumList.add(0);
+                outlayPriceList.add(BigDecimal.ZERO);
+            } else {
+                outlayNumList.add(currentMonthPutList.size());
+                BigDecimal currentMonthPutPrice = currentMonthPutList.stream()
+                        .filter(e -> e != null && e.getStatus() != null && !"0".equals(e.getStatus()))
+                        .map(e -> e.getDistance() != null ? e.getDistance() : BigDecimal.ZERO)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                outlayPriceList.add(currentMonthPutPrice);
+            }
+        }
+
+        result.put("orderPriceList", orderPriceList);
+        result.put("orderNumList", orderNumList);
+        result.put("outlayPriceList", outlayPriceList);
+        result.put("outlayNumList", outlayNumList);
+
+        // 添加月度的 highwayTolls 和 type 分布数据
+        result.put("monthlyHighwayTollsDistribution", monthlyHighwayTollsDistribution);
+        result.put("monthlyTypeDistribution", monthlyTypeDistribution);
+
+        return result;
     }
 
     /**
@@ -591,124 +732,423 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
      */
     @Override
     public LinkedHashMap<String, Object> selectStoreStatisticsByMonth(String dateStr) {
-        return null;
-//        String date = dateStr + "-01";
-//        // 返回数据
-//        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-//
-//        int year =  DateUtil.year(new Date());
-//        int month =  DateUtil.month(new Date()) + 1;
-//        if (StrUtil.isNotEmpty(date)) {
-//            year = DateUtil.year(DateUtil.parseDate(date));
-//            month = DateUtil.month(DateUtil.parseDate(date)) + 1;
-//        }
-//
-//        List<RouteInfo> scenicOrderList = routeInfoService.list(new LambdaQueryWrapper<RouteInfo>().apply("DATE_FORMAT(create_date, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
-//        for (RouteInfo scenicOrder : scenicOrderList) {
-//            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
-//            scenicOrder.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(scenicOrder.getCreateDate())));
-//        }
-//        Map<Integer, List<RouteInfo>> orderOutDayMap = scenicOrderList.stream().collect(Collectors.groupingBy(RouteInfo::getDay));
-//        List<RouteStaffInfo> hotelOrderList = routeStaffInfoService.list(new LambdaQueryWrapper<RouteStaffInfo>().apply("DATE_FORMAT(completion_time, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
-//        for (RouteStaffInfo orderInfo : hotelOrderList) {
-//            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCreateDate())) + 1);
-//            orderInfo.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(orderInfo.getCreateDate())));
-//        }
-//        Map<Integer, List<RouteStaffInfo>> orderPutDayMap = hotelOrderList.stream().collect(Collectors.groupingBy(RouteStaffInfo::getDay));
-//
-//        // 本月订单量
-//        result.put("orderNum", scenicOrderList.size());
-//        // 本月总收益
-//        BigDecimal totalPrice = BigDecimal.valueOf(scenicOrderList.stream().filter(e -> 4 == e.getStatus() || 5 == e.getStatus()).count());
-//        result.put("totalPrice", totalPrice);
-//        result.put("putNum", hotelOrderList.size());
-//        // 计算平均分
-//        double averageScore = hotelOrderList.stream()
-//                .mapToInt(AiInterview::getScore)
-//                .average()
-//                .orElse(0.0);
-//        result.put("outlayPrice", averageScore);
-//
-//        List<Integer> orderNumList = new ArrayList<>();
-//        List<BigDecimal> orderPriceList = new ArrayList<>();
-//        List<Integer> outlayNumList = new ArrayList<>();
-//        List<BigDecimal> outlayPriceList = new ArrayList<>();
-//        int days = DateUtil.getLastDayOfMonth(DateUtil.parseDate(date));
-//
-//        // 本月日期
-//        List<String> dateTimeList = new ArrayList<>();
-//
-//        for (int i = 1; i <= days; i++) {
-//            dateTimeList.add(month + "月" + i + "日");
-//            List<InterviewInfo> currentDayOutList = orderOutDayMap.get(i);
-//            if (CollectionUtil.isEmpty(currentDayOutList)) {
-//                orderNumList.add(0);
-//                orderPriceList.add(BigDecimal.ZERO);
-//            } else {
-//                orderNumList.add(currentDayOutList.size());
-//                BigDecimal currentDayOutPrice = BigDecimal.valueOf(currentDayOutList.stream().filter(e -> 4 == e.getStatus() || 5 == e.getStatus()).count());
-//                orderPriceList.add(currentDayOutPrice);
-//            }
-//
-//            // 本天入库
-//            List<AiInterview> currentDayPutList = orderPutDayMap.get(i);
-//            if (CollectionUtil.isEmpty(currentDayPutList)) {
-//                outlayNumList.add(0);
-//                outlayPriceList.add(BigDecimal.ZERO);
-//            } else {
-//                outlayNumList.add(currentDayPutList.size());
-//                BigDecimal currentDayPutPrice = BigDecimal.valueOf(currentDayPutList.stream().filter(e -> e.getScore() > 80).count());
-//                outlayPriceList.add(currentDayPutPrice);
-//            }
-//
-//        }
-//        result.put("orderPriceList", orderPriceList);
-//        result.put("orderNumList", orderNumList);
-//        result.put("outlayPriceList", outlayPriceList);
-//        result.put("outlayNumList", orderNumList);
-////        result.put("outlayNumList", outlayNumList);
-//
-//        result.put("dateList", dateTimeList);
-//        // 岗位销量排行
-//        List<LinkedHashMap<String, Object>> saleRank = new ArrayList<>();
-//        List<LinkedHashMap<String, Object>> salePriceRank = new ArrayList<>();
-//        LinkedHashMap<String, Integer> saleTypeRankMap = new LinkedHashMap<>();
-//
-//        Map<Integer, List<InterviewInfo>> recordInfoMap = scenicOrderList.stream().collect(Collectors.groupingBy(InterviewInfo::getBaseId));
-//
-//        // 岗位信息
-//        Set<Integer> scenicIdList = recordInfoMap.keySet();
-//        List<PostInfo> scenicInfoList = postInfoService.list(Wrappers.<PostInfo>lambdaQuery().in(CollectionUtil.isNotEmpty(scenicIdList), PostInfo::getId, scenicIdList));
-//        Map<Integer, PostInfo> scenicMap = scenicInfoList.stream().collect(Collectors.toMap(PostInfo::getId, e -> e));
-//
-//        recordInfoMap.forEach((key, value) -> {
-//            PostInfo scenicInfo = scenicMap.get(key);
-//            if (scenicInfo != null) {
-//                saleRank.add(new LinkedHashMap<String, Object>() {
-//                    {
-//                        put("name", scenicInfo.getPostName());
-//                        put("num", value.size());
-//                    }
-//                });
-//                salePriceRank.add(new LinkedHashMap<String, Object>() {
-//                    {
-//                        put("name", scenicInfo.getPostName());
-//                        put("num", value.stream().filter(e -> 4 == e.getStatus() || 5 == e.getStatus()).count());
-//                    }
-//                });
-//
-//                saleTypeRankMap.merge(StrUtil.toString(scenicInfo.getAcademic()), value.size(), Integer::sum);
-//            }
-//        });
-//        result.put("saleRank", saleRank);
-//        result.put("salePriceRank", salePriceRank);
-//        // 销售岗位分类
-//        LinkedHashMap<String, Integer> saleTypeRankMapCopy = new LinkedHashMap<>();
-//        List<String> scenicTypeList = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8");
-//        for (String level : scenicTypeList) {
-//            saleTypeRankMapCopy.put(level, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
-//        }
-//        result.put("saleTypeRankMapCopy", saleTypeRankMapCopy);
-//        return result;
+        String date = dateStr + "-01";
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        int year = DateUtil.year(new Date());
+        int month = DateUtil.month(new Date()) + 1;
+        if (StrUtil.isNotEmpty(date)) {
+            year = DateUtil.year(DateUtil.parseDate(date));
+            month = DateUtil.month(DateUtil.parseDate(date)) + 1;
+        }
+
+        List<RouteInfo> scenicOrderList = routeInfoService.list(new LambdaQueryWrapper<RouteInfo>().apply("DATE_FORMAT(create_date, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
+        for (RouteInfo scenicOrder : scenicOrderList) {
+            scenicOrder.setMonth(DateUtil.month(DateUtil.parseDate(scenicOrder.getCreateDate())) + 1);
+            scenicOrder.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(scenicOrder.getCreateDate())));
+        }
+        Map<Integer, List<RouteInfo>> orderOutDayMap = scenicOrderList.stream().collect(Collectors.groupingBy(RouteInfo::getDay));
+        List<RouteStaffInfo> hotelOrderList = routeStaffInfoService.list(new LambdaQueryWrapper<RouteStaffInfo>().apply("DATE_FORMAT(completion_time, '%Y%m') = {0}", (year + "" + ((month < 10) ? "0" + month : month))));
+        for (RouteStaffInfo orderInfo : hotelOrderList) {
+            orderInfo.setMonth(DateUtil.month(DateUtil.parseDate(orderInfo.getCreateDate())) + 1);
+            orderInfo.setDay(DateUtil.dayOfMonth(DateUtil.parseDate(orderInfo.getCreateDate())));
+        }
+        Map<Integer, List<RouteStaffInfo>> orderPutDayMap = hotelOrderList.stream().collect(Collectors.groupingBy(RouteStaffInfo::getDay));
+
+        // 本月订单量
+        result.put("orderNum", scenicOrderList.size());
+        // 本月总收益
+        BigDecimal totalPrice = scenicOrderList.stream().filter(e -> "-1".equals(e.getStatus())).map(e -> e.getDistance() != null ? e.getDistance() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        result.put("totalPrice", totalPrice);
+
+        // 统计 highwayTolls 字段分布
+        Map<String, Long> highwayTollsCountMap = scenicOrderList.stream()
+                .filter(e -> e.getHighwayTolls() != null)
+                .collect(Collectors.groupingBy(RouteInfo::getHighwayTolls, Collectors.counting()));
+        result.put("highwayTollsCountMap", highwayTollsCountMap);
+
+        // 统计 type 字段分布
+        Map<String, Long> typeCountMap = scenicOrderList.stream()
+                .filter(e -> e.getType() != null)
+                .collect(Collectors.groupingBy(RouteInfo::getType, Collectors.counting()));
+        result.put("typeCountMap", typeCountMap);
+
+        result.put("putNum", hotelOrderList.size());
+
+        // 计算平均分
+        double averageDistance = hotelOrderList.stream()
+                .filter(item -> item != null && item.getDistance() != null)
+                .mapToDouble(item -> item.getDistance().doubleValue())
+                .average()
+                .orElse(0.0);
+        result.put("outlayPrice", averageDistance);
+
+        List<Integer> orderNumList = new ArrayList<>();
+        List<BigDecimal> orderPriceList = new ArrayList<>();
+        List<Integer> outlayNumList = new ArrayList<>();
+        List<BigDecimal> outlayPriceList = new ArrayList<>();
+        int days = DateUtil.getLastDayOfMonth(DateUtil.parseDate(date));
+
+        // 本月日期
+        List<String> dateTimeList = new ArrayList<>();
+
+        // 为每天准备 highwayTolls 和 type 的分布数据
+        List<Map<String, Integer>> dailyHighwayTollsDistribution = new ArrayList<>();
+        List<Map<String, Integer>> dailyTypeDistribution = new ArrayList<>();
+
+        for (int i = 1; i <= days; i++) {
+            dateTimeList.add(month + "月" + i + "日");
+            List<RouteInfo> currentDayOutList = orderOutDayMap.get(i);
+            if (CollectionUtil.isEmpty(currentDayOutList)) {
+                orderNumList.add(0);
+                orderPriceList.add(BigDecimal.ZERO);
+
+                // 添加空的当日分布数据
+                dailyHighwayTollsDistribution.add(new HashMap<>());
+                dailyTypeDistribution.add(new HashMap<>());
+            } else {
+                orderNumList.add(currentDayOutList.size());
+                BigDecimal currentDayOutPrice = currentDayOutList.stream()
+                        .filter(e -> e != null && e.getStatus() != null && !"-1".equals(e.getStatus()))
+                        .map(e -> e.getDistance() != null ? e.getDistance() : BigDecimal.ZERO)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                orderPriceList.add(currentDayOutPrice);
+
+                // 统计当天的 highwayTolls 分布
+                Map<String, Long> dailyHighwayTollsCount = currentDayOutList.stream()
+                        .filter(e -> e.getHighwayTolls() != null)
+                        .collect(Collectors.groupingBy(RouteInfo::getHighwayTolls, Collectors.counting()));
+                Map<String, Integer> dailyHighwayTollsMap = new HashMap<>();
+                for (Map.Entry<String, Long> entry : dailyHighwayTollsCount.entrySet()) {
+                    dailyHighwayTollsMap.put(entry.getKey(), entry.getValue().intValue());
+                }
+                dailyHighwayTollsDistribution.add(dailyHighwayTollsMap);
+
+                // 统计当天的 type 分布
+                Map<String, Long> dailyTypeCount = currentDayOutList.stream()
+                        .filter(e -> e.getType() != null)
+                        .collect(Collectors.groupingBy(RouteInfo::getType, Collectors.counting()));
+                Map<String, Integer> dailyTypeMap = new HashMap<>();
+                for (Map.Entry<String, Long> entry : dailyTypeCount.entrySet()) {
+                    dailyTypeMap.put(entry.getKey(), entry.getValue().intValue());
+                }
+                dailyTypeDistribution.add(dailyTypeMap);
+            }
+
+            // 本天入库
+            List<RouteStaffInfo> currentDayPutList = orderPutDayMap.get(i);
+            if (CollectionUtil.isEmpty(currentDayPutList)) {
+                outlayNumList.add(0);
+                outlayPriceList.add(BigDecimal.ZERO);
+            } else {
+                outlayNumList.add(currentDayPutList.size());
+                BigDecimal currentDayPutPrice = currentDayPutList.stream()
+                        .filter(e -> e != null && e.getStatus() != null && !"0".equals(e.getStatus()))
+                        .map(e -> e.getDistance() != null ? e.getDistance() : BigDecimal.ZERO)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                outlayPriceList.add(currentDayPutPrice);
+            }
+        }
+
+        result.put("orderPriceList", orderPriceList);
+        result.put("orderNumList", orderNumList);
+        result.put("outlayPriceList", outlayPriceList);
+        result.put("outlayNumList", outlayNumList);
+
+        result.put("dateList", dateTimeList);
+
+        // 添加每日的 highwayTolls 和 type 分布数据
+        result.put("dailyHighwayTollsDistribution", dailyHighwayTollsDistribution);
+        result.put("dailyTypeDistribution", dailyTypeDistribution);
+
+        return result;
     }
+
+    /**
+     * 订单成功率
+     *
+     * @return 订单成功率
+     */
+    @Override
+    public LinkedHashMap<String, Object> orderSuccessRate() {
+        int currentYear = DateUtil.year(new Date());
+
+        // 查询本年所有乘客发布的订单
+        List<RouteInfo> allPassengerRoutes = routeInfoService.list(
+                new LambdaQueryWrapper<RouteInfo>()
+                        .apply("DATE_FORMAT(create_date, '%Y') = {0}", currentYear)
+        );
+
+        // 按月份分组订单
+        Map<Integer, List<RouteInfo>> ordersByMonth = allPassengerRoutes.stream()
+                .collect(Collectors.groupingBy(route ->
+                        DateUtil.month(DateUtil.parseDate(route.getCreateDate())) + 1
+                ));
+
+        // 统计全年总订单数
+        long totalOrders = allPassengerRoutes.size();
+
+        // 统计全年已接单的订单数
+        long successOrders = allPassengerRoutes.stream()
+                .filter(route -> route.getOrderId() != null)
+                .count();
+
+        // 计算全年成功率
+        double annualSuccessRate = totalOrders > 0 ? (double) successOrders / totalOrders * 100 : 0.0;
+
+        // 初始化月度数据
+        List<Integer> monthlyTotalOrders = new ArrayList<>();
+        List<Integer> monthlySuccessOrders = new ArrayList<>();
+        List<Double> monthlySuccessRates = new ArrayList<>();
+        List<Double> monthlyGrowthRates = new ArrayList<>(); // 同比增长率
+        List<Double> monthlyChainRates = new ArrayList<>();  // 环比增长率
+
+        // 上一个月的成功率，用于计算环比
+        double previousMonthRate = 0.0;
+
+        // 计算各月数据
+        for (int month = 1; month <= 12; month++) {
+            List<RouteInfo> monthOrders = ordersByMonth.getOrDefault(month, new ArrayList<>());
+            long monthTotal = monthOrders.size();
+            long monthSuccess = monthOrders.stream()
+                    .filter(route -> route.getOrderId() != null)
+                    .count();
+            double monthRate = monthTotal > 0 ? (double) monthSuccess / monthTotal * 100 : 0.0;
+
+            monthlyTotalOrders.add((int) monthTotal);
+            monthlySuccessOrders.add((int) monthSuccess);
+            monthlySuccessRates.add(monthRate);
+
+            // 计算同比增长率（与去年同月比较）
+            // 查询去年同月的订单数据
+            List<RouteInfo> lastYearMonthOrders = routeInfoService.list(
+                    new LambdaQueryWrapper<RouteInfo>()
+                            .apply("DATE_FORMAT(create_date, '%Y-%m') = {0}",
+                                    currentYear - 1 + "-" + (month < 10 ? "0" + month : month))
+            );
+            long lastYearMonthTotal = lastYearMonthOrders.size();
+            long lastYearMonthSuccess = lastYearMonthOrders.stream()
+                    .filter(route -> route.getOrderId() != null)
+                    .count();
+            double lastYearMonthRate = lastYearMonthTotal > 0 ? (double) lastYearMonthSuccess / lastYearMonthTotal * 100 : 0.0;
+
+            double growthRate = lastYearMonthRate != 0 ? (monthRate - lastYearMonthRate) / lastYearMonthRate * 100 : 0.0;
+            monthlyGrowthRates.add(growthRate);
+
+            // 计算环比增长率（与上月比较）
+            double chainRate = previousMonthRate != 0 ? (monthRate - previousMonthRate) / previousMonthRate * 100 : 0.0;
+            monthlyChainRates.add(chainRate);
+
+            previousMonthRate = monthRate;
+        }
+
+        // 构建返回结果
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("year", currentYear);                   // 统计年份
+        result.put("totalOrders", totalOrders);            // 全年总订单数
+        result.put("successOrders", successOrders);        // 全年成功接单数
+        result.put("failedOrders", totalOrders - successOrders); // 全年未接单数
+        result.put("annualSuccessRate", annualSuccessRate); // 全年成功率
+
+        // 月度数据
+        result.put("monthlyTotalOrders", monthlyTotalOrders);     // 各月总订单数
+        result.put("monthlySuccessOrders", monthlySuccessOrders); // 各月成功订单数
+        result.put("monthlySuccessRates", monthlySuccessRates);   // 各月成功率
+        result.put("monthlyGrowthRates", monthlyGrowthRates);     // 各月同比增长率
+        result.put("monthlyChainRates", monthlyChainRates);       // 各月环比增长率
+
+        return result;
+    }
+
+    /**
+     * 订单拼成率
+     *
+     * @return 订单拼成率
+     */
+    @Override
+    public LinkedHashMap<String, Object> assemblyRate() {
+        int currentYear = DateUtil.year(new Date());
+
+        // 查询本年所有已接单的订单
+        List<OrderInfo> allOrders = this.list(
+                new LambdaQueryWrapper<OrderInfo>()
+                        .apply("DATE_FORMAT(create_date, '%Y') = {0}", currentYear)
+        );
+
+        // 按月份和司机路线ID分组订单
+        Map<Integer, Map<Integer, List<OrderInfo>>> ordersByMonthAndRoute = allOrders.stream()
+                .collect(Collectors.groupingBy(
+                        order -> DateUtil.month(DateUtil.parseDate(order.getCreateDate())) + 1,
+                        Collectors.groupingBy(OrderInfo::getStaffRouteId)
+                ));
+
+        // 统计全年总司机路线数
+        long totalRoutes = allOrders.stream()
+                .collect(Collectors.groupingBy(OrderInfo::getStaffRouteId)).size();
+
+        // 统计全年拼载路线数（一个司机路线上有2个及以上订单）
+        long assemblyRoutes = allOrders.stream()
+                .collect(Collectors.groupingBy(OrderInfo::getStaffRouteId))
+                .values()
+                .stream()
+                .filter(orders -> orders.size() >= 2)
+                .count();
+
+        // 计算全年拼成率
+        double annualAssemblyRate = totalRoutes > 0 ? (double) assemblyRoutes / totalRoutes * 100 : 0.0;
+
+        // 初始化月度数据
+        List<Integer> monthlyTotalRoutes = new ArrayList<>();
+        List<Integer> monthlyAssemblyRoutes = new ArrayList<>();
+        List<Double> monthlyAssemblyRates = new ArrayList<>();
+        List<Double> monthlyGrowthRates = new ArrayList<>(); // 同比增长率
+        List<Double> monthlyChainRates = new ArrayList<>();  // 环比增长率
+
+        // 上一个月的拼成率，用于计算环比
+        double previousMonthRate = 0.0;
+
+        // 计算各月数据
+        for (int month = 1; month <= 12; month++) {
+            Map<Integer, List<OrderInfo>> monthOrdersByRoute = ordersByMonthAndRoute.getOrDefault(month, new HashMap<>());
+            long monthTotalRoutes = monthOrdersByRoute.size();
+            long monthAssemblyRoutes = monthOrdersByRoute.values().stream()
+                    .filter(orders -> orders.size() >= 2)
+                    .count();
+            double monthAssemblyRate = monthTotalRoutes > 0 ? (double) monthAssemblyRoutes / monthTotalRoutes * 100 : 0.0;
+
+            monthlyTotalRoutes.add((int) monthTotalRoutes);
+            monthlyAssemblyRoutes.add((int) monthAssemblyRoutes);
+            monthlyAssemblyRates.add(monthAssemblyRate);
+
+            // 计算同比增长率（与去年同月比较）
+            // 查询去年同月的订单数据
+            List<OrderInfo> lastYearMonthOrders = this.list(
+                    new LambdaQueryWrapper<OrderInfo>()
+                            .apply("DATE_FORMAT(create_date, '%Y-%m') = {0}",
+                                    currentYear - 1 + "-" + (month < 10 ? "0" + month : month))
+            );
+            Map<Integer, List<OrderInfo>> lastYearMonthOrdersByRoute = lastYearMonthOrders.stream()
+                    .collect(Collectors.groupingBy(OrderInfo::getStaffRouteId));
+            long lastYearMonthTotalRoutes = lastYearMonthOrdersByRoute.size();
+            long lastYearMonthAssemblyRoutes = lastYearMonthOrdersByRoute.values().stream()
+                    .filter(orders -> orders.size() >= 2)
+                    .count();
+            double lastYearMonthAssemblyRate = lastYearMonthTotalRoutes > 0 ? (double) lastYearMonthAssemblyRoutes / lastYearMonthTotalRoutes * 100 : 0.0;
+
+            double growthRate = lastYearMonthAssemblyRate != 0 ? (monthAssemblyRate - lastYearMonthAssemblyRate) / lastYearMonthAssemblyRate * 100 : 0.0;
+            monthlyGrowthRates.add(growthRate);
+
+            // 计算环比增长率（与上月比较）
+            double chainRate = previousMonthRate != 0 ? (monthAssemblyRate - previousMonthRate) / previousMonthRate * 100 : 0.0;
+            monthlyChainRates.add(chainRate);
+
+            previousMonthRate = monthAssemblyRate;
+        }
+
+        // 构建返回结果
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("year", currentYear);                     // 统计年份
+        result.put("totalRoutes", totalRoutes);              // 全年总司机路线数
+        result.put("assemblyRoutes", assemblyRoutes);        // 全年拼载路线数
+        result.put("nonAssemblyRoutes", totalRoutes - assemblyRoutes); // 全年非拼载路线数
+        result.put("annualAssemblyRate", annualAssemblyRate); // 全年拼成率
+
+        // 月度数据
+        result.put("monthlyTotalRoutes", monthlyTotalRoutes);      // 各月总司机路线数
+        result.put("monthlyAssemblyRoutes", monthlyAssemblyRoutes); // 各月拼载路线数
+        result.put("monthlyAssemblyRates", monthlyAssemblyRates);   // 各月拼成率
+        result.put("monthlyGrowthRates", monthlyGrowthRates);      // 各月同比增长率
+        result.put("monthlyChainRates", monthlyChainRates);        // 各月环比增长率
+
+        return result;
+    }
+
+    /**
+     * 平均顺路程度
+     *
+     * @return 结果
+     */
+    @Override
+    public LinkedHashMap<String, Object> queryConvenience() {
+        int currentYear = DateUtil.year(new Date());
+        // 查询本年所有车主路线
+        List<RouteStaffInfo> allStaffRoutes = routeStaffInfoService.list(
+                new LambdaQueryWrapper<RouteStaffInfo>()
+                        .apply("DATE_FORMAT(create_date, '%Y') = {0}", currentYear)
+        );
+
+        // 按月份分组路线
+        Map<Integer, List<RouteStaffInfo>> routesByMonth = allStaffRoutes.stream()
+                .collect(Collectors.groupingBy(route ->
+                        DateUtil.month(DateUtil.parseDate(route.getCreateDate())) + 1
+                ));
+        // 计算全年平均匹配率
+        double annualAverageMatchRate = calculateAverageMatchRate(allStaffRoutes);
+
+        // 初始化月度数据
+        List<Double> monthlyAverageMatchRates = new ArrayList<>();
+        List<Double> monthlyGrowthRates = new ArrayList<>(); // 同比增长率
+        List<Double> monthlyChainRates = new ArrayList<>();  // 环比增长率
+
+        // 上一个月的匹配率，用于计算环比
+        double previousMonthMatchRate = 0.0;
+
+        // 计算各月数据
+        for (int month = 1; month <= 12; month++) {
+            List<RouteStaffInfo> monthRoutes = routesByMonth.getOrDefault(month, new ArrayList<>());
+            double monthMatchRate = calculateAverageMatchRate(monthRoutes);
+            monthlyAverageMatchRates.add(monthMatchRate);
+
+            // 计算同比增长率（与去年同月比较）
+            List<RouteStaffInfo> lastYearMonthRoutes = routeStaffInfoService.list(
+                    new LambdaQueryWrapper<RouteStaffInfo>()
+                            .apply("DATE_FORMAT(create_date, '%Y-%m') = {0}",
+                                    currentYear - 1 + "-" + (month < 10 ? "0" + month : month))
+            );
+            double lastYearMonthMatchRate = calculateAverageMatchRate(lastYearMonthRoutes);
+            double growthRate = lastYearMonthMatchRate != 0 ?
+                    (monthMatchRate - lastYearMonthMatchRate) / lastYearMonthMatchRate * 100 : 0.0;
+            monthlyGrowthRates.add(growthRate);
+
+            // 计算环比增长率（与上月比较）
+            double chainRate = previousMonthMatchRate != 0 ?
+                    (monthMatchRate - previousMonthMatchRate) / previousMonthMatchRate * 100 : 0.0;
+            monthlyChainRates.add(chainRate);
+
+            previousMonthMatchRate = monthMatchRate;
+        }
+
+        // 构建返回结果
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("year", currentYear);                           // 统计年份
+        result.put("annualAverageMatchRate", annualAverageMatchRate); // 全年平均匹配率
+
+        // 月度数据
+        result.put("monthlyAverageMatchRates", monthlyAverageMatchRates); // 各月平均匹配率
+        result.put("monthlyGrowthRates", monthlyGrowthRates);           // 各月同比增长率
+        result.put("monthlyChainRates", monthlyChainRates);             // 各月环比增长率
+
+        return result;
+    }
+
+    /**
+     * 计算一组路线的平均匹配率
+     *
+     * @param routes 路线列表
+     * @return 平均匹配率
+     */
+    private double calculateAverageMatchRate(List<RouteStaffInfo> routes) {
+        if (routes.isEmpty()) {
+            return 0.0;
+        }
+        // 过滤掉 matchRate 为 null 的记录并计算平均值
+        return routes.stream()
+                .filter(route -> route.getMatchRate() != null)
+                .mapToInt(RouteStaffInfo::getMatchRate)
+                .average()
+                .orElse(0.0);
+    }
+
 }
