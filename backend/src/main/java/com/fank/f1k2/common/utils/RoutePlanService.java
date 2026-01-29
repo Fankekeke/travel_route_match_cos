@@ -6,6 +6,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,9 +31,8 @@ public class RoutePlanService {
      */
     public String getRoutePlan(Double startLongitude, Double startLatitude,
                                Double endLongitude, Double endLatitude) {
-        // 构建请求参数
-        Map<String, Object> params = new HashMap<>();
-        params.put("key", "fk04e01085b5de84cd79a80707604c795e");
+        // API密钥
+        String apiKey = "04e01085b5de84cd79a80707604c795e";
 
         // 构建packs数组
         List<Map<String, Object>> packs = new ArrayList<>();
@@ -41,27 +41,32 @@ public class RoutePlanService {
         Map<String, Object> pack1 = new HashMap<>();
         pack1.put("origin", startLongitude + "," + startLatitude);
         pack1.put("destination", endLongitude + "," + endLatitude);
-        pack1.put("departure_time", System.currentTimeMillis() / 1000 + 3600); // 一小时后
+        pack1.put("departure_time", System.currentTimeMillis() / 1000 + 3600);
         pack1.put("routeplan_type", "1");
         pack1.put("need_polyline", false);
         pack1.put("eta_strategy", 0);
-        pack1.put("strategy", "2");
         packs.add(pack1);
 
         // 第二个路线规划请求 - 需要polyline
         Map<String, Object> pack2 = new HashMap<>();
         pack2.put("origin", startLongitude + "," + startLatitude);
         pack2.put("destination", endLongitude + "," + endLatitude);
-        pack2.put("departure_time", System.currentTimeMillis() / 1000 + 3600); // 一小时后
+        pack2.put("departure_time", System.currentTimeMillis() / 1000 + 3600);
         pack2.put("routeplan_type", "1");
         pack2.put("need_polyline", true);
         packs.add(pack2);
 
-        params.put("packs", packs);
+        // 将packs数组转换为JSON字符串并进行URL编码
+        String packsJson = JSONUtil.toJsonStr(packs);
+        String encodedPacks = java.net.URLEncoder.encode(packsJson);
+
+        // 构建完整的URL
+        String url = ROUTE_PLAN_API_URL + "?key=" + apiKey + "&packs=" + encodedPacks;
 
         try {
             // 发送GET请求
-            String response = HttpUtil.get(ROUTE_PLAN_API_URL, params);
+            String response = HttpUtil.get(url);
+            System.out.println(response);
 
             // 解析响应JSON
             JSONObject jsonResponse = JSONUtil.parseObj(response);
@@ -70,18 +75,13 @@ public class RoutePlanService {
             JSONArray results = jsonResponse.getJSONArray("results");
 
             if (results != null && results.size() > 1) {
-                // 获取第二个元素（索引为1）
                 JSONObject secondResult = results.getJSONObject(1);
-                // 获取其中的routes数据
                 Object routes = secondResult.get("routes");
-
-                // 返回routes部分的JSON字符串
                 return JSONUtil.toJsonStr(routes);
             } else {
                 throw new RuntimeException("API响应中没有足够的results数据或不存在第二个元素");
             }
         } catch (Exception e) {
-            // 记录错误日志
             e.printStackTrace();
             throw new RuntimeException("路线规划API调用失败: " + e.getMessage());
         }

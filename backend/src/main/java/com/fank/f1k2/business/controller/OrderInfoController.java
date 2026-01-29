@@ -3,6 +3,7 @@ package com.fank.f1k2.business.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fank.f1k2.business.entity.*;
 import com.fank.f1k2.business.service.*;
@@ -276,7 +277,7 @@ public class OrderInfoController {
 
             String result = routePlanService.getRoutePlan(startLongitude, startLatitude,
                     endLongitude, endLatitude);
-            return R.ok(result);
+            return R.ok(JSONUtil.parse(result));
         } catch (Exception e) {
             e.printStackTrace();
             return R.error("获取路线规划失败: " + e.getMessage());

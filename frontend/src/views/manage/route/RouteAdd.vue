@@ -1,9 +1,10 @@
 <template>
   <a-modal
     v-model="show"
-    title="新增路线"
     @cancel="onClose"
-    :width="1400"
+    :width="1300"
+    :bodyStyle="{ padding: 0 }"
+    :footer="null"
     class="route-add-modal"
   >
     <template slot="footer">
@@ -22,12 +23,11 @@
     </template>
 
     <a-form :form="form" layout="vertical" class="main-form">
-      <a-row :gutter="24" class="main-content-row">
+      <a-row class="main-content-row">
         <a-col :span="15" class="map-column">
           <div id="areas" class="map-container"></div>
+
           <div>
-            <h4>推荐路线</h4>
-            <div></div>
             <div v-if="showRoutePlans" class="route-plans-panel">
               <div
                 v-for="(plan, index) in routePlans"
@@ -49,19 +49,18 @@
           </div>
         </a-col>
         <a-col :span="9" class="form-column">
-          <div class="form-container">
+          <div class="form-container" style="padding: 60px 20px 20px 20px">
             <!-- 出发地和目的地 -->
             <a-row :gutter="16" class="start-end-container">
               <a-col :span="12">
                 <a-form-item label="出发地" v-bind="formItemLayout">
                   <a-input-search
                     v-decorator="[
-                      'startAddress',
-                      { rules: [{ required: true, message: '请输入出发地' }] }
-                    ]"
+        'startAddress',
+        { rules: [{ required: true, message: '请输入出发地' }] }
+      ]"
                     placeholder="点击地图选择出发地"
-                    enter-button="选择"
-                    @search="onSearch"
+                    :enterButton="false"
                   />
                 </a-form-item>
               </a-col>
@@ -69,29 +68,28 @@
                 <a-form-item label="目的地" v-bind="formItemLayout">
                   <a-input-search
                     v-decorator="[
-                      'endAddress',
-                      { rules: [{ required: true, message: '请输入目的地' }] }
-                    ]"
+        'endAddress',
+        { rules: [{ required: true, message: '请输入目的地' }] }
+      ]"
                     placeholder="点击地图选择目的地"
-                    enter-button="选择"
-                    @search="onSearch"
+                    :enterButton="false"
                   />
                 </a-form-item>
               </a-col>
-              <a-col :span="24">
-                <a-form-item>
-                  <a-button
-                    type="primary"
-                    @click="handleCoordinateChange"
-                    :disabled="!canCalculateRoute" style="margin-right: 10px;"
-                  >
-                    手动规划路线
-                  </a-button>
-                  <span v-if="!canCalculateRoute" style="color: #999; font-size: 12px;">
-                    请先设置出发地和目的地
-                  </span>
-                </a-form-item>
-              </a-col>
+<!--              <a-col :span="24">-->
+<!--                <a-form-item>-->
+<!--                  <a-button-->
+<!--                    type="primary"-->
+<!--                    @click="handleCoordinateChange"-->
+<!--                    :disabled="!canCalculateRoute" style="margin-right: 10px;"-->
+<!--                  >-->
+<!--                    手动规划路线-->
+<!--                  </a-button>-->
+<!--                  <span v-if="!canCalculateRoute" style="color: #999; font-size: 12px;">-->
+<!--                    请先设置出发地和目的地-->
+<!--                  </span>-->
+<!--                </a-form-item>-->
+<!--              </a-col>-->
             </a-row>
 
             <!-- 时间选择 -->
@@ -183,6 +181,12 @@
                 :rows="4"
               />
             </a-form-item>
+            <div>
+              <div class="map-controls">
+                <a-button @click="onClose" class="control-btn cancel-btn">取消</a-button>
+                <a-button type="primary" @click="handleSubmit" :loading="loading" class="control-btn submit-btn">提交</a-button>
+              </div>
+            </div>
 
             <!-- 隐藏字段 -->
             <a-form-item class="hidden-field">
@@ -311,7 +315,7 @@ export default {
     handleCoordinateChange () {
       // 检查是否满足计算路线的条件
       if (this.canCalculateRoute) {
-        this.checkForRoutePlanning();
+        this.checkForRoutePlanning()
       }
     },
     onSearch (value) {
@@ -492,8 +496,8 @@ export default {
         endLongitude: endLng,
         endLatitude: endLat
       }).then((r) => {
-        if (r.data && Array.isArray(r.data)) {
-          r.data.forEach((routeData, index) => {
+        if (r.data.data && Array.isArray(r.data.data)) {
+          r.data.data.forEach((routeData, index) => {
             const routeInfo = {
               index: index,
               distance: (routeData.dist / 1000).toFixed(2) + '公里', // 将米转换为公里
@@ -564,22 +568,38 @@ export default {
         this.map.addOverlay(startMarker)
         this.map.addOverlay(endMarker)
 
-        // 添加路线
-        this.routePlans.forEach((plan, idx) => {
-          const route = plan.routes.getRoute(0)
+        // 使用 geo_list 数据绘制路线
+        if (selectedPlan.geoList && Array.isArray(selectedPlan.geoList) && selectedPlan.geoList.length > 0) {
+          // 将 geo_list 转换为百度地图的 Point 数组
+          const pathPoints = selectedPlan.geoList.map(coord =>
+            new BMapGL.Point(coord.longitude, coord.latitude)
+          )
 
-          // 为路线创建 Polyline 对象并设置样式
-          const polyline = new BMapGL.Polyline(route.getPath(), {
-            strokeColor: idx === index ? '#FF0000' : '#5555FF', // 选中的路线为红色，其他为蓝色
-            strokeWeight: idx === index ? 6 : 4, // 选中的路线更粗
-            strokeOpacity: idx === index ? 0.8 : 0.6 // 选中的路线更明显
+          // 创建 Polyline 对象并设置样式
+          const polyline = new BMapGL.Polyline(pathPoints, {
+            strokeColor: '#cccaca', // 改为蓝色
+            strokeWeight: 8, // 稍微加粗作为边框
+            strokeOpacity: 0.6, // 边框透明度
+            strokeStyle: 'solid' // 实线边框
           })
 
-          this.map.addOverlay(polyline)
-        })
+          // 创建内部细线
+          const innerLine = new BMapGL.Polyline(pathPoints, {
+            strokeColor: '#0b89d5', // 白色细线
+            strokeWeight: 4, // 内部细线较细
+            strokeOpacity: 1, // 不透明
+            strokeStyle: 'dashed', // 虚线样式
+            strokeDasharray: '30,3' // 虚线间隔模式：实线6px，空白4px
+          })
 
-        // 让地图适应路线视图
-        this.map.setViewport(selectedPlan.routes.getRoute(0).getPath())
+          this.map.addOverlay(polyline) // 先添加边框
+          this.map.addOverlay(innerLine) // 后添加内部线，使其显示在上面
+
+          this.map.addOverlay(polyline)
+
+          // 让地图适应路线视图
+          this.map.setViewport(pathPoints)
+        }
 
         // 更新距离字段
         this.form.setFieldsValue({
@@ -682,7 +702,7 @@ export default {
 /* 地图容器样式 */
 #areas {
   width: 100%;
-  height: 577px;
+  height: 523px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e8e8e8;
@@ -788,203 +808,17 @@ export default {
 /*  display: flex;*/
 /*  gap: 10px;*/
 /*}*/
-
-/* 表单行间距 */
-.a-row {
-  margin-bottom: 16px;
-}
-
-.a-row:last-child {
-  margin-bottom: 0;
-}
-
+/* 路线规划面板样式 */
 .route-plans-panel {
-  margin-top: 10px;
-  padding: 10px;
-  background: white;
-  border-radius: 4px;
-  border: 1px solid #e8e8e8;
-}
-
-.route-plan-item {
-  padding: 8px 12px;
-  border: 1px solid #e8e8e8;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.route-plan-item:hover {
-  border-color: #1890ff;
-  background-color: #f0f8ff;
-}
-
-.route-plan-item.active {
-  border-color: #1890ff;
-  background-color: #e6f7ff;
-}
-
-.route-title {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.route-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #666;
-}
-
-.route-plans-panel {
-  margin-top: 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-  max-height: 450px;
+  margin-top: 18px;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  border-radius: 3px;
+  backdrop-filter: blur(10px);
+  max-height: 200px;
   overflow-y: auto;
-}
-
-.route-plans-panel h4 {
-  margin: 0 0 16px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #1890ff;
-  color: #1d3557;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.route-plan-item {
-  padding: 12px 16px;
-  border: 2px solid #e8e8e8;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.route-plan-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: #1890ff;
-  transform: scaleY(0);
-  transition: transform 0.3s ease;
-}
-
-.route-plan-item:hover::before {
-  transform: scaleY(1);
-}
-
-.route-plan-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
-}
-
-.route-plan-item.active {
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #e6f7ff 0%, #dcf4ff 100%);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
-}
-
-.route-plan-item.active::before {
-  transform: scaleY(1);
-}
-
-.route-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #1d3557;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.route-title::before {
-  content: '📍';
-  font-size: 16px;
-}
-
-.route-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #6c757d;
-  padding-top: 6px;
-  border-top: 1px dashed #e9ecef;
-}
-
-.distance {
-  font-weight: 500;
-  color: #2a9d8f;
-}
-
-.duration {
-  font-weight: 500;
-  color: #e76f51;
-}
-
-.route-status-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.route-status-time {
-  background-color: #4ecdc4;
-}
-
-.route-status-distance {
-  background-color: #f4978e;
-}
-
-.route-status-avoid-highways {
-  background-color: #ffd166;
-}
-
-.route-status-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.route-status-time {
-  background-color: #4ecdc4;
-}
-
-.route-status-distance {
-  background-color: #f4978e;
-}
-
-.route-status-avoid-highways {
-  background-color: #ffd166;
-}
-
-.route-plans-panel {
-  margin-top: 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-  max-height: 450px;
-  overflow-y: auto;
+  z-index: 1000;
 }
 
 .route-plans-panel::-webkit-scrollbar {
@@ -992,95 +826,79 @@ export default {
 }
 
 .route-plans-panel::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
 }
 
 .route-plans-panel::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
-.route-plans-panel::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+.route-plan-item {
+  width: 95%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border: 2px solid #e8e8e8;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.route-plan-item.active {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
 }
 
 .route-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #1d3557;
-  margin-bottom: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
 }
 
-.route-title::before {
-  content: '📍';
-  font-size: 16px;
+.route-status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid transparent;
+}
+
+.route-status-recommended {
+  background-color: #52c41a;
+}
+
+.route-status-fastest {
+  background-color: #1890ff;
+}
+
+.route-status-shortest {
+  background-color: #faad14;
+}
+
+.route-status-avoid_highways {
+  background-color: #722ed1;
 }
 
 .route-info {
   display: flex;
-  justify-content: space-between;
+  gap: 15px;
   font-size: 13px;
-  color: #6c757d;
-  padding-top: 6px;
-  border-top: 1px dashed #e9ecef;
-}
-
-.distance {
+  color: #666;
   font-weight: 500;
-  color: #2a9d8f;
 }
 
-.duration {
-  font-weight: 500;
-  color: #e76f51;
-}
-
-.route-plan-item {
-  padding: 12px 16px;
-  border: 2px solid #e8e8e8;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.route-plan-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: #1890ff;
-  transform: scaleY(0);
-  transition: transform 0.3s ease;
-}
-
-.route-plan-item:hover::before {
-  transform: scaleY(1);
-}
-
-.route-plan-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
-}
-
-.route-plan-item.active {
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #e6f7ff 0%, #dcf4ff 100%);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
-}
-
-.route-plan-item.active::before {
-  transform: scaleY(1);
+.route-info .distance,
+.route-info .duration {
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 </style>
