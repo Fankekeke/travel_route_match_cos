@@ -14,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
@@ -52,6 +55,11 @@ public class RouteInfoServiceImpl extends ServiceImpl<RouteInfoMapper, RouteInfo
         }
         routeInfo.setUserId(userInfo.getId());
         routeInfo.setStatus("-1");
+        // 判断用户是否存在未完成的路线
+        List<RouteInfo> unfinishedRoute = list(Wrappers.<RouteInfo>lambdaQuery().eq(RouteInfo::getUserId, routeInfo.getUserId()).ne(RouteInfo::getStatus, "3"));
+        if (unfinishedRoute != null && unfinishedRoute.size() > 0) {
+            throw new F1k2Exception("用户存在未完成路线");
+        }
         return save(routeInfo);
     }
 }

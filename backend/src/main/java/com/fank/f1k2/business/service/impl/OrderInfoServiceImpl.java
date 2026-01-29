@@ -76,7 +76,11 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setStaffId(routeStaffInfo.getStaffId());
         orderInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
         orderInfo.setCode("ORD-" + System.currentTimeMillis());
-        orderInfo.setStatus("-1");
+        if ("0".equals(routeStaffInfo.getAutoOrder())) {
+            orderInfo.setStatus("-1");
+        } else {
+            orderInfo.setStatus("0");
+        }
         orderInfo.setOrderName(DateUtil.formatChineseDate(new Date(), true, false) + " 用户【" + userInfo.getName() + "】 " + routeInfo.getStartAddress() + " 到 " + routeInfo.getEndAddress());
 
         // 车主发送消息

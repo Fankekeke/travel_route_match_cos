@@ -1,13 +1,14 @@
 package com.fank.f1k2.business.controller;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
-import com.fank.f1k2.business.entity.StaffIncome;
-import com.fank.f1k2.business.service.IStaffIncomeService;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.*;
+import com.fank.f1k2.business.service.*;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fank.f1k2.business.entity.OrderInfo;
-import com.fank.f1k2.business.service.IOrderInfoService;
+import com.fank.f1k2.common.utils.RoutePlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,16 @@ public class OrderInfoController {
     private final IOrderInfoService orderInfoService;
 
     private final IStaffIncomeService staffIncomeService;
+
+    private final IRouteInfoService routeInfoService;
+
+    private final IRouteStaffInfoService routeStaffInfoService;
+
+    private final IUserInfoService userInfoService;
+
+    private final IStaffInfoService staffInfoService;
+
+    private final RoutePlanService routePlanService;
 
     /**
      * 分页获取订单信息
@@ -73,6 +84,38 @@ public class OrderInfoController {
     @PostMapping
     public R save(OrderInfo addFrom) {
         return R.ok(orderInfoService.orderAdd(addFrom));
+    }
+
+    /**
+     * 查询当前用户进行中路线
+     *
+     * @param userId 用户ID
+     * @return 列表
+     */
+    @GetMapping("/queryCurrentRouteByUser")
+    public R queryCurrentRouteByUser(Integer userId) {
+        UserInfo userInfo = userInfoService.getOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, userId));
+        List<RouteInfo> routeInfoList = routeInfoService.list(Wrappers.<RouteInfo>lambdaQuery().eq(RouteInfo::getUserId, userInfo.getId()).ne(RouteInfo::getStatus, "3"));
+        if (CollectionUtil.isEmpty(routeInfoList)) {
+            return R.ok();
+        }
+        return R.ok(orderInfoService.queryRouteUserDetail(routeInfoList.get(0).getId()));
+    }
+
+    /**
+     * 查询当前用户进行中路线
+     *
+     * @param staffId 车主ID
+     * @return 列表
+     */
+    @GetMapping("/queryCurrentRouteByStaff")
+    public R queryCurrentRouteByStaff(Integer staffId) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, staffId));
+        List<RouteStaffInfo> routeInfoList = routeStaffInfoService.list(Wrappers.<RouteStaffInfo>lambdaQuery().eq(RouteStaffInfo::getStaffId, staffInfo.getId()).ne(RouteStaffInfo::getStatus, "1"));
+        if (CollectionUtil.isEmpty(routeInfoList)) {
+            return R.ok();
+        }
+        return R.ok(orderInfoService.queryRouteStaffDetail(routeInfoList.get(0).getId()));
     }
 
     /**
@@ -210,6 +253,34 @@ public class OrderInfoController {
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
         return R.ok(orderInfoService.removeByIds(ids));
+    }
+
+    /**
+     * 查询线路规划设置
+     *
+     * @param startLongitude 起始经度
+     * @param startLatitude  起始纬度
+     * @param endLongitude   终点经度
+     * @param endLatitude    终点纬度
+     * @return 线路规划结果
+     */
+    @GetMapping("/routeSet")
+    public R queryRouteSet(Double startLongitude, Double startLatitude,
+                           Double endLongitude, Double endLatitude) {
+        try {
+            // 参数校验
+            if (startLongitude == null || startLatitude == null ||
+                    endLongitude == null || endLatitude == null) {
+                return R.error("起始位置和终点位置不能为空");
+            }
+
+            String result = routePlanService.getRoutePlan(startLongitude, startLatitude,
+                    endLongitude, endLatitude);
+            return R.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("获取路线规划失败: " + e.getMessage());
+        }
     }
 
 }
