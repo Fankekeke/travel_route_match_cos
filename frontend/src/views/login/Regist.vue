@@ -183,7 +183,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$post('registSupplier', {
+          this.$post('registUser', {
             username: this.username,
             password: this.password,
             supplierName: this.supplierName

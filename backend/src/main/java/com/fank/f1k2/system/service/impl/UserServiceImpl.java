@@ -220,7 +220,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(user.getUserId());
         userInfo.setCode("UR-" + System.currentTimeMillis());
-        userInfo.setName("乘客");
+        userInfo.setName("乘客"+ System.currentTimeMillis());
         userInfo.setIntegral(BigDecimal.ZERO);
         userInfo.setSex("1");
         userInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
@@ -258,7 +258,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         StaffInfo staffInfo = new StaffInfo();
         staffInfo.setUserId(Math.toIntExact(user.getUserId()));
         staffInfo.setCode("STF-" + System.currentTimeMillis());
-        staffInfo.setName("乘客");
+        staffInfo.setName("车主"+ System.currentTimeMillis());
         staffInfo.setPrice(BigDecimal.ZERO);
         staffInfo.setSex("1");
         staffInfo.setStatus("-1");

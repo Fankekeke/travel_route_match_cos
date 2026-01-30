@@ -66,10 +66,40 @@
           </template>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>
+          <a-icon type="picture" v-if="record.faceImages === null" @click="face(record)" title="照 片" style="margin-right: 15px"></a-icon>
+          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
         </template>
       </a-table>
     </div>
+    <a-modal v-model="faceView.visiable" title="上传车主人脸照片">
+      <template slot="footer">
+        <a-button key="back" @click="faceView.visiable = false">
+          取消
+        </a-button>
+      </template>
+      <div style="height: 120px">
+        <a-upload
+          v-if="faceView.visiable"
+          name="avatar"
+          action="http://127.0.0.1:9527/business/face/registered/"
+          list-type="picture-card"
+          :data="{'code': faceView.data.code, 'ownerId': faceView.data.id}"
+          :file-list="fileList"
+          @preview="handlePreview"
+          @change="picHandleChange"
+        >
+          <div v-if="fileList.length < 1">
+            <a-icon type="plus" />
+            <div class="ant-upload-text">
+              Upload
+            </div>
+          </div>
+        </a-upload>
+      </div>
+      <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%" :src="previewImage" />
+      </a-modal>
+    </a-modal>
     <staff-add
       v-if="staffAdd.visiable"
       @close="handlestaffAddClose"
@@ -105,6 +135,10 @@ export default {
       staffEdit: {
         visiable: false
       },
+      faceView: {
+        visiable: false,
+        data: null
+      },
       queryParams: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -120,7 +154,10 @@ export default {
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
-      userList: []
+      userList: [],
+      fileList: [],
+      previewVisible: false,
+      previewImage: ''
     }
   },
   computed: {
@@ -234,6 +271,34 @@ export default {
     this.fetch()
   },
   methods: {
+    handleCancel () {
+      this.previewVisible = false
+    },
+    async handlePreview (file) {
+      if (!file.url && !file.preview) {
+        file.preview = await getBase64(file.originFileObj)
+      }
+      this.previewImage = file.url || file.preview
+      this.previewVisible = true
+    },
+    picHandleChange (info) {
+      console.log(info.file.response)
+      if (info.file.response !== undefined && info.file.response.msg !== undefined) {
+        if (info.file.response.msg === 'success') {
+          this.$message.success('添加照片成功')
+          this.faceView.visiable = false
+          this.fetch()
+        } else {
+          this.$message.error(info.file.response.msg)
+        }
+      }
+      this.fileList = info.fileList
+    },
+    face (row) {
+      this.fileList = []
+      this.faceView.visiable = true
+      this.faceView.data = row
+    },
     editStatus (row, status) {
       this.$post('/business/staff-info/account/status', { staffId: row.id, status }).then((r) => {
         this.$message.success('修改成功')

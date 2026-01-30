@@ -118,4 +118,6 @@ public class StaffInfo implements Serializable {
      * 服务评分
      */
     private BigDecimal serviceScore;
+
+    private String faceImages;
 }

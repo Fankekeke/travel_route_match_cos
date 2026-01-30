@@ -222,6 +222,7 @@
 
 <script>
 import {mapState} from 'vuex'
+import conversion from '@/utils/conversion'
 import moment from 'moment'
 moment.locale('zh-cn')
 
@@ -473,38 +474,38 @@ export default {
         )
       }
     },
-
-    queryRoutePlans (startLng, startLat, endLng, endLat) {
-      this.$get(`/business/order-info/routeSet`, {
-        startLongitude: startLng,
-        startLatitude: startLat,
-        endLongitude: endLng,
-        endLatitude: endLat
-      }).then((r) => {
-        let routePlans = r.data
-      })
-    },
     calculateRoute (startLng, startLat, endLng, endLat) {
       // 清空之前的路线规划结果
       this.routePlans = []
       this.showRoutePlans = false
 
+      const converStart = conversion.baiduToChina(startLat, startLng);
+      const converEnd = conversion.baiduToChina(endLat, endLng);
       // 发送请求到后端获取路线数据
       this.$get('/business/order-info/routeSet', {
-        startLongitude: startLng,
-        startLatitude: startLat,
-        endLongitude: endLng,
-        endLatitude: endLat
+        startLongitude: converStart.lng,
+        startLatitude: converStart.lat,
+        endLongitude: converEnd.lng,
+        endLatitude: converEnd.lat
       }).then((r) => {
         if (r.data.data && Array.isArray(r.data.data)) {
           r.data.data.forEach((routeData, index) => {
+            // 转换 geo_list 中的经纬度坐标系
+            const convertedGeoList = routeData.geo_list.map(coord => {
+              const convertedCoord = conversion.chinaToBaidu(coord.latitude, coord.longitude);
+              return {
+                latitude: convertedCoord.lat,
+                longitude: convertedCoord.lng
+              };
+            });
+
             const routeInfo = {
               index: index,
               distance: (routeData.dist / 1000).toFixed(2) + '公里', // 将米转换为公里
               duration: this.formatDuration(routeData.duration), // 格式化持续时间
               policyName: routeData.tag || '平台推荐',
               policyCode: 'recommended',
-              geoList: routeData.geo_list,
+              geoList: convertedGeoList, // 使用转换后的坐标列表
               routes: routeData
             }
             this.routePlans.push(routeInfo)
@@ -553,11 +554,11 @@ export default {
         ))
 
         // 设置标记图标
-        const startIcon = new BMapGL.Icon('//api.map.baidu.com/img/markers_new.png', new BMapGL.Size(23, 25), {
+        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(23, 25), {
           offset: new BMapGL.Size(10, 25),
           imageOffset: new BMapGL.Size(0, 0)
         })
-        const endIcon = new BMapGL.Icon('//api.map.baidu.com/img/markers_new.png', new BMapGL.Size(23, 25), {
+        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(23, 25), {
           offset: new BMapGL.Size(10, 25),
           imageOffset: new BMapGL.Size(-23, 0)
         })
@@ -638,6 +639,13 @@ export default {
         })
         if (!err) {
           values.images = images.length > 0 ? images.join(',') : null
+
+          // 添加路径信息
+          if (this.routePlans.length > 0 && this.selectedRouteIndex >= 0) {
+            const selectedRoute = this.routePlans[this.selectedRouteIndex];
+            // 将选中路线的geoList转换为字符串格式存储
+            values.path = JSON.stringify(selectedRoute.geoList || []);
+          }
 
           // 处理时间字段
           if (values.earliestTime) {

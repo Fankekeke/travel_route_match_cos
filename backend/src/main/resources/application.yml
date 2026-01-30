@@ -3,10 +3,10 @@ server:
 
 baidu:
   face:
-    app-name: property_face
-    app-id:  25798253
-    app-key: fk8FH4xcAgXOyeTbC0kUUtCipE
-    secret-key: fkCK9FcAOXyl3SoAASg2yeXANSekTDVnUu
+    app-name: travel_route_match
+    app-id:  121974099
+    app-key: E7knCUltUdcwCNCIi894cCQV
+    secret-key: fkEh01sprncV7HCARgBbuTtngo9otCpr2J
 
 knife4j:
   # 开启增强配置

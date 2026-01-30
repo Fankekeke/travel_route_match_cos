@@ -39,19 +39,19 @@ public class FaceRecognitionController {
      * 人脸注册
      *
      * @param file 图片
-     * @param name 名称
+     * @param code 名称
      * @return
      */
     @PostMapping("/registered")
-    public R registered(@RequestParam("avatar") MultipartFile file, @RequestParam("name") String name, @RequestParam("ownerId") Integer ownerId) throws IOException {
+    public R registered(@RequestParam("avatar") MultipartFile file, @RequestParam("code") String code, @RequestParam("ownerId") Integer ownerId) throws IOException {
         BASE64Encoder base64Encoder = new BASE64Encoder();
         String base64EncoderImg = base64Encoder.encode(file.getBytes());
-        String result = faceRecognition.registered(base64EncoderImg, name);
+        String result = faceRecognition.registered(base64EncoderImg, code);
         if ("success".equals(result)) {
-            String localPath = "E:/Project/小区物业管理系统/db";
+            String localPath = "G:/Project/20251021基于WebGIS的出行路线匹配与在线结算研究/db";
             String fileName = file.getOriginalFilename();
             String newFileName = FileUtil.upload(file, localPath, fileName);
-            staffInfoService.update(Wrappers.<StaffInfo>lambdaUpdate().set(StaffInfo::getImages, newFileName).eq(StaffInfo::getId, ownerId));
+            staffInfoService.update(Wrappers.<StaffInfo>lambdaUpdate().set(StaffInfo::getFaceImages, newFileName).eq(StaffInfo::getId, ownerId));
         }
         return R.ok(result);
     }

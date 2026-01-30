@@ -3,11 +3,11 @@
     <div class="user-layout-register">
       <a-form ref="formRegister" :autoFormCreate="(form)=>{this.form = form}" id="formRegister">
         <a-divider orientation="left"><span style="font-size: 16px">车主注册</span></a-divider>
-        <a-form-item
-          fieldDecoratorId="staffName"
-          :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入车主姓名' }], validateTrigger: ['change', 'blur']}">
-          <a-input type="text" v-model="staffName" placeholder="车主姓名"></a-input>
-        </a-form-item>
+<!--        <a-form-item-->
+<!--          fieldDecoratorId="staffName"-->
+<!--          :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入车主姓名' }], validateTrigger: ['change', 'blur']}">-->
+<!--          <a-input type="text" v-model="staffName" placeholder="车主姓名"></a-input>-->
+<!--        </a-form-item>-->
         <a-form-item
           fieldDecoratorId="email"
           :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入注册账号' },  { validator: this.handleUsernameCheck }], validateTrigger: ['change', 'blur']}">
