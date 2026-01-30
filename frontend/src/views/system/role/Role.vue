@@ -43,7 +43,7 @@
         </a-dropdown>
       </div>
       <!-- 表格区域 -->
-      <a-table ref="TableInfo"
+      <a-table bordered  ref="TableInfo"
                :columns="columns"
                :dataSource="dataSource"
                :pagination="pagination"

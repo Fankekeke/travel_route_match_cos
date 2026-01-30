@@ -35,7 +35,7 @@
         <a-button @click="batchDelete">删除</a-button>
       </div>
       <!-- 表格区域 -->
-      <a-table ref="TableInfo"
+      <a-table bordered  ref="TableInfo"
                :columns="columns"
                :rowKey="record => record.id"
                :dataSource="dataSource"
@@ -55,7 +55,7 @@
           </template>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>
+<!--          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>-->
           <a-icon type="file-search" @click="handlevehicleViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
@@ -128,100 +128,141 @@ export default {
       currentUser: state => state.account.user
     }),
     columns () {
-      return [{
-        title: '车牌号码',
-        dataIndex: 'vehicleNo',
-        ellipsis: true
-      }, {
-        title: '车辆名称',
-        dataIndex: 'name',
-        ellipsis: true
-      }, {
-        title: '车辆类型',
-        dataIndex: 'useType',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '1':
-              return <a-tag>轿车</a-tag>
-            case '2':
-              return <a-tag>商务车</a-tag>
-            case '3':
-              return <a-tag>大巴</a-tag>
-            default:
+      return [
+        {
+          title: '订单编号',
+          dataIndex: 'userCode',
+          ellipsis: true,
+          width: 150
+        },
+        {
+          title: '起始位置',
+          dataIndex: 'startAddress',
+          ellipsis: true,
+          width: 200
+        },
+        {
+          title: '终点位置',
+          dataIndex: 'endAddress',
+          ellipsis: true,
+          width: 200
+        },
+        {
+          title: '乘客信息',
+          dataIndex: 'userName',
+          customRender: (text, record, index) => {
+            if (!text) return '- -'
+            return (
+              <div style="display: flex; align-items: center;">
+                <a-avatar
+                  size="72"
+                  src={ record.userImages ? 'http://127.0.0.1:9527/imagesWeb/' + record.userImages : null }
+                  icon={ record.userImages ? null : 'user' }
+                  style="margin-right: 15px;"
+                />
+                <div>
+                  <div>{text}</div>
+                  <div style="color: #999; font-size: 12px;">{record.userPhone}</div>
+                </div>
+              </div>
+            )
+          },
+          width: 200
+        },
+        {
+          title: '出发时间范围',
+          dataIndex: 'earliestTime',
+          customRender: (text, record, index) => {
+            if (!text) return '- -'
+            return (
+              <div>
+                <div>{text}</div>
+                <div style="color: #999; font-size: 12px;">至 {record.latestTime}</div>
+              </div>
+            )
+          },
+          width: 180
+        },
+        {
+          title: '行程距离(km)',
+          dataIndex: 'distance',
+          customRender: (text, record, index) => {
+            if (text !== null && text !== undefined) {
+              return `${text.toFixed(2)} km`
+            } else {
               return '- -'
-          }
-        }
-      }, {
-        title: '座位数量',
-        dataIndex: 'seatNum',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
+            }
+          },
+          width: 120
         },
-        ellipsis: true
-      }, {
-        title: '照片',
-        dataIndex: 'images',
-        customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
-          return <a-popover>
-            <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-            </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-          </a-popover>
-        }
-      }, {
-        title: '燃料类型',
-        dataIndex: 'fuelType',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '1':
-              return <a-tag>燃油</a-tag>
-            case '2':
-              return <a-tag>柴油</a-tag>
-            case '3':
-              return <a-tag>油电混动</a-tag>
-            case '4':
-              return <a-tag>电能</a-tag>
-            default:
+        {
+          title: '乘车人数',
+          dataIndex: 'rideNum',
+          customRender: (text, record, index) => {
+            if (text !== null) {
+              return `${text} 人`
+            } else {
               return '- -'
-          }
+            }
+          },
+          width: 100
+        },
+        {
+          title: '类型',
+          dataIndex: 'type',
+          customRender: (text, record, index) => {
+            switch (text) {
+              case '0':
+                return <a-tag color="blue">拼坐</a-tag>
+              case '1':
+                return <a-tag color="green">独享</a-tag>
+              default:
+                return <a-tag>未知</a-tag>
+            }
+          },
+          width: 120
+        },
+        {
+          title: '订单状态',
+          dataIndex: 'status',
+          customRender: (text, record, index) => {
+            switch (text) {
+              case '-1':
+                return <a-tag>待接单</a-tag>
+              case '0':
+                return <a-tag color="orange">待上车</a-tag>
+              case '1':
+                return <a-tag color="green">已上车</a-tag>
+              case '2':
+                return <a-tag color="blue">已送达</a-tag>
+              case '3':
+                return <a-tag color="purple">已支付</a-tag>
+              default:
+                return <a-tag color="default">未知</a-tag>
+            }
+          },
+          width: 100
+        },
+        {
+          title: '备注',
+          dataIndex: 'remark',
+          ellipsis: true,
+          width: 150
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'createDate',
+          ellipsis: true,
+          width: 160
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          width: 100,
+          fixed: 'right',
+          scopedSlots: { customRender: 'operation' }
         }
-      }, {
-        title: '所属车主',
-        dataIndex: 'staffName',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
-        title: '车辆品牌',
-        dataIndex: 'brand',
-        ellipsis: true
-      }, {
-        title: '创建时间',
-        dataIndex: 'createDate',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
-        title: '操作',
-        dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'}
-      }]
+      ]
     }
   },
   mounted () {

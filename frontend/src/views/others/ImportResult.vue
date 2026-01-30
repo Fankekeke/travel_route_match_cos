@@ -45,7 +45,7 @@
     </div>
     <a-tabs defaultActiveKey="1">
       <a-tab-pane tab="成功记录" key="1" v-if="importData.length">
-        <a-table ref="successTable"
+        <a-table bordered  ref="successTable"
                  :columns="successColumns"
                  :dataSource="importData"
                  :pagination="pagination"
@@ -53,7 +53,7 @@
         </a-table>
       </a-tab-pane>
       <a-tab-pane tab="失败记录" key="2" v-if="errors.length">
-        <a-table ref="errorTable"
+        <a-table bordered  ref="errorTable"
                  :columns="errorColumns"
                  :dataSource="errorsData"
                  :pagination="pagination"

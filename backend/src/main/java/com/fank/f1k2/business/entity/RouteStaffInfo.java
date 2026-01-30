@@ -160,4 +160,7 @@ public class RouteStaffInfo implements Serializable {
 
     @TableField(exist = false)
     private Integer day;
+
+    @TableField(exist = false)
+    private String staffName;
 }

@@ -28,7 +28,7 @@
     </div>
     <a-card :bordered="false" class="card-area">
       <!-- 表格区域 -->
-      <a-table ref="TableInfo"
+      <a-table bordered  ref="TableInfo"
                :columns="columns"
                :dataSource="dataSource"
                :pagination="pagination"

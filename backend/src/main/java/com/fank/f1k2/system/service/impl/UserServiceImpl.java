@@ -214,7 +214,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         UserRole ur = new UserRole();
         ur.setUserId(user.getUserId());
-        ur.setRoleId(2L); // 注册用户角色 ID
+        ur.setRoleId(76L); // 注册用户角色 ID
         this.userRoleMapper.insert(ur);
 
         UserInfo userInfo = new UserInfo();
@@ -252,7 +252,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         UserRole ur = new UserRole();
         ur.setUserId(user.getUserId());
-        ur.setRoleId(2L); // 注册用户角色 ID
+        ur.setRoleId(75L); // 注册用户角色 ID
         this.userRoleMapper.insert(ur);
 
         StaffInfo staffInfo = new StaffInfo();

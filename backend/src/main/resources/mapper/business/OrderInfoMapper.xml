@@ -26,7 +26,7 @@
 
         vi.vehicle_no,
         vi.brand,
-        vi.useType
+        vi.use_type
         FROM
         order_info oi
         LEFT JOIN user_info ui (ui.id = oi.user_id)

@@ -51,7 +51,7 @@
         </a-dropdown>
       </div>
       <!-- 表格区域 -->
-      <a-table :columns="columns"
+      <a-table bordered  :columns="columns"
                :key="key"
                :dataSource="dataSource"
                :pagination="pagination"

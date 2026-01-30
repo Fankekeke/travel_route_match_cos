@@ -554,13 +554,13 @@ export default {
         ))
 
         // 设置标记图标
-        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(23, 25), {
-          offset: new BMapGL.Size(10, 25),
+        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
           imageOffset: new BMapGL.Size(0, 0)
         })
-        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(23, 25), {
-          offset: new BMapGL.Size(10, 25),
-          imageOffset: new BMapGL.Size(-23, 0)
+        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
+          imageOffset: new BMapGL.Size(0, 0)
         })
 
         startMarker.setIcon(startIcon)
@@ -578,7 +578,7 @@ export default {
 
           // 创建 Polyline 对象并设置样式
           const polyline = new BMapGL.Polyline(pathPoints, {
-            strokeColor: '#cccaca', // 改为蓝色
+            strokeColor: '#2979e5', // 改为蓝色
             strokeWeight: 8, // 稍微加粗作为边框
             strokeOpacity: 0.6, // 边框透明度
             strokeStyle: 'solid' // 实线边框
@@ -586,7 +586,7 @@ export default {
 
           // 创建内部细线
           const innerLine = new BMapGL.Polyline(pathPoints, {
-            strokeColor: '#0b89d5', // 白色细线
+            strokeColor: '#f1f1f1', // 白色细线
             strokeWeight: 4, // 内部细线较细
             strokeOpacity: 1, // 不透明
             strokeStyle: 'dashed', // 虚线样式

@@ -14,7 +14,7 @@
 
         vi.vehicle_no,
         vi.brand,
-        vi.useType
+        vi.use_type
         FROM
         route_staff_info rsi
         LEFT JOIN staff_info si ON (si.id = rsi.staff_id)
@@ -31,6 +31,6 @@
             AND si.user_id = #{queryFrom.staffId}
         </if>
         ORDER BY
-        ri.create_date DESC
+        rsi.create_date DESC
     </select>
 </mapper>

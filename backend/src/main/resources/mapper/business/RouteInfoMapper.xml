@@ -35,7 +35,7 @@
 
         vi.vehicle_no,
         vi.brand,
-        vi.useType
+        vi.use_type
         FROM
         route_info ri
         LEFT JOIN user_info ui ON (ui.id = ri.user_id)

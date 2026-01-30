@@ -561,13 +561,13 @@ export default {
         ))
 
         // 设置标记图标
-        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(23, 25), {
-          offset: new BMapGL.Size(10, 25),
+        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
           imageOffset: new BMapGL.Size(0, 0)
         })
-        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(23, 25), {
-          offset: new BMapGL.Size(10, 25),
-          imageOffset: new BMapGL.Size(-23, 0)
+        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
+          imageOffset: new BMapGL.Size(0, 0)
         })
 
         startMarker.setIcon(startIcon)

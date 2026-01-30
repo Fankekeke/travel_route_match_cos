@@ -41,7 +41,7 @@
       <div class="operator">
       </div>
       <!-- 表格区域 -->
-      <a-table ref="TableInfo"
+      <a-table bordered  ref="TableInfo"
                :columns="columns"
                :rowKey="record => record.id"
                :dataSource="dataSource"
