@@ -235,47 +235,47 @@ export default {
       brandList: [],
       selectedStartPoint: null,
       selectedEndPoint: null,
-      vehicleList: []  // 车辆列表
+      vehicleList: [] // 车辆列表
     }
   },
   mounted () {
   },
   methods: {
     queryVehicleByStaff () {
-      this.$post('/business/vehicle-info/queryVehicleByStaff', {
+      this.$get('/business/vehicle-info/queryVehicleByStaff', {
         userId: this.currentUser.userId
       }).then((r) => {
-        this.vehicleList = r.data || [];
+        this.vehicleList = r.data || []
       })
     },
     /**
      * 初始化地图
      */
-    initMap() {
-      this.map = new BMapGL.Map(this.mapId);
-      this.map.centerAndZoom(new BMapGL.Point(116.404, 39.915), 12);
-      this.map.enableScrollWheelZoom(true);
-      this.map.setDisplayOptions({poiIcon: false});
+    initMap () {
+      this.map = new BMapGL.Map(this.mapId)
+      this.map.centerAndZoom(new BMapGL.Point(116.404, 39.915), 12)
+      this.map.enableScrollWheelZoom(true)
+      this.map.setDisplayOptions({poiIcon: false})
     },
 
     /**
      * 添加地图事件监听
      */
-    addMapEventListeners() {
+    addMapEventListeners () {
       // 地图点击事件，用于选择地点
       this.map.addEventListener('click', (e) => {
-        this.handleMapClick(e);
-      });
+        this.handleMapClick(e)
+      })
     },
 
     /**
      * 处理地图点击事件
      */
-    handleMapClick(e) {
+    handleMapClick (e) {
       // 使用百度地图逆地理编码获取地址
-      const geocoder = new BMapGL.Geocoder();
+      const geocoder = new BMapGL.Geocoder()
       geocoder.getLocation(e.point, (rs) => {
-        const address = rs.address;
+        const address = rs.address
 
         // 这里可以根据用户交互决定是设置起点还是终点
         // 比如可以弹出对话框询问用户
@@ -284,22 +284,22 @@ export default {
           content: `您选择的地点是：${address}\n\n是否设置为起点或终点？`,
           onOk: () => {
             // 可以添加逻辑让用户选择设置为起点还是终点
-            this.setPoint(address, e.point.lng, e.point.lat);
+            this.setPoint(address, e.point.lng, e.point.lat)
           }
-        });
-      });
+        })
+      })
     },
 
     /**
      * 设置地点信息
      */
-    setPoint(address, longitude, latitude) {
+    setPoint (address, longitude, latitude) {
       // 示例：设置起点信息
       this.form.setFieldsValue({
         startAddress: address,
         startLongitude: longitude,
         startLatitude: latitude
-      });
+      })
     },
 
     handleCancel () {
@@ -317,9 +317,9 @@ export default {
     },
     setFormValues ({...vehicle}) {
       this.rowId = vehicle.id
-      this.queryVehicleByStaff();
-      this.initMap();
-      this.addMapEventListeners();  // 添加地图事件监听
+      this.queryVehicleByStaff()
+      this.initMap()
+      this.addMapEventListeners() // 添加地图事件监听
       let fields = [
         'path',
         'distance',

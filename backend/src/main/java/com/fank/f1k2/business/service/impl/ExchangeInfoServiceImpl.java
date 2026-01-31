@@ -5,10 +5,12 @@ import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fank.f1k2.business.entity.DiscountInfo;
 import com.fank.f1k2.business.entity.ExchangeInfo;
 import com.fank.f1k2.business.dao.ExchangeInfoMapper;
 import com.fank.f1k2.business.entity.MaterialInfo;
 import com.fank.f1k2.business.entity.UserInfo;
+import com.fank.f1k2.business.service.IDiscountInfoService;
 import com.fank.f1k2.business.service.IExchangeInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fank.f1k2.business.service.IMaterialInfoService;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -33,6 +36,9 @@ public class ExchangeInfoServiceImpl extends ServiceImpl<ExchangeInfoMapper, Exc
 
     @Resource
     private IMaterialInfoService materialInfoService;
+
+    @Resource
+    private IDiscountInfoService discountInfoService;
 
     /**
      * 分页获取积分兑换
@@ -69,6 +75,34 @@ public class ExchangeInfoServiceImpl extends ServiceImpl<ExchangeInfoMapper, Exc
         exchangeInfo.setUserId(userInfo.getId());
         exchangeInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
         this.save(exchangeInfo);
+
+        // 添加优惠券
+        if (exchangeInfo.getMaterialId() != null) {
+            DiscountInfo discountInfo = new DiscountInfo();
+            discountInfo.setCode("DC-" + System.currentTimeMillis());
+            discountInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+            discountInfo.setUserId(userInfo.getId());
+            switch (exchangeInfo.getMaterialId()) {
+                case 1:
+                    discountInfo.setDiscountPrice(new BigDecimal(100));
+                    discountInfo.setThreshold(new BigDecimal(500));
+                    discountInfo.setCouponName("500-100优惠券");
+                    discountInfo.setType("1");
+                    discountInfo.setContent("500-100优惠券");
+                    discountInfo.setStatus("0");
+                    break;
+                case 2:
+                    discountInfo.setCouponName("八折无门槛优惠券");
+                    discountInfo.setType("2");
+                    discountInfo.setContent("八折无门槛优惠券");
+                    discountInfo.setStatus("0");
+                    discountInfo.setRebate(new BigDecimal(8));
+                    break;
+                default:
+                    break;
+            }
+            discountInfoService.save(discountInfo);
+        }
 
         // 添加优惠券销量
         materialInfo.setSaleNum(materialInfo.getSaleNum() + 1);

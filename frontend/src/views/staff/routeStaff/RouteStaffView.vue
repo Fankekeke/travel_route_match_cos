@@ -1,6 +1,6 @@
 
 <template>
-  <a-modal v-model="show" title="车辆详情" @cancel="onClose" :width="1000"
+  <a-modal v-model="show" title="路线详情" @cancel="onClose" :width="1000"
            :body-style="{ padding: '0' }">
     <template slot="footer">
       <a-button key="back" @click="onClose" type="default">
@@ -9,74 +9,70 @@
     </template>
 
     <div class="vehicle-detail-container" v-if="vehicleData !== null">
-      <!-- 车辆基本信息 -->
-      <div class="info-section vehicle-info">
+      <!-- 路线基本信息 -->
+      <div class="info-section route-info">
         <div class="section-header">
-          <h3 class="section-title">车辆信息</h3>
+          <h3 class="section-title">路线信息</h3>
         </div>
 
         <div class="info-grid">
-          <div class="info-item">
-            <span class="label">车辆编号：</span>
-            <span class="value">{{ vehicleData.vehicleNo }}</span>
+<!--          <div class="info-item">-->
+<!--            <span class="label">路线编号：</span>-->
+<!--            <span class="value">{{ vehicleData.staffCode }}</span>-->
+<!--          </div>-->
+
+          <div class="info-item full-width">
+            <span class="label">起点：</span>
+            <span class="value">{{ vehicleData.startAddress }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">终点：</span>
+            <span class="value">{{ vehicleData.endAddress }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">车牌号：</span>
-            <span class="value">{{ vehicleData.vehicleNumber ? vehicleData.vehicleNumber : '- -' }}</span>
+            <span class="label">出发时间：</span>
+            <span class="value">{{ vehicleData.earliestTime }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">车辆颜色：</span>
-            <span class="value">{{ vehicleData.vehicleColor ? vehicleData.vehicleColor : '- -' }}</span>
+            <span class="label">最晚到达：</span>
+            <span class="value">{{ vehicleData.latestTime }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">车辆名称：</span>
-            <span class="value">{{ vehicleData.name }}</span>
+            <span class="label">预估距离：</span>
+            <span class="value">{{ vehicleData.distance ? vehicleData.distance.toFixed(2) + ' km' : '- -' }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">排放标准：</span>
-            <span class="value">{{ vehicleData.emissionStandard }}</span>
+            <span class="label">计划单价：</span>
+            <span class="value">{{ vehicleData.planPriceUnit ? '¥' + vehicleData.planPriceUnit.toFixed(2) : '- -' }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">发动机号码：</span>
-            <span class="value">{{ vehicleData.engineNo }}</span>
+            <span class="label">可乘人数：</span>
+            <span class="value">{{ vehicleData.rideNum ? vehicleData.rideNum : '- -' }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">车辆品牌：</span>
-            <span class="value">{{ vehicleData.brand }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">燃料类型：</span>
-            <span class="value fuel-type">
-              <span v-if="vehicleData.fuelType == 1" class="fuel-label fuel-gasoline">燃油</span>
-              <span v-if="vehicleData.fuelType == 2" class="fuel-label fuel-diesel">柴油</span>
-              <span v-if="vehicleData.fuelType == 3" class="fuel-label fuel-hybrid">油电混动</span>
-              <span v-if="vehicleData.fuelType == 4" class="fuel-label fuel-electric">电能</span>
-            </span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">使用性质：</span>
+            <span class="label">状态：</span>
             <span class="value">
-              <span v-if="vehicleData.useType == 1" class="use-type operational">营运</span>
-              <span v-if="vehicleData.useType == 2" class="use-type non-operational">非营运</span>
-            </span>
+        <a-tag v-if="vehicleData.status === '0'" color="orange">候补中</a-tag>
+        <a-tag v-if="vehicleData.status === '1'" color="green">已完成</a-tag>
+        <a-tag v-if="vehicleData.status === '2'" color="gray">暂停</a-tag>
+        <span v-if="!vehicleData.status">- -</span>
+      </span>
           </div>
 
           <div class="info-item">
-            <span class="label">座位数：</span>
-            <span class="value">{{ vehicleData.seatNum ? vehicleData.seatNum : '- -' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">出厂日期：</span>
-            <span class="value date">{{ vehicleData.factoryDate }}</span>
+            <span class="label">自动接单：</span>
+            <span class="value">
+        <a-tag v-if="vehicleData.autoOrder === '0'" color="blue">开启</a-tag>
+        <a-tag v-if="vehicleData.autoOrder === '1'" color="default">关闭</a-tag>
+        <span v-if="!vehicleData.autoOrder">- -</span>
+      </span>
           </div>
 
           <div class="info-item">
@@ -86,85 +82,53 @@
         </div>
       </div>
 
-      <!-- 司机信息 -->
+      <!-- 车主信息 -->
       <div class="info-section driver-info">
         <div class="section-header">
-          <h3 class="section-title">司机信息</h3>
+          <h3 class="section-title">车主信息</h3>
         </div>
 
         <div class="info-grid">
-          <div class="info-item">
-            <span class="label">司机姓名：</span>
+          <div class="info-item full-width">
+            <span class="label">车主姓名：</span>
             <span class="value">{{ vehicleData.staffName }}</span>
           </div>
 
-          <div class="info-item">
-            <span class="label">联系电话：</span>
-            <span class="value phone">{{ vehicleData.phone }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">员工编号：</span>
-            <span class="value">{{ vehicleData.code }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">性别：</span>
-            <span class="value">{{ vehicleData.sex === 1 ? '男' : '女' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">身份证号：</span>
-            <span class="value id-number">{{ vehicleData.idNumber }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">出生日期：</span>
-            <span class="value date">{{ vehicleData.birthDate }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">民族：</span>
-            <span class="value">{{ vehicleData.ethnicity }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">服务评分：</span>
-            <span class="value score">{{ vehicleData.serviceScore }}</span>
-          </div>
-
           <div class="info-item full-width">
-            <span class="label">地址：</span>
-            <span class="value address">{{ vehicleData.address }}</span>
+            <span class="label">联系电话：</span>
+            <span class="value phone">{{ vehicleData.staffPhone }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">车牌号：</span>
+            <span class="value">{{ vehicleData.vehicleNo }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">车辆品牌：</span>
+            <span class="value">{{ vehicleData.brand }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">车辆类型：</span>
+            <span class="value">
+              <span v-if="vehicleData.useType === '1'" class="use-type operational">轿车</span>
+              <span v-if="vehicleData.useType === '2'" class="use-type operational">商务车</span>
+              <span v-if="vehicleData.useType === '3'" class="use-type operational">大巴</span>
+              <span v-if="!vehicleData.useType">- -</span>
+            </span>
           </div>
 
           <div class="info-item full-width">
             <span class="label">备注：</span>
-            <span class="value content">{{ vehicleData.content }}</span>
+            <span class="value content">{{ vehicleData.remark || '- -' }}</span>
           </div>
         </div>
-      </div>
-
-      <!-- 图册部分 -->
-      <div class="gallery-section">
-        <div class="section-header">
-          <h3 class="section-title">图册</h3>
-        </div>
-
-        <div class="gallery-content">
-          <a-upload
-            name="avatar"
-            action="http://127.0.0.1:9527/file/fileUpload/"
-            list-type="picture-card"
-            :file-list="fileList"
-            @preview="handlePreview"
-            @change="picHandleChange"
-            :disabled="true"
-          >
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%" :src="previewImage" />
-          </a-modal>
+        <div class="map-section">
+          <div class="section-header">
+            <h3 class="section-title">路线地图</h3>
+          </div>
+          <div id="route-map" style="height: 400px; width: 100%;"></div>
         </div>
       </div>
     </div>
@@ -216,26 +180,102 @@ export default {
       vehicleInfo: null,
       shopInfo: null,
       brandInfo: null,
-      typeInfo: null
+      typeInfo: null,
+      map: null
     }
   },
   watch: {
     vehicleShow: function (value) {
       if (value) {
-        this.imagesInit(this.vehicleData.images)
+        this.$nextTick(() => {
+          this.initRouteMap()
+        })
       }
     }
   },
   methods: {
+    initRouteMap () {
+      this.map = new BMapGL.Map('route-map')
+      this.map.centerAndZoom(new BMapGL.Point(116.404, 39.915), 12)
+      this.map.enableScrollWheelZoom(true)
+
+      // 解析路径数据
+      let pathCoordinates = []
+      if (this.vehicleData.path) {
+        try {
+          pathCoordinates = JSON.parse(this.vehicleData.path)
+        } catch (e) {
+          console.error('解析路径数据失败:', e)
+          // 如果解析失败，回退到使用起终点坐标
+          pathCoordinates = [
+            { latitude: this.vehicleData.startLatitude, longitude: this.vehicleData.startLongitude },
+            { latitude: this.vehicleData.endLatitude, longitude: this.vehicleData.endLongitude }
+          ]
+        }
+      } else {
+        // 如果没有路径数据，使用起终点坐标
+        pathCoordinates = [
+          { latitude: this.vehicleData.startLatitude, longitude: this.vehicleData.startLongitude },
+          { latitude: this.vehicleData.endLatitude, longitude: this.vehicleData.endLongitude }
+        ]
+      }
+
+      // 添加起点标记
+      if (pathCoordinates.length > 0) {
+        const startPoint = new BMapGL.Point(pathCoordinates[0].longitude, pathCoordinates[0].latitude)
+        // 设置标记图标
+        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
+          imageOffset: new BMapGL.Size(0, 0)
+        })
+        const startMarker = new BMapGL.Marker(startPoint)
+        startMarker.setIcon(startIcon)
+        this.map.addOverlay(startMarker)
+      }
+
+      // 添加终点标记
+      if (pathCoordinates.length > 0) {
+        const endPoint = new BMapGL.Point(
+          pathCoordinates[pathCoordinates.length - 1].longitude,
+          pathCoordinates[pathCoordinates.length - 1].latitude
+        )
+        // 设置标记图标
+        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
+          imageOffset: new BMapGL.Size(0, 0)
+        })
+        const endMarker = new BMapGL.Marker(endPoint)
+        endMarker.setIcon(endIcon)
+        this.map.addOverlay(endMarker)
+      }
+
+      // 将路径坐标转换为百度地图点数组
+      const pathPoints = pathCoordinates.map(coord => new BMapGL.Point(coord.longitude, coord.latitude))
+
+      // 绘制详细路线
+      if (pathPoints.length > 1) {
+        const polyline = new BMapGL.Polyline(pathPoints, {
+          strokeColor: '#1890ff',
+          strokeWeight: 6,
+          strokeOpacity: 0.8
+        })
+        this.map.addOverlay(polyline)
+      }
+
+      // 自动调整视野以显示整个路线
+      if (pathPoints.length > 0) {
+        this.map.setViewport(pathPoints)
+      }
+    },
     local (vehicleData) {
       baiduMap.clearOverlays()
       baiduMap.rMap().enableScrollWheelZoom(true)
       // eslint-disable-next-line no-undef
-      let point = new BMap.Point(vehicleData.longitude, vehicleData.latitude)
+      let point = new BMapGL.Point(vehicleData.longitude, vehicleData.latitude)
       baiduMap.pointAdd(point)
       baiduMap.findPoint(point, 16)
-      // let driving = new BMap.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});
-      // driving.search(new BMap.Point(this.nowPoint.lng,this.nowPoint.lat), new BMap.Point(scenic.point.split(",")[0],scenic.point.split(",")[1]));
+      // let driving = new BMapGL.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});
+      // driving.search(new BMapGL.Point(this.nowPoint.lng,this.nowPoint.lat), new BMapGL.Point(scenic.point.split(",")[0],scenic.point.split(",")[1]));
     },
     dataInit (vehicleNo) {
       this.$get(`/business/vehicle-info/detail/${vehicleNo}`).then((r) => {

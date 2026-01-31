@@ -116,6 +116,20 @@ public class ChatRecordController {
     }
 
     /**
+     * 发送消息
+     *
+     * @param chatRecord 聊天记录
+     * @return 结果
+     */
+    @PostMapping("/defaultStaffChat")
+    public R defaultStaffChat(ChatRecord chatRecord) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, chatRecord.getStaffId()));
+        chatRecord.setStaffId(staffInfo.getId());
+        chatRecord.setCreateTime(DateUtil.formatDateTime(new Date()));
+        return R.ok(chatRecordService.save(chatRecord));
+    }
+
+    /**
      * 标记消息为已读
      *
      * @param id 消息ID

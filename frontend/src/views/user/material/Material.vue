@@ -7,7 +7,7 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="兑换编号"
+                label="优惠券编号"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.code"/>
@@ -15,7 +15,7 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="兑换名称"
+                label="优惠券标题"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.name"/>
@@ -31,11 +31,10 @@
     </div>
     <div>
       <div class="operator">
-<!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
-        <a-button @click="batchDelete">删除</a-button>
+        <span style="margin: 12px;font-weight: 800;font-family: SimHei">我的积分： {{ integral }}</span>
       </div>
       <!-- 表格区域 -->
-      <a-table bordered  ref="TableInfo"
+      <a-table bordered ref="TableInfo"
                :columns="columns"
                :rowKey="record => record.id"
                :dataSource="dataSource"
@@ -55,7 +54,7 @@
           </template>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
+          <a-icon v-if="integral >= record.integral" type="retweet" @click="exchangeOrder(record)" title="兑 换"></a-icon>
         </template>
       </a-table>
     </div>
@@ -87,6 +86,7 @@ export default {
   components: {materialAdd, materialEdit, RangeDate},
   data () {
     return {
+      integral: 0,
       advanced: false,
       materialAdd: {
         visiable: false
@@ -118,18 +118,28 @@ export default {
     }),
     columns () {
       return [{
-        title: '兑换编号',
+        title: '优惠券编号',
         dataIndex: 'code'
       }, {
-        title: '兑换名称',
+        title: '优惠券标题',
         dataIndex: 'name'
       }, {
-        title: '兑换描述',
+        title: '优惠券描述',
         dataIndex: 'content',
-        scopedSlots: { customRender: 'contentShow' }
+        scopedSlots: {customRender: 'contentShow'}
       }, {
         title: '所需积分',
         dataIndex: 'integral',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        }
+      }, {
+        title: '销量',
+        dataIndex: 'saleNum',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -147,13 +157,34 @@ export default {
             return '- -'
           }
         }
+      }, {
+        title: '操作',
+        dataIndex: 'operation',
+        scopedSlots: {customRender: 'operation'}
       }]
     }
   },
   mounted () {
     this.fetch()
+    this.selectDetailByUserId()
   },
   methods: {
+    exchangeOrder (row) {
+      this.$post(`/business/exchange-info`, {
+        materialId: row.id,
+        userId: this.currentUser.userId,
+        integral: row.integral
+      }).then((r) => {
+        this.$message.success('兑换优惠券成功')
+        this.selectDetailByUserId()
+        this.fetch()
+      })
+    },
+    selectDetailByUserId () {
+      this.$get(`/business/user-info/detailByUserId/${this.currentUser.userId}`).then((r) => {
+        this.integral = r.data.data.integral
+      })
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -168,7 +199,7 @@ export default {
     },
     handlematerialAddSuccess () {
       this.materialAdd.visiable = false
-      this.$message.success('新增兑换成功')
+      this.$message.success('新增优惠券成功')
       this.search()
     },
     edit (record) {
@@ -180,7 +211,7 @@ export default {
     },
     handlematerialEditSuccess () {
       this.materialEdit.visiable = false
-      this.$message.success('修改兑换成功')
+      this.$message.success('修改优惠券成功')
       this.search()
     },
     handleDeptChange (value) {
@@ -268,6 +299,7 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
+      params.userId = this.currentUser.userId
       this.$get('/business/material-info/page', {
         ...params
       }).then((r) => {

@@ -36,7 +36,7 @@
             AND ui.NAME LIKE CONCAT('%',#{queryFrom.userName},'%')
         </if>
         <if test="queryFrom.userId != null and queryFrom.userId != ''">
-            AND di.user_id = #{queryFrom.userId}
+            AND ui.user_id = #{queryFrom.userId}
         </if>
         order by di.create_date desc
     </select>

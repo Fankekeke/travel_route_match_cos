@@ -49,12 +49,11 @@ public class RouteInfoServiceImpl extends ServiceImpl<RouteInfoMapper, RouteInfo
     @Override
     public Boolean addRouteUser(RouteInfo routeInfo) throws F1k2Exception {
         // 获取用户信息
-//        UserInfo userInfo = userInfoMapper.selectOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, routeInfo.getUserId()));
-//        if (userInfo == null) {
-//            throw new F1k2Exception("用户不存在");
-//        }
-//        routeInfo.setUserId(userInfo.getId());
-        routeInfo.setUserId(6);
+        UserInfo userInfo = userInfoMapper.selectOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, routeInfo.getUserId()));
+        if (userInfo == null) {
+            throw new F1k2Exception("用户不存在");
+        }
+        routeInfo.setUserId(userInfo.getId());
         routeInfo.setStatus("-1");
         // 判断用户是否存在未完成的路线
         List<RouteInfo> unfinishedRoute = list(Wrappers.<RouteInfo>lambdaQuery().eq(RouteInfo::getUserId, routeInfo.getUserId()).ne(RouteInfo::getStatus, "3"));

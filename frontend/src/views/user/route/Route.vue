@@ -130,12 +130,6 @@ export default {
     columns () {
       return [
         {
-          title: '订单编号',
-          dataIndex: 'userCode',
-          ellipsis: true,
-          width: 150
-        },
-        {
           title: '起始位置',
           dataIndex: 'startAddress',
           ellipsis: true,

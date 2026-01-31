@@ -85,6 +85,8 @@ public class VehicleInfoController {
      */
     @PostMapping
     public R save(VehicleInfo addFrom) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, addFrom.getStaffId()));
+        addFrom.setStaffId(staffInfo.getId());
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
         return R.ok(vehicleInfoService.save(addFrom));
     }

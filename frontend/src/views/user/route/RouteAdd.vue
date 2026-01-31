@@ -654,7 +654,7 @@ export default {
           if (values.latestTime) {
             values.latestTime = moment(values.latestTime).format('YYYY-MM-DD HH:mm')
           }
-
+          values.userId = this.currentUser.userId
           this.loading = true
           this.$post('/business/route-info', { // 修改API路径
             ...values

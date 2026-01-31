@@ -44,8 +44,8 @@
         <if test="queryFrom.auditStatus != null and queryFrom.auditStatus != ''">
             AND ai.audit_status = #{queryFrom.auditStatus}
         </if>
-        <if test="queryFrom.userId != null and queryFrom.userId != ''">
-            AND si.user_id = #{queryFrom.userId}
+        <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
+            AND si.user_id = #{queryFrom.staffId}
         </if>
         order by ai.create_date desc
     </select>

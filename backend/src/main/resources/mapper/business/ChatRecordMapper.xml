@@ -27,7 +27,7 @@
         SELECT DISTINCT cr.staff_id         as         staffId,
                         cr.user_id          AS         userId,
                         hi.name             as         staffName,
-                        hi.images           as         staffImage,
+                        hi.images           as         staffImages,
                         MAX(cr.create_time) as         lastMessageTime,
                         (SELECT content
                          FROM chat_record cr2

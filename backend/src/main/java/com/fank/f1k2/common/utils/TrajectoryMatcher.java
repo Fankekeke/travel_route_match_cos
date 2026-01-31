@@ -1,6 +1,7 @@
 package com.fank.f1k2.common.utils;
 
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.operation.buffer.BufferOp;
 import org.geotools.geometry.jts.JTS;
@@ -29,8 +30,10 @@ public class TrajectoryMatcher {
     private static LineString createTargetPath(JSONArray roadCoordinates) throws Exception {
         Coordinate[] coords = new Coordinate[roadCoordinates.size()];
         for (int i = 0; i < roadCoordinates.size(); i++) {
-            JSONArray pointItem = roadCoordinates.getJSONArray(i);
-            coords[i] = new Coordinate(pointItem.get(0, double.class), pointItem.get(1, double.class));
+            JSONObject pointItem = roadCoordinates.getJSONObject(i);
+            double longitude = pointItem.getDouble("longitude");
+            double latitude = pointItem.getDouble("latitude");
+            coords[i] = new Coordinate(longitude, latitude);
         }
         return new GeometryFactory().createLineString(coords);
     }

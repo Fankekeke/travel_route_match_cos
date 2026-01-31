@@ -73,5 +73,8 @@ public class AuditInfo implements Serializable {
     @TableField(exist = false)
     private String phone;
 
+    @TableField(exist = false)
+    private Integer staffId;
+
 
 }

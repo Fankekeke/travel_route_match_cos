@@ -40,6 +40,9 @@
     </a-row>
 <!--    <supplier-home v-if="user.roleId == 76"></supplier-home>-->
 <!--    <home @setTitle="setTitleData"></home>-->
+    <staff v-if="user.roleId == 75"></staff>
+    <user v-if="user.roleId == 76"></user>
+    <admin v-if="user.roleId == 74"></admin>
     <a-row :gutter="8" class="count-info" style="margin-top: 15px" v-show="false">
       <a-col :span="12" class="visit-count-wrapper">
         <a-card class="visit-count" hoverable>
@@ -53,14 +56,15 @@
 import HeadInfo from '@/views/common/HeadInfo'
 import {mapState} from 'vuex'
 import moment from 'moment'
-// import Home from './manage/component/home/Home'
-// import supplierHome from './manage/component/supplier-home/Home'
+import Staff from './manage/work/staff/Staff.vue'
+import User from './manage/work/user/User.vue'
+import Admin from './manage/work/admin/Admin.vue'
 moment.locale('zh-cn')
 
 export default {
   name: 'HomePage',
   // components: {Home, supplierHome, HeadInfo},
-  components: {HeadInfo},
+  components: {User, Staff, Admin, HeadInfo},
   data () {
     return {
       titleData: {

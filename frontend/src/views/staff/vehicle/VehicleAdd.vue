@@ -68,16 +68,6 @@
           </a-form-item>
         </a-col>
         <a-col :span="6">
-          <a-form-item label='所属车主' v-bind="formItemLayout">
-            <a-select v-decorator="[
-              'staffId',
-              { rules: [{ required: true, message: '请输入所属所属车主!' }] }
-              ]">
-              <a-select-option :value="item.id" v-for="(item, index) in shopList" :key="index">{{ item.name }}</a-select-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-        <a-col :span="6">
           <a-form-item label='车辆类型' v-bind="formItemLayout">
             <a-select v-decorator="[
               'useType',
@@ -240,6 +230,7 @@ export default {
           if (values.factoryDate) {
             values.factoryDate = moment(values.factoryDate).format('YYYY-MM-DD')
           }
+          values.staffId = this.currentUser.userId
           this.loading = true
           this.$post('/business/vehicle-info', {
             ...values

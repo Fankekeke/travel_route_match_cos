@@ -244,7 +244,7 @@ export default {
       if (params.readStatus === undefined) {
         delete params.readStatus
       }
-      params.staffId = this.currentUser.userId
+      params.userId = this.currentUser.userId
       this.$get('/business/notify-info/page', {
         ...params
       }).then((r) => {
