@@ -55,7 +55,7 @@
           </template>
         </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>
+<!--          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>-->
           <a-icon type="file-search" @click="handlevehicleViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
@@ -74,8 +74,8 @@
     </vehicle-edit>
     <vehicle-view
       @close="handlevehicleViewClose"
-      :vehicleShow="vehicleView.visiable"
-      :vehicleData="vehicleView.data">
+      :orderShow="vehicleView.visiable"
+      :orderData="vehicleView.data">
     </vehicle-view>
   </a-card>
 </template>
@@ -129,16 +129,105 @@ export default {
     }),
     columns () {
       return [{
-        title: '车牌号码',
-        dataIndex: 'vehicleNo',
+        title: '订单名称',
+        dataIndex: 'code',
+        customRender: (text, record, index) => {
+          if (!text) return '- -'
+          return (
+            <div style="display: flex; align-items: center;">
+              <div>
+                <a-tooltip title={text}>
+                  <div style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    {text}
+                  </div>
+                </a-tooltip>
+                <a-tooltip title={record.orderName}>
+                  <div style="color: #999; font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    {record.orderName}
+                  </div>
+                </a-tooltip>
+              </div>
+            </div>
+          )
+        },
+        width: 200
+      }, {
+        title: '乘客姓名',
+        dataIndex: 'userName',
+        customRender: (text, record, index) => {
+          if (!text) return '- -'
+          return (
+            <div style="display: flex; align-items: center;">
+              <a-avatar
+                size="72"
+                src={ record.userImages ? 'http://127.0.0.1:9527/imagesWeb/' + record.userImages : null }
+                icon={ record.userImages ? null : 'user' }
+                style="margin-right: 15px;"
+              />
+              <div>
+                <div>{text}</div>
+                <div style="color: #999; font-size: 12px;">{record.userPhone}</div>
+              </div>
+            </div>
+          )
+        },
+        width: 250
+      }, {
+        title: '车主姓名',
+        dataIndex: 'staffName',
+        customRender: (text, record, index) => {
+          if (!text) return '- -'
+          return (
+            <div style="display: flex; align-items: center;">
+              <a-avatar
+                size="72"
+                src={ record.staffImages ? 'http://127.0.0.1:9527/imagesWeb/' + record.staffImages : null }
+                icon={ record.staffImages ? null : 'user' }
+                style="margin-right: 15px;"
+              />
+              <div>
+                <div>{text}</div>
+                <div style="color: #999; font-size: 12px;">{record.staffPhone}</div>
+              </div>
+            </div>
+          )
+        },
+        width: 250,
         ellipsis: true
       }, {
-        title: '车辆名称',
-        dataIndex: 'name',
+        title: '订单状态',
+        dataIndex: 'status',
+        width: 150,
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '-1':
+              return <a-tag>待接单</a-tag>
+            case '0':
+              return <a-tag color="orange">待上车</a-tag>
+            case '1':
+              return <a-tag color="green">已上车</a-tag>
+            case '2':
+              return <a-tag color="blue">已送达</a-tag>
+            case '3':
+              return <a-tag color="purple">已支付</a-tag>
+            default:
+              return <a-tag color="default">未知状态</a-tag>
+          }
+        }
+      }, {
+        title: '车牌号码',
+        dataIndex: 'vehicleNo',
+        width: 150,
+        ellipsis: true
+      }, {
+        title: '车辆品牌',
+        dataIndex: 'brand',
+        width: 150,
         ellipsis: true
       }, {
         title: '车辆类型',
         dataIndex: 'useType',
+        width: 150,
         customRender: (text, row, index) => {
           switch (text) {
             case '1':
@@ -152,59 +241,40 @@ export default {
           }
         }
       }, {
-        title: '座位数量',
-        dataIndex: 'seatNum',
+        title: '订单金额',
+        dataIndex: 'orderPrice',
+        width: 150,
         customRender: (text, row, index) => {
           if (text !== null) {
-            return text
+            return `¥${text}`
           } else {
             return '- -'
           }
         },
         ellipsis: true
       }, {
-        title: '照片',
-        dataIndex: 'images',
-        customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
-          return <a-popover>
-            <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-            </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-          </a-popover>
-        }
-      }, {
-        title: '燃料类型',
-        dataIndex: 'fuelType',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '1':
-              return <a-tag>燃油</a-tag>
-            case '2':
-              return <a-tag>柴油</a-tag>
-            case '3':
-              return <a-tag>油电混动</a-tag>
-            case '4':
-              return <a-tag>电能</a-tag>
-            default:
-              return '- -'
-          }
-        }
-      }, {
-        title: '所属车主',
-        dataIndex: 'staffName',
+        title: '里程(km)',
+        dataIndex: 'kilometre',
+        width: 150,
         customRender: (text, row, index) => {
           if (text !== null) {
-            return text
+            return `${text} km`
           } else {
             return '- -'
           }
         },
         ellipsis: true
       }, {
-        title: '车辆品牌',
-        dataIndex: 'brand',
+        title: '乘客人数',
+        dataIndex: 'rideNum',
+        width: 150,
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return `${text} 人`
+          } else {
+            return '- -'
+          }
+        },
         ellipsis: true
       }, {
         title: '创建时间',
@@ -216,10 +286,13 @@ export default {
             return '- -'
           }
         },
+        width: 150,
         ellipsis: true
       }, {
         title: '操作',
         dataIndex: 'operation',
+        width: 100,
+        fixed: 'right',
         scopedSlots: {customRender: 'operation'}
       }]
     }
@@ -241,7 +314,7 @@ export default {
       })
     },
     editStatus (row, status) {
-      this.$post('/business/vehicle-info/account/status', { vehicleId: row.id, status }).then((r) => {
+      this.$post('/business/order-info/account/status', { vehicleId: row.id, status }).then((r) => {
         this.$message.success('修改成功')
         this.fetch()
       })
@@ -290,7 +363,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/business/vehicle-info/' + ids).then(() => {
+          that.$delete('/business/order-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -364,7 +437,7 @@ export default {
         delete params.brand
       }
       params.userId = this.currentUser.userId
-      this.$get('/business/vehicle-info/page', {
+      this.$get('/business/order-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

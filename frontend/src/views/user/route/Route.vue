@@ -74,8 +74,8 @@
     </vehicle-edit>
     <vehicle-view
       @close="handlevehicleViewClose"
-      :vehicleShow="vehicleView.visiable"
-      :vehicleData="vehicleView.data">
+      :routeShow="vehicleView.visiable"
+      :routeData="vehicleView.data">
     </vehicle-view>
   </a-card>
 </template>

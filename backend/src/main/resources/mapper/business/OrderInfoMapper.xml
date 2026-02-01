@@ -29,23 +29,23 @@
         vi.use_type
         FROM
         order_info oi
-        LEFT JOIN user_info ui (ui.id = oi.user_id)
+        LEFT JOIN user_info ui ON (ui.id = oi.user_id)
         LEFT JOIN staff_info si ON (si.id = oi.staff_id)
         LEFT JOIN route_staff_info rsi ON (rsi.id = oi.staff_route_id)
         LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)
         WHERE
         1 = 1
-        <if test="queryParam.staffName != null and queryParam.staffName != ''">
-            AND si.name LIKE CONCAT('%',#{queryParam.staffName},'%')
+        <if test="queryFrom.staffName != null and queryFrom.staffName != ''">
+            AND si.name LIKE CONCAT('%',#{queryFrom.staffName},'%')
         </if>
-        <if test="queryParam.userName != null and queryParam.userName != ''">
-            AND ui.name LIKE CONCAT('%',#{queryParam.userName},'%')
+        <if test="queryFrom.userName != null and queryFrom.userName != ''">
+            AND ui.name LIKE CONCAT('%',#{queryFrom.userName},'%')
         </if>
         <if test="queryFrom.staffId != null and queryFrom.staffId != ''">
             AND si.user_id = #{queryFrom.staffId}
         </if>
         <if test="queryFrom.userId != null and queryFrom.userId != ''">
-            AND ui.user_id = #{queryFrom.staffId}
+            AND ui.user_id = #{queryFrom.userId}
         </if>
         ORDER BY
         oi.create_date DESC

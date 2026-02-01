@@ -157,4 +157,10 @@ public class OrderInfo implements Serializable {
      */
     @TableField(exist = false)
     private EvaluateInfo evaluateInfo;
+
+    @TableField(exist = false)
+    private String staffName;
+
+    @TableField(exist = false)
+    private String userName;
 }

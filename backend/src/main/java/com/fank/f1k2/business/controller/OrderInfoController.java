@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -98,7 +99,11 @@ public class OrderInfoController {
         UserInfo userInfo = userInfoService.getOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, userId));
         List<RouteInfo> routeInfoList = routeInfoService.list(Wrappers.<RouteInfo>lambdaQuery().eq(RouteInfo::getUserId, userInfo.getId()).ne(RouteInfo::getStatus, "3"));
         if (CollectionUtil.isEmpty(routeInfoList)) {
-            return R.ok();
+            return R.ok(new LinkedHashMap<String, Object>() {
+                {
+                    put("userInfo", userInfo);
+                }
+            });
         }
         return R.ok(orderInfoService.queryRouteUserDetail(routeInfoList.get(0).getId()));
     }
@@ -114,7 +119,11 @@ public class OrderInfoController {
         StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, staffId));
         List<RouteStaffInfo> routeInfoList = routeStaffInfoService.list(Wrappers.<RouteStaffInfo>lambdaQuery().eq(RouteStaffInfo::getStaffId, staffInfo.getId()).ne(RouteStaffInfo::getStatus, "1"));
         if (CollectionUtil.isEmpty(routeInfoList)) {
-            return R.ok();
+            return R.ok(new LinkedHashMap<String, Object>() {
+                {
+                    put("staffInfo", staffInfo);
+                }
+            });
         }
         return R.ok(orderInfoService.queryRouteStaffDetail(routeInfoList.get(0).getId()));
     }

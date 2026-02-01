@@ -1,6 +1,6 @@
 
 <template>
-  <a-modal v-model="show" title="车辆详情" @cancel="onClose" :width="1000"
+  <a-modal v-model="show" title="行程详情" @cancel="onClose" :width="600"
            :body-style="{ padding: '0' }">
     <template slot="footer">
       <a-button key="back" @click="onClose" type="default">
@@ -8,36 +8,149 @@
       </a-button>
     </template>
 
-    <div class="vehicle-detail-container" v-if="vehicleData !== null"></div>
+    <div class="route-detail-container" v-if="routeData !== null">
+      <!-- 行程基本信息 -->
+      <div class="info-section route-info">
+        <div class="section-header">
+          <h3 class="section-title">行程信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <span class="label">起点：</span>
+            <span class="value">{{ routeData.startAddress }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">终点：</span>
+            <span class="value">{{ routeData.endAddress }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">出发时间：</span>
+            <span class="value">{{ routeData.earliestTime }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">最晚到达：</span>
+            <span class="value">{{ routeData.latestTime }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">预估距离：</span>
+            <span class="value">{{ routeData.distance ? routeData.distance.toFixed(2) + ' km' : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">服务类型：</span>
+            <span class="value">
+              <a-tag v-if="routeData.type === '0'" color="blue">拼座</a-tag>
+              <a-tag v-if="routeData.type === '1'" color="green">独享</a-tag>
+              <span v-if="!routeData.type">- -</span>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">乘坐人数：</span>
+            <span class="value">{{ routeData.rideNum ? routeData.rideNum : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">高速费：</span>
+            <span class="value">
+              <a-tag v-if="routeData.highwayTolls === '0'" color="orange">部分协商</a-tag>
+              <a-tag v-if="routeData.highwayTolls === '1'" color="blue">全部承担</a-tag>
+              <a-tag v-if="routeData.highwayTolls === '2'" color="red">不承担</a-tag>
+              <span v-if="!routeData.highwayTolls">- -</span>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">状态：</span>
+            <span class="value">
+              <a-tag v-if="routeData.status === '-1'">待接单</a-tag>
+              <a-tag v-if="routeData.status === '0'" color="orange">待上车</a-tag>
+              <a-tag v-if="routeData.status === '1'" color="green">已上车</a-tag>
+              <a-tag v-if="routeData.status === '2'" color="blue">已送达</a-tag>
+              <a-tag v-if="routeData.status === '3'" color="purple">已支付</a-tag>
+              <span v-if="!routeData.status">- -</span>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">行程编号：</span>
+            <span class="value">{{ routeData.userCode || '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">创建时间：</span>
+            <span class="value date">{{ routeData.createDate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户信息 -->
+      <div class="info-section user-info">
+        <div class="section-header">
+          <h3 class="section-title">用户信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <span class="label">用户姓名：</span>
+            <span class="value">{{ routeData.userName }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">联系电话：</span>
+            <span class="value phone">{{ routeData.userPhone }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">用户头像：</span>
+            <div class="value">
+              <img :size="50" :src="getImageUrl(routeData.userImages)"
+                   alt="用户头像"
+                   class="avatar-image"/>
+            </div>
+          </div>
+
+          <div class="info-item full-width" v-if="routeData.remark">
+            <span class="label">备注：</span>
+            <span class="value content">{{ routeData.remark }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 路线地图 -->
+      <div class="info-section map-section">
+        <div class="section-header">
+          <h3 class="section-title">路线地图</h3>
+        </div>
+        <div id="route-map" style="height: 400px; width: 100%;"></div>
+      </div>
+    </div>
   </a-modal>
 </template>
 
-<script>import baiduMap from '@/utils/map/baiduMap'
-import moment from 'moment'
+<script>import moment from 'moment'
 moment.locale('zh-cn')
-function getBase64 (file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = error => reject(error)
-  })
-}
+
 export default {
-  name: 'vehicleView',
+  name: 'RouteUserView',
   props: {
-    vehicleShow: {
+    routeShow: {
       type: Boolean,
       default: false
     },
-    vehicleData: {
+    routeData: {
       type: Object
     }
   },
   computed: {
     show: {
       get: function () {
-        return this.vehicleShow
+        return this.routeShow
       },
       set: function () {
       }
@@ -46,67 +159,107 @@ export default {
   data () {
     return {
       loading: false,
-      fileList: [],
-      previewVisible: false,
-      previewImage: '',
-      repairInfo: null,
-      reserveInfo: null,
-      durgList: [],
-      logisticsList: [],
-      userInfo: null,
-      vehicleInfo: null,
-      shopInfo: null,
-      brandInfo: null,
-      typeInfo: null
+      map: null
     }
   },
   watch: {
-    vehicleShow: function (value) {
+    routeShow: function (value) {
       if (value) {
-        this.imagesInit(this.vehicleData.images)
+        setTimeout(() => {
+          this.initRouteMap()
+        }, 200)
       }
     }
   },
   methods: {
-    queryRouteStaffDetail(id) {
+    initRouteMap () {
+      this.map = new BMapGL.Map('route-map')
+      this.map.centerAndZoom(new BMapGL.Point(116.404, 39.915), 12)
+      this.map.enableScrollWheelZoom(true)
 
-    },
-    local (vehicleData) {
-      baiduMap.clearOverlays()
-      baiduMap.rMap().enableScrollWheelZoom(true)
-      // eslint-disable-next-line no-undef
-      let point = new BMap.Point(vehicleData.longitude, vehicleData.latitude)
-      baiduMap.pointAdd(point)
-      baiduMap.findPoint(point, 16)
-      // let driving = new BMap.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});
-      // driving.search(new BMap.Point(this.nowPoint.lng,this.nowPoint.lat), new BMap.Point(scenic.point.split(",")[0],scenic.point.split(",")[1]));
-    },
-    dataInit (id) {
-      this.$get(`/business/order-info/queryRouteUserDetail`, {routeId: id}).then((r) => {
+      // 解析路径数据
+      let pathCoordinates = []
+      if (this.routeData.path) {
+        try {
+          pathCoordinates = JSON.parse(this.routeData.path)
+        } catch (e) {
+          console.error('解析路径数据失败:', e)
+          // 如果解析失败，回退到使用起终点坐标
+          pathCoordinates = [
+            { latitude: this.routeData.startLatitude, longitude: this.routeData.startLongitude },
+            { latitude: this.routeData.endLatitude, longitude: this.routeData.endLongitude }
+          ]
+        }
+      } else {
+        // 如果没有路径数据，使用起终点坐标
+        pathCoordinates = [
+          { latitude: this.routeData.startLatitude, longitude: this.routeData.startLongitude },
+          { latitude: this.routeData.endLatitude, longitude: this.routeData.endLongitude }
+        ]
+      }
 
-      })
-    },
-    imagesInit (images) {
-      if (images !== null && images !== '') {
-        let imageList = []
-        images.split(',').forEach((image, index) => {
-          imageList.push({uid: index, name: image, status: 'done', url: 'http://127.0.0.1:9527/imagesWeb/' + image})
+      // 添加起点标记
+      if (pathCoordinates.length > 0) {
+        const startPoint = new BMapGL.Point(pathCoordinates[0].longitude, pathCoordinates[0].latitude)
+        // 设置标记图标
+        const startIcon = new BMapGL.Icon('static/img/start.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
+          imageOffset: new BMapGL.Size(0, 0)
         })
-        this.fileList = imageList
+        const startMarker = new BMapGL.Marker(startPoint)
+        startMarker.setIcon(startIcon)
+        this.map.addOverlay(startMarker)
+      }
+
+      // 添加终点标记
+      if (pathCoordinates.length > 0) {
+        const endPoint = new BMapGL.Point(
+          pathCoordinates[pathCoordinates.length - 1].longitude,
+          pathCoordinates[pathCoordinates.length - 1].latitude
+        )
+        // 设置标记图标
+        const endIcon = new BMapGL.Icon('static/img/end.png', new BMapGL.Size(32, 32), {
+          offset: new BMapGL.Size(0, 0),
+          imageOffset: new BMapGL.Size(0, 0)
+        })
+        const endMarker = new BMapGL.Marker(endPoint)
+        endMarker.setIcon(endIcon)
+        this.map.addOverlay(endMarker)
+      }
+
+      // 将路径坐标转换为百度地图点数组
+      const pathPoints = pathCoordinates.map(coord => new BMapGL.Point(coord.longitude, coord.latitude))
+
+      // 绘制详细路线
+      if (pathPoints.length > 1) {
+        const polyline = new BMapGL.Polyline(pathPoints, {
+          strokeColor: '#1890ff',
+          strokeWeight: 6,
+          strokeOpacity: 0.8
+        })
+        this.map.addOverlay(polyline)
+      }
+
+      // 自动调整视野以显示整个路线
+      if (pathPoints.length > 0) {
+        this.map.setViewport(pathPoints)
       }
     },
-    handleCancel () {
-      this.previewVisible = false
-    },
-    async handlePreview (file) {
-      if (!file.url && !file.preview) {
-        file.preview = await getBase64(file.originFileObj)
+    getImageUrl(imagePath) {
+      if (!imagePath) {
+        return '' // 替换为默认头像路径
       }
-      this.previewImage = file.url || file.preview
-      this.previewVisible = true
+
+      // 如果已经是完整的URL，则直接返回
+      if (imagePath.startsWith('http')) {
+        return imagePath
+      }
+
+      // 按照 http://127.0.0.1:9527/imagesWeb/${text} 格式构建URL
+      return `http://127.0.0.1:9527/imagesWeb/${imagePath}`
     },
-    picHandleChange ({ fileList }) {
-      this.fileList = fileList
+    setDefaultAvatar(e) {
+      e.target.src = ''
     },
     onClose () {
       this.$emit('close')
@@ -115,7 +268,7 @@ export default {
 }
 </script>
 
-<style scoped>.vehicle-detail-container {
+<style scoped>.route-detail-container {
   padding: 0;
 }
 
@@ -124,17 +277,12 @@ export default {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.vehicle-info {
+.route-info {
   background-color: #fafafa;
 }
 
-.driver-info {
+.user-info {
   background-color: #f9f9f9;
-}
-
-.gallery-section {
-  padding: 24px;
-  background-color: #ffffff;
 }
 
 .section-header {
@@ -186,80 +334,24 @@ export default {
   font-size: 13px;
 }
 
-.info-item .value.score {
-  color: #52c41a;
-  font-weight: 600;
-  font-size: 15px;
-}
-
 .info-item .value.phone {
   color: #1890ff;
   font-weight: 500;
 }
 
-.info-item .value.id-number {
-  font-family: monospace;
-  letter-spacing: 1px;
+.info-item .value.content {
+  background-color: #f9f9f9;
+  padding: 8px;
+  border-left: 5px solid #1890ff;
+  white-space: pre-wrap;
 }
 
-.fuel-label {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.fuel-gasoline {
-  background-color: #fffbe6;
-  color: #faad14;
-  border: 1px solid #ffe58f;
-}
-
-.fuel-diesel {
-  background-color: #fff2e8;
-  color: #ff7a45;
-  border: 1px solid #ffd8bf;
-}
-
-.fuel-hybrid {
-  background-color: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
-}
-
-.fuel-electric {
-  background-color: #e6f7ff;
-  color: #1890ff;
-  border: 1px solid #91d5ff;
-}
-
-.use-type {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.operational {
-  background-color: #fff1f0;
-  color: #ff4d4f;
-  border: 1px solid #ffa39e;
-}
-
-.non-operational {
-  background-color: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
-}
-
-.gallery-content {
-  background-color: #fafafa;
-  padding: 16px;
-  border-radius: 4px;
-  border: 1px solid #e8e8e8;
+.avatar-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8e8e8;
 }
 
 /* 响应式调整 */
@@ -272,8 +364,7 @@ export default {
     grid-column: span 1;
   }
 
-  .info-section,
-  .gallery-section {
+  .info-section {
     padding: 16px;
   }
 

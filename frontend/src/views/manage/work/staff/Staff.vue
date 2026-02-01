@@ -5,11 +5,7 @@
       <div class="section-header">
         <h3 class="section-title">路线信息</h3>
       </div>
-      <div class="info-grid">
-<!--        <div class="route-item">-->
-<!--          <span class="label">路线编号：</span>-->
-<!--          <span class="value">{{ routeInfo.routeStaffInfo.id }}</span>-->
-<!--        </div>-->
+      <div v-if="routeInfo && routeInfo.routeStaffInfo" class="info-grid">
         <div class="route-item">
           <span class="label">起点：</span>
           <span class="value">{{ routeInfo.routeStaffInfo.startAddress }}</span>
@@ -41,19 +37,35 @@
         <div class="route-item">
           <span class="label">状态：</span>
           <span class="value">
-            <a-tag v-if="routeInfo.routeStaffInfo.status === '0'" color="orange">候补中</a-tag>
-            <a-tag v-if="routeInfo.routeStaffInfo.status === '1'" color="green">已完成</a-tag>
-            <a-tag v-if="routeInfo.routeStaffInfo.status === '2'" color="gray">暂停</a-tag>
-          </span>
+        <a-tag v-if="routeInfo.routeStaffInfo.status === '0'" color="orange">候补中</a-tag>
+        <a-tag v-if="routeInfo.routeStaffInfo.status === '1'" color="green">已完成</a-tag>
+        <a-tag v-if="routeInfo.routeStaffInfo.status === '2'" color="gray">暂停</a-tag>
+      </span>
+        </div>
+      </div>
+      <div v-else class="no-route">
+        <div class="empty-state">
+          <a-empty
+            description="您当前没有正在进行的路线"
+          />
+          <div class="action-buttons">
+            <a-button
+              type="primary"
+              @click="goToCreateRoute"
+            >
+              创建新路线
+            </a-button>
+          </div>
         </div>
       </div>
     </div>
+
 
     <div class="vehicle-info-section">
       <div class="section-header">
         <h3 class="section-title">车辆信息</h3>
       </div>
-      <div class="info-grid">
+      <div v-if="routeInfo && routeInfo.vehicleInfo" class="info-grid">
         <div class="vehicle-item">
           <span class="label">车牌号：</span>
           <span class="value">{{ routeInfo.vehicleInfo.vehicleNo }}</span>
@@ -73,11 +85,18 @@
         <div class="vehicle-item">
           <span class="label">燃料类型：</span>
           <span class="value fuel-type">
-            <span v-if="routeInfo.vehicleInfo.fuelType === '1'" class="fuel-label fuel-gasoline">燃油</span>
-            <span v-if="routeInfo.vehicleInfo.fuelType === '2'" class="fuel-label fuel-diesel">柴油</span>
-            <span v-if="routeInfo.vehicleInfo.fuelType === '3'" class="fuel-label fuel-hybrid">油电混动</span>
-            <span v-if="routeInfo.vehicleInfo.fuelType === '4'" class="fuel-label fuel-electric">电能</span>
-          </span>
+        <span v-if="routeInfo.vehicleInfo.fuelType === '1'" class="fuel-label fuel-gasoline">燃油</span>
+        <span v-if="routeInfo.vehicleInfo.fuelType === '2'" class="fuel-label fuel-diesel">柴油</span>
+        <span v-if="routeInfo.vehicleInfo.fuelType === '3'" class="fuel-label fuel-hybrid">油电混动</span>
+        <span v-if="routeInfo.vehicleInfo.fuelType === '4'" class="fuel-label fuel-electric">电能</span>
+      </span>
+        </div>
+      </div>
+      <div v-else class="no-vehicle">
+        <div class="empty-state">
+          <a-empty
+            description="当前路线未关联车辆信息"
+          />
         </div>
       </div>
     </div>
@@ -86,7 +105,7 @@
       <div class="section-header">
         <h3 class="section-title">车主信息</h3>
       </div>
-      <div class="info-grid">
+      <div v-if="routeInfo && routeInfo.staffInfo" class="info-grid">
         <div class="staff-item">
           <span class="label">车主姓名：</span>
           <span class="value">{{ routeInfo.staffInfo.name }}</span>
@@ -102,6 +121,13 @@
         <div class="staff-item">
           <span class="label">地址：</span>
           <span class="value">{{ routeInfo.staffInfo.address }}</span>
+        </div>
+      </div>
+      <div v-else class="no-staff">
+        <div class="empty-state">
+          <a-empty
+            description="当前路线未关联车主信息"
+          />
         </div>
       </div>
     </div>
@@ -892,15 +918,24 @@ export default {
         this.$message.error('获取车找人订单失败')
       })
     },
+    goToCreateRoute() {
+      // 根据实际路由配置调整路径
+      this.$router.push('/staff/routeStaff')
+    },
     queryCurrentRouteByStaff () {
       this.$get('/business/order-info/queryCurrentRouteByStaff', {
         staffId: this.currentUser.userId
       }).then((r) => {
         this.routeInfo = r.data
-        this.queryRouteUserList(this.routeInfo.routeStaffInfo.id)
+        // 添加条件检查，确保对象存在且有id属性时才调用
+        if (this.routeInfo && this.routeInfo.routeStaffInfo && this.routeInfo.routeStaffInfo.id) {
+          this.queryRouteUserList(this.routeInfo.routeStaffInfo.id)
+        }
       }).catch(error => {
         console.error('获取当前路线信息失败:', error)
         this.$message.error('获取当前路线信息失败')
+        // 即使失败也设置routeInfo为默认值，以便页面正确渲染
+        this.routeInfo = null
       })
     },
 
@@ -1507,5 +1542,20 @@ export default {
   padding: 8px;
   border-radius: 4px;
   border-left: 3px solid #1890ff;
+}
+
+.no-route,
+.no-vehicle,
+.no-staff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background-color: #fafafa;
+  text-align: center;
+}
+
+.action-buttons {
+  margin-top: 20px;
 }
 </style>

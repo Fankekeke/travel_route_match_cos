@@ -76,6 +76,12 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setStaffId(routeStaffInfo.getStaffId());
         orderInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
         orderInfo.setCode("ORD-" + System.currentTimeMillis());
+        orderInfo.setRemark(routeInfo.getRemark());
+        orderInfo.setKilometre(routeInfo.getDistance());
+        orderInfo.setOrderPrice(routeStaffInfo.getPlanPriceUnit());
+        orderInfo.setDeliverIndexNo(0);
+        orderInfo.setIntegral(routeStaffInfo.getPlanPriceUnit());
+
         if ("0".equals(routeStaffInfo.getAutoOrder())) {
             orderInfo.setStatus("-1");
         } else {

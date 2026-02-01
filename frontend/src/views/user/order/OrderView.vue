@@ -1,6 +1,6 @@
 
 <template>
-  <a-modal v-model="show" title="车辆详情" @cancel="onClose" :width="1000"
+  <a-modal v-model="show" title="订单详情" @cancel="onClose" :width="600"
            :body-style="{ padding: '0' }">
     <template slot="footer">
       <a-button key="back" @click="onClose" type="default">
@@ -8,8 +8,150 @@
       </a-button>
     </template>
 
-    <div class="vehicle-detail-container" v-if="vehicleData !== null">
-      <!-- 车辆基本信息 -->
+    <div class="order-detail-container" v-if="orderData !== null">
+      <!-- 订单基本信息 -->
+      <div class="info-section order-info">
+        <div class="section-header">
+          <h3 class="section-title">订单信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <span class="label">订单编号：</span>
+            <span class="value">{{ orderData.code }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">订单名称：</span>
+            <span class="value">{{ orderData.orderName }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">订单金额：</span>
+            <span class="value">¥{{ orderData.orderPrice || '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">优惠后金额：</span>
+            <span class="value">¥{{ orderData.afterOrderPrice || '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">预估里程：</span>
+            <span class="value">{{ orderData.kilometre ? orderData.kilometre + ' km' : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">乘坐人数：</span>
+            <span class="value">{{ orderData.rideNum ? orderData.rideNum + ' 人' : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">订单状态：</span>
+            <span class="value">
+              <a-tag v-if="orderData.status === '-1'">待接单</a-tag>
+              <a-tag v-if="orderData.status === '0'" color="blue">已接单</a-tag>
+              <a-tag v-if="orderData.status === '1'" color="orange">已出发</a-tag>
+              <a-tag v-if="orderData.status === '2'" color="green">已完成</a-tag>
+              <a-tag v-if="orderData.status === '3'" color="red">已取消</a-tag>
+              <span v-if="!orderData.status">- -</span>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">获得积分：</span>
+            <span class="value">{{ orderData.integral || '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">预估时长：</span>
+            <span class="value">{{ orderData.planMinute ? orderData.planMinute + ' 分钟' : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">实际时长：</span>
+            <span class="value">{{ orderData.actualMinute ? orderData.actualMinute + ' 分钟' : '- -' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">创建时间：</span>
+            <span class="value date">{{ orderData.createDate }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">支付时间：</span>
+            <span class="value date">{{ orderData.payDate || '- -' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户信息 -->
+      <div class="info-section user-info">
+        <div class="section-header">
+          <h3 class="section-title">乘客信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <span class="label">乘客姓名：</span>
+            <span class="value">{{ orderData.userName }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">乘客电话：</span>
+            <span class="value phone">{{ orderData.userPhone }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">乘客头像：</span>
+            <div class="value">
+              <img :size="50" :src="getImageUrl(orderData.userImages)"
+                   alt="乘客头像"
+                   class="avatar-image"/>
+            </div>
+          </div>
+
+          <div class="info-item full-width" v-if="orderData.remark">
+            <span class="label">乘客备注：</span>
+            <span class="value content">{{ orderData.remark }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 车主信息 -->
+      <div class="info-section staff-info">
+        <div class="section-header">
+          <h3 class="section-title">车主信息</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <span class="label">车主姓名：</span>
+            <span class="value">{{ orderData.staffName }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">车主电话：</span>
+            <span class="value phone">{{ orderData.staffPhone || '- -' }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">车主头像：</span>
+            <div class="value">
+              <img :size="50" :src="getImageUrl(orderData.staffImages)"
+                   alt="车主头像"
+                   class="avatar-image"/>
+            </div>
+          </div>
+
+          <div class="info-item full-width" v-if="orderData.staffRemark">
+            <span class="label">车主备注：</span>
+            <span class="value content">{{ orderData.staffRemark }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 车辆信息 -->
       <div class="info-section vehicle-info">
         <div class="section-header">
           <h3 class="section-title">车辆信息</h3>
@@ -17,186 +159,91 @@
 
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">车辆编号：</span>
-            <span class="value">{{ vehicleData.vehicleNo }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">车牌号：</span>
-            <span class="value">{{ vehicleData.vehicleNumber ? vehicleData.vehicleNumber : '- -' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">车辆颜色：</span>
-            <span class="value">{{ vehicleData.vehicleColor ? vehicleData.vehicleColor : '- -' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">车辆名称：</span>
-            <span class="value">{{ vehicleData.name }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">排放标准：</span>
-            <span class="value">{{ vehicleData.emissionStandard }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">发动机号码：</span>
-            <span class="value">{{ vehicleData.engineNo }}</span>
+            <span class="label">车牌号码：</span>
+            <span class="value">{{ orderData.vehicleNo }}</span>
           </div>
 
           <div class="info-item">
             <span class="label">车辆品牌：</span>
-            <span class="value">{{ vehicleData.brand }}</span>
+            <span class="value">{{ orderData.brand }}</span>
           </div>
 
           <div class="info-item">
-            <span class="label">燃料类型：</span>
-            <span class="value fuel-type">
-              <span v-if="vehicleData.fuelType == 1" class="fuel-label fuel-gasoline">燃油</span>
-              <span v-if="vehicleData.fuelType == 2" class="fuel-label fuel-diesel">柴油</span>
-              <span v-if="vehicleData.fuelType == 3" class="fuel-label fuel-hybrid">油电混动</span>
-              <span v-if="vehicleData.fuelType == 4" class="fuel-label fuel-electric">电能</span>
-            </span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">使用性质：</span>
+            <span class="label">车辆类型：</span>
             <span class="value">
-              <span v-if="vehicleData.useType == 1" class="use-type operational">营运</span>
-              <span v-if="vehicleData.useType == 2" class="use-type non-operational">非营运</span>
+              <a-tag v-if="orderData.useType === '1'">轿车</a-tag>
+              <a-tag v-if="orderData.useType === '2'" color="green">商务车</a-tag>
+              <a-tag v-if="orderData.useType === '3'" color="blue">大巴</a-tag>
+              <span v-if="!orderData.useType">- -</span>
             </span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">座位数：</span>
-            <span class="value">{{ vehicleData.seatNum ? vehicleData.seatNum : '- -' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">出厂日期：</span>
-            <span class="value date">{{ vehicleData.factoryDate }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">创建时间：</span>
-            <span class="value date">{{ vehicleData.createDate }}</span>
           </div>
         </div>
       </div>
 
-      <!-- 司机信息 -->
-      <div class="info-section driver-info">
+      <!-- 出发到达信息 -->
+      <div class="info-section route-info">
         <div class="section-header">
-          <h3 class="section-title">司机信息</h3>
+          <h3 class="section-title">行程信息</h3>
         </div>
 
         <div class="info-grid">
-          <div class="info-item">
-            <span class="label">司机姓名：</span>
-            <span class="value">{{ vehicleData.staffName }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">联系电话：</span>
-            <span class="value phone">{{ vehicleData.phone }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">员工编号：</span>
-            <span class="value">{{ vehicleData.code }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">性别：</span>
-            <span class="value">{{ vehicleData.sex === 1 ? '男' : '女' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">身份证号：</span>
-            <span class="value id-number">{{ vehicleData.idNumber }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">出生日期：</span>
-            <span class="value date">{{ vehicleData.birthDate }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">民族：</span>
-            <span class="value">{{ vehicleData.ethnicity }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="label">服务评分：</span>
-            <span class="value score">{{ vehicleData.serviceScore }}</span>
+          <div class="info-item full-width">
+            <span class="label">出发时间：</span>
+            <span class="value">{{ orderData.staffEarliestTime }}</span>
           </div>
 
           <div class="info-item full-width">
-            <span class="label">地址：</span>
-            <span class="value address">{{ vehicleData.address }}</span>
+            <span class="label">最晚到达：</span>
+            <span class="value">{{ orderData.staffLatestTime }}</span>
           </div>
 
           <div class="info-item full-width">
-            <span class="label">备注：</span>
-            <span class="value content">{{ vehicleData.content }}</span>
+            <span class="label">起点地址：</span>
+            <span class="value">{{ orderData.staffStartAddress }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="label">终点地址：</span>
+            <span class="value">{{ orderData.staffEndAddress }}</span>
           </div>
         </div>
       </div>
 
-      <!-- 图册部分 -->
-      <div class="gallery-section">
+      <!-- AI推荐备注 -->
+      <div class="info-section ai-remark" v-if="orderData.aiRemark">
         <div class="section-header">
-          <h3 class="section-title">图册</h3>
+          <h3 class="section-title">AI推荐备注</h3>
         </div>
 
-        <div class="gallery-content">
-          <a-upload
-            name="avatar"
-            action="http://127.0.0.1:9527/file/fileUpload/"
-            list-type="picture-card"
-            :file-list="fileList"
-            @preview="handlePreview"
-            @change="picHandleChange"
-            :disabled="true"
-          >
-          </a-upload>
-          <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-            <img alt="example" style="width: 100%" :src="previewImage" />
-          </a-modal>
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <span class="label">AI分析：</span>
+            <span class="value content">{{ orderData.aiRemark }}</span>
+          </div>
         </div>
       </div>
     </div>
   </a-modal>
 </template>
 
-<script>import baiduMap from '@/utils/map/baiduMap'
-import moment from 'moment'
+<script>import moment from 'moment'
 moment.locale('zh-cn')
-function getBase64 (file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = error => reject(error)
-  })
-}
+
 export default {
-  name: 'vehicleView',
+  name: 'OrderDetailView',
   props: {
-    vehicleShow: {
+    orderShow: {
       type: Boolean,
       default: false
     },
-    vehicleData: {
+    orderData: {
       type: Object
     }
   },
   computed: {
     show: {
       get: function () {
-        return this.vehicleShow
+        return this.orderShow
       },
       set: function () {
       }
@@ -204,68 +251,22 @@ export default {
   },
   data () {
     return {
-      loading: false,
-      fileList: [],
-      previewVisible: false,
-      previewImage: '',
-      repairInfo: null,
-      reserveInfo: null,
-      durgList: [],
-      logisticsList: [],
-      userInfo: null,
-      vehicleInfo: null,
-      shopInfo: null,
-      brandInfo: null,
-      typeInfo: null
-    }
-  },
-  watch: {
-    vehicleShow: function (value) {
-      if (value) {
-        this.imagesInit(this.vehicleData.images)
-      }
+      loading: false
     }
   },
   methods: {
-    local (vehicleData) {
-      baiduMap.clearOverlays()
-      baiduMap.rMap().enableScrollWheelZoom(true)
-      // eslint-disable-next-line no-undef
-      let point = new BMap.Point(vehicleData.longitude, vehicleData.latitude)
-      baiduMap.pointAdd(point)
-      baiduMap.findPoint(point, 16)
-      // let driving = new BMap.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});
-      // driving.search(new BMap.Point(this.nowPoint.lng,this.nowPoint.lat), new BMap.Point(scenic.point.split(",")[0],scenic.point.split(",")[1]));
-    },
-    dataInit (vehicleNo) {
-      this.$get(`/business/vehicle-info/detail/${vehicleNo}`).then((r) => {
-        this.vehicleInfo = r.data.vehicle
-        this.shopInfo = r.data.shop
-        this.brandInfo = r.data.brand
-        this.typeInfo = r.data.type
-      })
-    },
-    imagesInit (images) {
-      if (images !== null && images !== '') {
-        let imageList = []
-        images.split(',').forEach((image, index) => {
-          imageList.push({uid: index, name: image, status: 'done', url: 'http://127.0.0.1:9527/imagesWeb/' + image})
-        })
-        this.fileList = imageList
+    getImageUrl(imagePath) {
+      if (!imagePath) {
+        return '' // 替换为默认头像路径
       }
-    },
-    handleCancel () {
-      this.previewVisible = false
-    },
-    async handlePreview (file) {
-      if (!file.url && !file.preview) {
-        file.preview = await getBase64(file.originFileObj)
+
+      // 如果已经是完整的URL，则直接返回
+      if (imagePath.startsWith('http')) {
+        return imagePath
       }
-      this.previewImage = file.url || file.preview
-      this.previewVisible = true
-    },
-    picHandleChange ({ fileList }) {
-      this.fileList = fileList
+
+      // 按照 http://127.0.0.1:9527/imagesWeb/${text} 格式构建URL
+      return `http://127.0.0.1:9527/imagesWeb/${imagePath}`
     },
     onClose () {
       this.$emit('close')
@@ -274,7 +275,7 @@ export default {
 }
 </script>
 
-<style scoped>.vehicle-detail-container {
+<style scoped>.order-detail-container {
   padding: 0;
 }
 
@@ -283,17 +284,28 @@ export default {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.vehicle-info {
+.order-info {
   background-color: #fafafa;
 }
 
-.driver-info {
+.user-info {
   background-color: #f9f9f9;
 }
 
-.gallery-section {
-  padding: 24px;
-  background-color: #ffffff;
+.staff-info {
+  background-color: #f8f9fa;
+}
+
+.vehicle-info {
+  background-color: #f5f9ff;
+}
+
+.route-info {
+  background-color: #f9f5ff;
+}
+
+.ai-remark {
+  background-color: #fff9f5;
 }
 
 .section-header {
@@ -345,80 +357,24 @@ export default {
   font-size: 13px;
 }
 
-.info-item .value.score {
-  color: #52c41a;
-  font-weight: 600;
-  font-size: 15px;
-}
-
 .info-item .value.phone {
   color: #1890ff;
   font-weight: 500;
 }
 
-.info-item .value.id-number {
-  font-family: monospace;
-  letter-spacing: 1px;
+.info-item .value.content {
+  background-color: #f9f9f9;
+  padding: 8px;
+  border-left: 5px solid #1890ff;
+  white-space: pre-wrap;
 }
 
-.fuel-label {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.fuel-gasoline {
-  background-color: #fffbe6;
-  color: #faad14;
-  border: 1px solid #ffe58f;
-}
-
-.fuel-diesel {
-  background-color: #fff2e8;
-  color: #ff7a45;
-  border: 1px solid #ffd8bf;
-}
-
-.fuel-hybrid {
-  background-color: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
-}
-
-.fuel-electric {
-  background-color: #e6f7ff;
-  color: #1890ff;
-  border: 1px solid #91d5ff;
-}
-
-.use-type {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.operational {
-  background-color: #fff1f0;
-  color: #ff4d4f;
-  border: 1px solid #ffa39e;
-}
-
-.non-operational {
-  background-color: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
-}
-
-.gallery-content {
-  background-color: #fafafa;
-  padding: 16px;
-  border-radius: 4px;
-  border: 1px solid #e8e8e8;
+.avatar-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8e8e8;
 }
 
 /* 响应式调整 */
@@ -431,8 +387,7 @@ export default {
     grid-column: span 1;
   }
 
-  .info-section,
-  .gallery-section {
+  .info-section {
     padding: 16px;
   }
 
