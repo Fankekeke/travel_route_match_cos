@@ -620,7 +620,7 @@ export default {
         // 更新距离字段
 
         this.form.setFieldsValue({
-          distance: parseFloat(selectedPlan.distance.replace('公里', ''))
+          distance: parseFloat(selectedPlan.distance.replace('公里', '')),
           planMinute: this.parseDurationToMinutes(selectedPlan.duration)
         })
       }

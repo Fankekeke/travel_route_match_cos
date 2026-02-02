@@ -13,6 +13,7 @@ import com.fank.f1k2.business.entity.*;
 import com.fank.f1k2.business.dao.OrderInfoMapper;
 import com.fank.f1k2.business.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import com.fank.f1k2.common.utils.DistanceUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +66,18 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean orderAdd(OrderInfo orderInfo) {
+    public Boolean orderAdd(OrderInfo orderInfo) throws F1k2Exception {
         RouteStaffInfo routeStaffInfo = routeStaffInfoService.getById(orderInfo.getStaffRouteId());
         RouteInfo routeInfo = routeInfoService.getById(orderInfo.getUserRouteId());
 
         StaffInfo staffInfo = staffInfoService.getById(routeStaffInfo.getStaffId());
         UserInfo userInfo = userInfoService.getById(routeInfo.getUserId());
+
+        List<OrderInfo> orderInfoList = this.list(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getUserRouteId, routeInfo.getId())
+                .eq(OrderInfo::getStaffRouteId, routeStaffInfo.getId()));
+        if (CollectionUtil.isNotEmpty(orderInfoList) && orderInfoList.stream().anyMatch(e -> "-1".equals(e.getStatus()))) {
+            throw new F1k2Exception("该订单等待车主确认中");
+        }
 
         orderInfo.setUserId(routeInfo.getUserId());
         orderInfo.setStaffId(routeStaffInfo.getStaffId());
@@ -120,6 +127,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             throw new RuntimeException("用户信息不存在");
         }
         if ("0".equals(status)) {
+            orderInfo.setStatus("0");
             // 接单操作
             NotifyInfo notifyInfo = new NotifyInfo();
             notifyInfo.setUserId(userInfo.getId());
@@ -278,7 +286,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             }
             if (CollectionUtil.isNotEmpty(orderInfoList)) {
                 List<Integer> userRouteIdList = orderInfoList.stream().map(OrderInfo::getUserRouteId).collect(Collectors.toList());
-                List<Integer> userIdList = orderInfoList.stream().map(OrderInfo::getUserRouteId).collect(Collectors.toList());
+                List<Integer> userIdList = orderInfoList.stream().map(OrderInfo::getUserId).collect(Collectors.toList());
 
                 List<UserInfo> userInfoList = new ArrayList<>(userInfoService.listByIds(userIdList));
                 List<RouteInfo> routeInfoList = new ArrayList<>(routeInfoService.listByIds(userRouteIdList));

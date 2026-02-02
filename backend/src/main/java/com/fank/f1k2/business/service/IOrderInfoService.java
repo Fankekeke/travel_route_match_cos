@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.OrderInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.LinkedHashMap;
@@ -28,7 +29,7 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @param orderInfo 订单信息
      * @return 添加结果
      */
-    Boolean orderAdd(OrderInfo orderInfo);
+    Boolean orderAdd(OrderInfo orderInfo) throws F1k2Exception;
 
     /**
      * 车主审核订单

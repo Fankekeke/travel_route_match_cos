@@ -60,7 +60,6 @@
       </div>
     </div>
 
-
     <div class="vehicle-info-section">
       <div class="section-header">
         <h3 class="section-title">车辆信息</h3>
@@ -245,18 +244,20 @@
                 <a-tabs default-active-key="all" tab-position="top">
                   <a-tab-pane key="all" tab="全部订单">
                     <div v-for="order in routeInfo.orderInfoList" :key="order.id" class="order-item">
-                      <a-card class="order-inner-card">
+                      <a-card class="order-inner-card" :bordered="false">
                         <div class="order-header">
                           <div class="order-basic-info">
                             <h3>{{ order.orderName }}</h3>
                             <div class="order-id">订单号：{{ order.code }}</div>
                           </div>
                           <div class="order-status">
-                            <a-tag v-if="order.status === '0'" color="blue">待接单</a-tag>
-                            <a-tag v-if="order.status === '1'" color="orange">已接单</a-tag>
-                            <a-tag v-if="order.status === '2'" color="gold">行程中</a-tag>
-                            <a-tag v-if="order.status === '3'" color="green">已完成</a-tag>
-                            <a-tag v-if="order.status === '4'" color="red">已取消</a-tag>
+                            <a-tag v-if="order.status == '-1'" color="orange">确认中</a-tag>
+                            <a-tag v-if="order.status == '0'" color="blue">已确认</a-tag>
+                            <a-tag v-if="order.status == '1'" color="green">已接客</a-tag>
+                            <a-tag v-if="order.status == '2'" color="cyan">已送达</a-tag>
+                            <a-tag v-if="order.status == '3'" color="purple">已支付</a-tag>
+                            <a-tag v-if="order.status == '4'" color="red">已拒绝</a-tag>
+                            <a-tag v-if="order.status == '5'">已取消</a-tag>
                           </div>
                         </div>
 
@@ -318,17 +319,99 @@
                       </a-card>
                     </div>
                   </a-tab-pane>
+                  <a-tab-pane key="pending" tab="确认中">
+                    <div v-if="getOrdersByStatus('-1').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
+                    <div v-for="order in getOrdersByStatus('-1')" :key="order.id" class="order-item">
+                      <a-card class="order-inner-card" :bordered="false">
+                        <div class="order-header">
+                          <div class="order-basic-info">
+                            <h3>{{ order.orderName }}</h3>
+                            <div class="order-id">订单号：{{ order.code }}</div>
+                          </div>
+                          <div class="order-status">
+                            <a-tag color="orange">确认中</a-tag>
+                          </div>
+                        </div>
 
-                  <a-tab-pane key="pending" tab="待接单">
+                        <!-- 用户信息 -->
+                        <div class="info-row">
+                          <div class="info-item user-info">
+                            <div class="info-label">乘客信息</div>
+                            <div class="info-value" style="margin-left: 15px">
+                              <div class="user-name">{{ order.userInfo.name }}</div>
+                              <div class="user-phone">{{ order.userInfo.phone }}</div>
+                            </div>
+                          </div>
+                          <div class="info-item">
+                            <div class="info-label">下单时间</div>
+                            <div class="info-value">{{ order.createDate }}</div>
+                          </div>
+                        </div>
+
+                        <!-- 订单金额 -->
+                        <div class="info-row">
+                          <div class="info-item">
+                            <div class="info-label">订单金额</div>
+                            <div class="info-value amount">¥{{ order.orderPrice }}</div>
+                          </div>
+                          <div class="info-item" v-if="order.afterOrderPrice && order.afterOrderPrice !== order.orderPrice">
+                            <div class="info-label">优惠后金额</div>
+                            <div class="info-value amount discount">¥{{ order.afterOrderPrice }}</div>
+                          </div>
+                          <div class="info-item">
+                            <div class="info-label">里程</div>
+                            <div class="info-value">{{ order.kilometre }} km</div>
+                          </div>
+                        </div>
+
+                        <!-- 路线信息 -->
+                        <div class="route-info-wrapper">
+                          <div class="info-label">路线详情</div>
+                          <div class="route-details">
+                            <div class="route-item">
+                              <i class="icon start-icon">起点</i>
+                              <span>{{ order.routeInfo.startAddress }}</span>
+                            </div>
+                            <div class="route-item">
+                              <i class="icon end-icon">终点</i>
+                              <span>{{ order.routeInfo.endAddress }}</span>
+                            </div>
+                            <div class="route-distance">距离：{{ order.routeInfo.distance }} km</div>
+                          </div>
+                        </div>
+
+                        <!-- 评价信息 -->
+                        <div class="evaluation-wrapper" v-if="order.evaluateInfo">
+                          <div class="info-label">评价信息</div>
+                          <div class="evaluation-details">
+                            <a-rate :value="order.evaluateInfo.score" disabled/>
+                            <div class="evaluation-content">{{ order.evaluateInfo.content }}</div>
+                          </div>
+                        </div>
+
+                        <div class="order-actions" v-if="order.status == '-1'">
+                          <a-button type="primary" @click="acceptOrder(order)">接单</a-button>
+                          <a-button type="danger" @click="rejectOrder(order)" style="margin-left: 8px;">拒绝</a-button>
+                        </div>
+                      </a-card>
+                    </div>
+                  </a-tab-pane>
+
+                  <a-tab-pane key="accepted" tab="已确认">
+                    <div v-if="getOrdersByStatus('0').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
                     <div v-for="order in getOrdersByStatus('0')" :key="order.id" class="order-item">
-                      <a-card class="order-inner-card">
+                      <a-card class="order-inner-card" :bordered="false">
                         <div class="order-header">
                           <div class="order-basic-info">
                             <h3>{{ order.orderName }}</h3>
                             <div class="order-id">订单号：{{ order.code }}</div>
                           </div>
                           <div class="order-status">
-                            <a-tag color="blue">待接单</a-tag>
+                            <a-tag color="blue">已确认</a-tag>
                           </div>
                         </div>
 
@@ -391,16 +474,19 @@
                     </div>
                   </a-tab-pane>
 
-                  <a-tab-pane key="accepted" tab="已接单">
+                  <a-tab-pane key="inprogress" tab="已接客">
+                    <div v-if="getOrdersByStatus('1').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
                     <div v-for="order in getOrdersByStatus('1')" :key="order.id" class="order-item">
-                      <a-card class="order-inner-card">
+                      <a-card class="order-inner-card" :bordered="false">
                         <div class="order-header">
                           <div class="order-basic-info">
                             <h3>{{ order.orderName }}</h3>
                             <div class="order-id">订单号：{{ order.code }}</div>
                           </div>
                           <div class="order-status">
-                            <a-tag color="orange">已接单</a-tag>
+                            <a-tag color="green">已接客</a-tag>
                           </div>
                         </div>
 
@@ -463,16 +549,19 @@
                     </div>
                   </a-tab-pane>
 
-                  <a-tab-pane key="inprogress" tab="行程中">
+                  <a-tab-pane key="delivered" tab="已送达">
+                    <div v-if="getOrdersByStatus('2').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
                     <div v-for="order in getOrdersByStatus('2')" :key="order.id" class="order-item">
-                      <a-card class="order-inner-card">
+                      <a-card class="order-inner-card" :bordered="false">
                         <div class="order-header">
                           <div class="order-basic-info">
                             <h3>{{ order.orderName }}</h3>
                             <div class="order-id">订单号：{{ order.code }}</div>
                           </div>
                           <div class="order-status">
-                            <a-tag color="gold">行程中</a-tag>
+                            <a-tag color="cyan">已送达</a-tag>
                           </div>
                         </div>
 
@@ -535,16 +624,94 @@
                     </div>
                   </a-tab-pane>
 
-                  <a-tab-pane key="completed" tab="已完成">
+                  <a-tab-pane key="paid" tab="已支付">
+                    <div v-if="getOrdersByStatus('3').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
                     <div v-for="order in getOrdersByStatus('3')" :key="order.id" class="order-item">
-                      <a-card class="order-inner-card">
+                      <a-card class="order-inner-card" :bordered="false">
                         <div class="order-header">
                           <div class="order-basic-info">
                             <h3>{{ order.orderName }}</h3>
                             <div class="order-id">订单号：{{ order.code }}</div>
                           </div>
                           <div class="order-status">
-                            <a-tag color="green">已完成</a-tag>
+                            <a-tag color="purple">已支付</a-tag>
+                          </div>
+                        </div>
+
+                        <!-- 用户信息 -->
+                        <div class="info-row">
+                          <div class="info-item user-info">
+                            <div class="info-label">乘客信息</div>
+                            <div class="info-value" style="margin-left: 15px">
+                              <div class="user-name">{{ order.userInfo.name }}</div>
+                              <div class="user-phone">{{ order.userInfo.phone }}</div>
+                            </div>
+                          </div>
+                          <div class="info-item">
+                            <div class="info-label">下单时间</div>
+                            <div class="info-value">{{ order.createDate }}</div>
+                          </div>
+                        </div>
+
+                        <!-- 订单金额 -->
+                        <div class="info-row">
+                          <div class="info-item">
+                            <div class="info-label">订单金额</div>
+                            <div class="info-value amount">¥{{ order.orderPrice }}</div>
+                          </div>
+                          <div class="info-item" v-if="order.afterOrderPrice && order.afterOrderPrice !== order.orderPrice">
+                            <div class="info-label">优惠后金额</div>
+                            <div class="info-value amount discount">¥{{ order.afterOrderPrice }}</div>
+                          </div>
+                          <div class="info-item">
+                            <div class="info-label">里程</div>
+                            <div class="info-value">{{ order.kilometre }} km</div>
+                          </div>
+                        </div>
+
+                        <!-- 路线信息 -->
+                        <div class="route-info-wrapper">
+                          <div class="info-label">路线详情</div>
+                          <div class="route-details">
+                            <div class="route-item">
+                              <i class="icon start-icon">起点</i>
+                              <span>{{ order.routeInfo.startAddress }}</span>
+                            </div>
+                            <div class="route-item">
+                              <i class="icon end-icon">终点</i>
+                              <span>{{ order.routeInfo.endAddress }}</span>
+                            </div>
+                            <div class="route-distance">距离：{{ order.routeInfo.distance }} km</div>
+                          </div>
+                        </div>
+
+                        <!-- 评价信息 -->
+                        <div class="evaluation-wrapper" v-if="order.evaluateInfo">
+                          <div class="info-label">评价信息</div>
+                          <div class="evaluation-details">
+                            <a-rate :value="order.evaluateInfo.score" disabled/>
+                            <div class="evaluation-content">{{ order.evaluateInfo.content }}</div>
+                          </div>
+                        </div>
+                      </a-card>
+                    </div>
+                  </a-tab-pane>
+
+                  <a-tab-pane key="rejected" tab="已拒绝">
+                    <div v-if="getOrdersByStatus('4').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
+                    <div v-for="order in getOrdersByStatus('4')" :key="order.id" class="order-item">
+                      <a-card class="order-inner-card" :bordered="false">
+                        <div class="order-header">
+                          <div class="order-basic-info">
+                            <h3>{{ order.orderName }}</h3>
+                            <div class="order-id">订单号：{{ order.code }}</div>
+                          </div>
+                          <div class="order-status">
+                            <a-tag color="red">已拒绝</a-tag>
                           </div>
                         </div>
 
@@ -608,15 +775,18 @@
                   </a-tab-pane>
 
                   <a-tab-pane key="cancelled" tab="已取消">
-                    <div v-for="order in getOrdersByStatus('4')" :key="order.id" class="order-item">
-                      <a-card class="order-inner-card">
+                    <div v-if="getOrdersByStatus('5').length === 0" class="empty-order-state">
+                      <a-empty description="暂无订单" ></a-empty>
+                    </div>
+                    <div v-for="order in getOrdersByStatus('5')" :key="order.id" class="order-item">
+                      <a-card class="order-inner-card" :bordered="false">
                         <div class="order-header">
                           <div class="order-basic-info">
                             <h3>{{ order.orderName }}</h3>
                             <div class="order-id">订单号：{{ order.code }}</div>
                           </div>
                           <div class="order-status">
-                            <a-tag color="red">已取消</a-tag>
+                            <a-tag>已取消</a-tag>
                           </div>
                         </div>
 
@@ -918,7 +1088,7 @@ export default {
         this.$message.error('获取车找人订单失败')
       })
     },
-    goToCreateRoute() {
+    goToCreateRoute () {
       // 根据实际路由配置调整路径
       this.$router.push('/staff/routeStaff')
     },
@@ -927,6 +1097,7 @@ export default {
         staffId: this.currentUser.userId
       }).then((r) => {
         this.routeInfo = r.data
+        console.log(this.routeInfo)
         // 添加条件检查，确保对象存在且有id属性时才调用
         if (this.routeInfo && this.routeInfo.routeStaffInfo && this.routeInfo.routeStaffInfo.id) {
           this.queryRouteUserList(this.routeInfo.routeStaffInfo.id)
@@ -945,7 +1116,47 @@ export default {
       }
       return this.routeInfo.orderInfoList.filter(order => order.status === status)
     },
+    acceptOrder (order) {
+      this.$confirm({
+        title: '确认接单',
+        content: `确定要接受订单 "${order.orderName}" 吗？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          this.$get('/business/order-info/auditOrderByStaff', {
+            orderId: order.id,
+            status: 0
+          }).then(r => {
+            this.$message.success('订单已接受')
+            // 刷新当前订单列表
+            this.queryCurrentRouteByStaff()
+          }).catch(error => {
+            this.$message.error('接单失败：' + error.message)
+          })
+        }
+      })
+    },
 
+    rejectOrder (order) {
+      this.$confirm({
+        title: '确认拒绝',
+        content: `确定要拒绝订单 "${order.orderName}" 吗？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          this.$get('/business/order-info/auditOrderByStaff', {
+            orderId: order.id,
+            staffId: 4
+          }).then(r => {
+            this.$message.success('订单已拒绝')
+            // 刷新当前订单列表
+            this.queryCurrentRouteByStaff()
+          }).catch(error => {
+            this.$message.error('拒绝失败：' + error.message)
+          })
+        }
+      })
+    },
     contactUser (item) {
       // 联系乘客的逻辑
       this.$confirm({
@@ -1130,7 +1341,7 @@ export default {
 .order-inner-card {
   /*border-radius: 6px;*/
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8e8e8;
+  /*border: 1px solid #e8e8e8;*/
   margin-bottom: 15px;
   width: 100%;
 }
@@ -1221,8 +1432,8 @@ export default {
 
 .order-inner-card {
   /*border-radius: 8px;*/
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e8e8e8;
+  /*box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);*/
+  /*border: 1px solid #e8e8e8;*/
   margin-bottom: 16px;
   overflow: hidden;
 }
@@ -1413,7 +1624,7 @@ export default {
 .route-user-card {
   /*border-radius: 8px;*/
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e8e8e8;
+  /*border: 1px solid #e8e8e8;*/
   margin-bottom: 16px;
   overflow: hidden;
 }
@@ -1557,5 +1768,38 @@ export default {
 
 .action-buttons {
   margin-top: 20px;
+}
+
+.empty-order-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  min-height: 200px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.empty-order-state .ant-empty {
+  padding: 20px 0;
+}
+
+/* 其他状态标签页样式 */
+.order-status-tabs .ant-tabs-tabpane {
+  padding: 16px 0;
+}
+
+.order-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.order-actions .ant-btn {
+  height: 32px;
 }
 </style>

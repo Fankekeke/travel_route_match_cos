@@ -232,7 +232,7 @@ export default {
               case '3':
                 return <a-tag color="purple">已支付</a-tag>
               default:
-                return <a-tag color="default">未知</a-tag>
+                return <a-tag>未知</a-tag>
             }
           },
           width: 100

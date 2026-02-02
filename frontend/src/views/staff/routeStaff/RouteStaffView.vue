@@ -70,7 +70,7 @@
             <span class="label">自动接单：</span>
             <span class="value">
         <a-tag v-if="vehicleData.autoOrder === '0'" color="blue">开启</a-tag>
-        <a-tag v-if="vehicleData.autoOrder === '1'" color="default">关闭</a-tag>
+        <a-tag v-if="vehicleData.autoOrder === '1'">关闭</a-tag>
         <span v-if="!vehicleData.autoOrder">- -</span>
       </span>
           </div>

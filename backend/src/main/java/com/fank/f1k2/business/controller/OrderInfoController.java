@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fank.f1k2.business.entity.*;
 import com.fank.f1k2.business.service.*;
+import com.fank.f1k2.common.exception.F1k2Exception;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.common.utils.RoutePlanService;
@@ -84,7 +85,7 @@ public class OrderInfoController {
      * @return 结果
      */
     @PostMapping
-    public R save(OrderInfo addFrom) {
+    public R save(OrderInfo addFrom) throws F1k2Exception {
         return R.ok(orderInfoService.orderAdd(addFrom));
     }
 

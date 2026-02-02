@@ -467,7 +467,7 @@ export default {
       if (params.brand === undefined) {
         delete params.brand
       }
-      params.userId = this.currentUser.userId
+      params.staffId = this.currentUser.userId
       this.$get('/business/order-info/page', {
         ...params
       }).then((r) => {
