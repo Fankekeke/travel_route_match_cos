@@ -130,6 +130,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             // 更新行程状态
             routeInfoService.update(Wrappers.<RouteInfo>lambdaUpdate().set(RouteInfo::getOrderId, orderId).eq(RouteInfo::getId, orderInfo.getUserRouteId()));
             notifyInfoService.save(notifyInfo);
+            // 取消用户此行程其他订单
+            this.update(Wrappers.<OrderInfo>lambdaUpdate().set(OrderInfo::getStatus, "5").eq(OrderInfo::getUserRouteId, orderInfo.getUserRouteId()).ne(OrderInfo::getId, orderId));
         } else {
             // 拒绝操作
             orderInfo.setStatus("4");
