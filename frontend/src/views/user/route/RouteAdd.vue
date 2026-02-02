@@ -129,6 +129,21 @@
                 </a-form-item>
               </a-col>
               <a-col :span="12">
+                <a-form-item label="预计花费时间(min)" v-bind="formItemLayout">
+                  <a-input-number
+                    v-decorator="['planMinute', {
+          rules: [
+            { pattern: /^\d+$/, message: '请输入正确的时间值' },
+            { min: 1, message: '时间至少为1分钟' }
+          ]
+        }]"
+                    placeholder="请输入预计花费时间（分钟）"        style="width: 100%"
+                    :min="1"
+                    :precision="0"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
                 <a-form-item label="乘坐人数" v-bind="formItemLayout">
                   <a-input-number
                     v-decorator="['rideNum', { rules: [{ required: true, message: '请输入乘坐人数' }] }]"
@@ -603,8 +618,10 @@ export default {
         }
 
         // 更新距离字段
+
         this.form.setFieldsValue({
           distance: parseFloat(selectedPlan.distance.replace('公里', ''))
+          planMinute: this.parseDurationToMinutes(selectedPlan.duration)
         })
       }
     },
@@ -630,6 +647,21 @@ export default {
       this.reset()
       this.$emit('close')
     },
+    parseDurationToMinutes(durationStr) {
+      // 例如："2小时30分钟" -> 150分钟
+      const hourMatch = durationStr.match(/(\d+)小时/);
+      const minuteMatch = durationStr.match(/(\d+)分钟/);
+
+      let totalMinutes = 0;
+      if (hourMatch) {
+        totalMinutes += parseInt(hourMatch[1]) * 60;
+      }
+      if (minuteMatch) {
+        totalMinutes += parseInt(minuteMatch[1]);
+      }
+
+      return totalMinutes || 0;
+    },
     handleSubmit () {
       this.form.validateFields((err, values) => {
         // 获取图片List
@@ -643,6 +675,10 @@ export default {
           // 添加路径信息
           if (this.routePlans.length > 0 && this.selectedRouteIndex >= 0) {
             const selectedRoute = this.routePlans[this.selectedRouteIndex];
+            if (!values.planMinute && selectedRoute.duration) {
+              // 解析持续时间字符串为分钟数
+              values.planMinute = this.parseDurationToMinutes(selectedRoute.duration);
+            }
             // 将选中路线的geoList转换为字符串格式存储
             values.path = JSON.stringify(selectedRoute.geoList || []);
           }
@@ -908,5 +944,10 @@ export default {
   display: flex;
   align-items: center;
   gap: 3px;
+}
+
+.time-cost-container {
+  display: flex;
+  gap: 10px;
 }
 </style>

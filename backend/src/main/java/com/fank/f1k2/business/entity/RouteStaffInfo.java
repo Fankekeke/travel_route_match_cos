@@ -132,6 +132,11 @@ public class RouteStaffInfo implements Serializable {
     private Integer vehicleId;
 
     /**
+     * 预计分钟
+     */
+    private Integer planMinute;
+
+    /**
      * 匹配度
      */
     @TableField(exist = false)

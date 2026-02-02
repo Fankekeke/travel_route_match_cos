@@ -129,6 +129,21 @@
                 </a-form-item>
               </a-col>
               <a-col :span="12">
+                <a-form-item label="预计花费时间(min)" v-bind="formItemLayout">
+                  <a-input-number
+                    v-decorator="['estimatedTime', {
+          rules: [
+            { pattern: /^\d+$/, message: '请输入正确的时间值' },
+            { min: 1, message: '时间必须大于0' }
+          ]
+        }]"
+                    placeholder="请输入预计花费时间(分钟)"        style="width: 100%"
+                    :min="1"
+                    :precision="0"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
                 <a-form-item label="乘坐人数" v-bind="formItemLayout">
                   <a-input-number
                     v-decorator="['rideNum', { rules: [{ required: true, message: '请输入乘坐人数' }] }]"
@@ -612,7 +627,8 @@ export default {
 
         // 更新距离字段
         this.form.setFieldsValue({
-          distance: parseFloat(selectedPlan.distance.replace('公里', ''))
+          distance: parseFloat(selectedPlan.distance.replace('公里', '')),
+          estimatedTime: Math.ceil(selectedPlan.routes.duration / 60) // 将秒转换为分钟
         })
       }
     },
