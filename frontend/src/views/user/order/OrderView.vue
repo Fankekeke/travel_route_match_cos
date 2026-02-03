@@ -189,12 +189,12 @@
         </div>
 
         <div class="info-grid">
-          <div class="info-item full-width">
+          <div class="info-item">
             <span class="label">出发时间：</span>
             <span class="value">{{ orderData.staffEarliestTime }}</span>
           </div>
 
-          <div class="info-item full-width">
+          <div class="info-item">
             <span class="label">最晚到达：</span>
             <span class="value">{{ orderData.staffLatestTime }}</span>
           </div>

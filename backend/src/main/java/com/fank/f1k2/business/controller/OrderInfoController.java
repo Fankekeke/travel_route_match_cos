@@ -217,18 +217,18 @@ public class OrderInfoController {
      * @param status 订单状态
      * @return 订单信息
      */
-    @PutMapping("/updateOrderStatus")
-    public R updateOrderStatus(Integer id, String status) {
+    @GetMapping("/updateOrderStatus")
+    public R updateOrderStatus(Integer orderId, String status) {
         OrderInfo orderInfo = new OrderInfo();
-        orderInfo.setId(id);
+        orderInfo.setId(orderId);
         orderInfo.setStatus(status);
         if ("3".equals(status)) {
             orderInfo.setPayDate(DateUtil.formatDateTime(new Date()));
-            OrderInfo orderInfo1 = orderInfoService.getById(id);
+            OrderInfo orderInfo1 = orderInfoService.getById(orderId);
             // 更新车主收益
             StaffIncome staffIncome = new StaffIncome();
             staffIncome.setStaffId(orderInfo1.getStaffId());
-            staffIncome.setOrderId(id);
+            staffIncome.setOrderId(orderId);
             staffIncome.setTotalPrice(orderInfo1.getAfterOrderPrice());
             staffIncome.setCreateDate(DateUtil.formatDateTime(new Date()));
             staffIncomeService.save(staffIncome);
@@ -240,7 +240,7 @@ public class OrderInfoController {
             orderInfo.setDeliveryDate(DateUtil.formatDateTime(new Date()));
         }
         orderInfoService.updateById(orderInfo);
-        orderInfoService.checkOrderStatus(id);
+        orderInfoService.checkOrderStatus(orderId);
         return R.ok(true);
     }
 

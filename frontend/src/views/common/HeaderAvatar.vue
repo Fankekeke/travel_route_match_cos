@@ -1,8 +1,11 @@
 <template>
   <div>
-    <div @click="openAiAssistant" style="display: inline-block; height: 100%; vertical-align: initial">
-      <a-icon type="robot"/>
-      <span>AI助手</span>
+    <div @click="openAiAssistant" style="display: inline-flex; align-items: center; height: 100%; vertical-align: initial; cursor: pointer; padding: 0 12px; transition: all 0.3s ease;">
+      <a-icon
+        type="robot"
+        style="font-size: 18px; color: #1890ff; margin-right: 8px; transition: color 0.3s ease;"
+      />
+      <span style="font-size: 13px; font-weight: 500; color: #333; transition: color 0.3s ease;">AI助手</span>
     </div>
     <a-dropdown style="display: inline-block; height: 100%; vertical-align: initial">
       <span style="cursor: pointer">
@@ -32,12 +35,14 @@
       :updatePasswordModelVisible="updatePasswordModelVisible">
     </update-password>
     <a-drawer
-      title="AI助手"
       placement="right"
       :closable="true"
       :visible="aiAssistantVisible"
       @close="closeAiAssistant"
-      width="400"
+      width="500"
+      destroyOnClose
+      wrapClassName="aa"
+      :bodyStyle="{ height: '100vh', padding: '0'}"
     >
       <div class="ai-container">
         <div class="chat-box">
@@ -75,7 +80,7 @@ export default {
       aiMessages: [
         {
           type: 'bot',
-          avatar: 'http://127.0.0.1:9527/imagesWeb/SA1675604990128.jpg',
+          avatar: 'http://127.0.0.1:9527/imagesWeb/AI助手-copy.png',
           text: '您好！有什么我可以帮您的吗？',
           timestamp: this.getFormattedTime()
         }
@@ -107,7 +112,7 @@ export default {
       // 添加用户消息
       this.aiMessages.push({
         type: 'user',
-        avatar: 'http://127.0.0.1:9527/imagesWeb/SA1675604212612.jpg',
+        avatar: 'http://127.0.0.1:9527/imagesWeb/用户.png',
         text: this.aiUserInput,
         timestamp: this.getFormattedTime()
       });
@@ -129,17 +134,17 @@ export default {
     generateAiResponse(content) {
       this.aiMessages.push({
         type: 'bot',
-        avatar: 'http://127.0.0.1:9527/imagesWeb/SA1675604990128.jpg',
-        text: '请稍后 正在加载中😋',
+        avatar: 'http://127.0.0.1:9527/imagesWeb/AI助手-copy.png',
+        text: '请稍后 正在加载中',
         timestamp: this.getFormattedTime()
       });
 
-      this.$post(`/cos/ai/aliTyqw`, {
+      this.$post(`/business/ai/aliTyqw`, {
         content: content
       }).then((r) => {
         this.aiMessages.push({
           type: 'bot',
-          avatar: 'http://127.0.0.1:9527/imagesWeb/SA1675604990128.jpg',
+          avatar: 'http://127.0.0.1:9527/imagesWeb/AI助手-copy.png',
           text: r.data.msg,
           timestamp: this.getFormattedTime()
         });
@@ -200,8 +205,6 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -222,7 +225,7 @@ export default {
 
   &::-webkit-scrollbar-thumb {
     background-color: #dcdcdc;
-    border-radius: 3px;
+    border-radius: 1px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -239,7 +242,7 @@ export default {
   .avatar {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: 2px;
     overflow: hidden;
     margin-right: 12px;
     flex-shrink: 0;
@@ -255,7 +258,7 @@ export default {
     position: relative;
     max-width: 70%;
     padding: 10px 14px;
-    border-radius: 18px;
+    border-radius: 2px;
     line-height: 1.4;
     word-wrap: break-word;
 
@@ -328,7 +331,7 @@ export default {
     flex: 1;
     padding: 10px 14px;
     border: 1px solid #ddd;
-    border-radius: 20px;
+    border-radius: 2px;
     outline: none;
     font-size: 14px;
     transition: all 0.2s ease-in-out;
@@ -345,7 +348,7 @@ export default {
     background-color: #00bfff;
     color: #fff;
     border: none;
-    border-radius: 20px;
+    border-radius: 2px;
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s ease-in-out;
@@ -354,5 +357,69 @@ export default {
       background-color: #009fd9;
     }
   }
+}
+.ant-drawer-wrapper-body {
+  height: 100%;
+}
+</style>
+<style lang="less" scoped>
+.ai-container {
+  display: flex;
+  padding: 0;
+  flex-direction: column;
+  height: 100%; /* 确保占满父容器 */
+}
+
+.chat-box {
+  flex: 1; /* 占据剩余空间 */
+  overflow-y: auto; /* 允许滚动 */
+  padding: 16px;
+  background-color: #f5f5f5;
+}
+
+.input-area {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  flex-shrink: 0; /* 防止被压缩 */
+
+  input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+
+    &:focus {
+      border-color: #00bfff;
+      box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.2);
+    }
+  }
+
+  button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    background-color: #00bfff;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease-in-out;
+
+    &:hover {
+      background-color: #009fd9;
+    }
+  }
+}
+</style>
+<style scoped>
+>>> .ant-drawer-body {
+  padding: 0 !important;
+  height: 100%;
 }
 </style>

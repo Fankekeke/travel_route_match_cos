@@ -470,6 +470,9 @@
                             <div class="evaluation-content">{{ order.evaluateInfo.content }}</div>
                           </div>
                         </div>
+                        <div class="order-actions">
+                          <a-button type="primary" @click="orderPick(order)">已接客</a-button>
+                        </div>
                       </a-card>
                     </div>
                   </a-tab-pane>
@@ -544,6 +547,9 @@
                             <a-rate :value="order.evaluateInfo.score" disabled/>
                             <div class="evaluation-content">{{ order.evaluateInfo.content }}</div>
                           </div>
+                        </div>
+                        <div class="order-actions">
+                          <a-button type="primary" @click="orderService(order)">已送达</a-button>
                         </div>
                       </a-card>
                     </div>
@@ -1132,6 +1138,47 @@ export default {
             this.queryCurrentRouteByStaff()
           }).catch(error => {
             this.$message.error('接单失败：' + error.message)
+          })
+        }
+      })
+    },
+    orderPick (order) {
+      this.$confirm({
+        title: '确认接客',
+        content: `确定要接客 "${order.orderName}" 吗？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          this.$get('/business/order-info/updateOrderStatus', {
+            orderId: order.id,
+            status: 1
+          }).then(r => {
+            this.$message.success('订单已接客')
+            // 刷新当前订单列表
+            this.queryCurrentRouteByStaff()
+          }).catch(error => {
+            this.$message.error('接客失败：' + error.message)
+          })
+        }
+      })
+    },
+
+    orderService (order) {
+      this.$confirm({
+        title: '确认已送达',
+        content: `确定要送达 "${order.orderName}" 吗？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          this.$get('/business/order-info/updateOrderStatus', {
+            orderId: order.id,
+            status: 2
+          }).then(r => {
+            this.$message.success('订单已送达')
+            // 刷新当前订单列表
+            this.queryCurrentRouteByStaff()
+          }).catch(error => {
+            this.$message.error('送达失败：' + error.message)
           })
         }
       })

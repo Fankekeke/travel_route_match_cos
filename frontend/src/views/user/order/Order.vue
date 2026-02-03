@@ -63,6 +63,7 @@
             title="取 消 订 单"
             style="margin-left: 15px; color: #ff4d4f;"
           ></a-icon>
+          <a-icon v-if="record.status == 2" type="alipay" @click="handlevehiclePayOpen(record)" title="支 付" style="margin-left: 15px"></a-icon>
           <a-icon type="file-search" @click="handlevehicleViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
@@ -84,6 +85,11 @@
       :orderShow="vehicleView.visiable"
       :orderData="vehicleView.data">
     </vehicle-view>
+    <order-pay
+      @close="handlevehiclePayClose"
+      :orderShow="vehiclePay.visiable"
+      :orderData="vehiclePay.data">
+    </order-pay>
   </a-card>
 </template>
 
@@ -92,13 +98,14 @@ import RangeDate from '@/components/datetime/RangeDate'
 import vehicleAdd from './OrderAdd.vue'
 import vehicleEdit from './OrderEdit.vue'
 import vehicleView from './OrderView.vue'
+import OrderPay from './OrderPay.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
   name: 'vehicle',
-  components: {vehicleAdd, vehicleEdit, vehicleView, RangeDate},
+  components: {vehicleAdd, vehicleEdit, vehicleView, OrderPay, RangeDate},
   data () {
     return {
       advanced: false,
@@ -109,6 +116,10 @@ export default {
         visiable: false
       },
       vehicleView: {
+        visiable: false,
+        data: null
+      },
+      vehiclePay: {
         visiable: false,
         data: null
       },
@@ -338,6 +349,13 @@ export default {
     handlevehicleViewOpen (row) {
       this.vehicleView.data = row
       this.vehicleView.visiable = true
+    },
+    handlevehiclePayClose () {
+      this.vehiclePay.visiable = false
+    },
+    handlevehiclePayOpen (row) {
+      this.vehiclePay.data = row
+      this.vehiclePay.visiable = true
     },
     selectShopList () {
       this.$get(`/business/brand-info/list`).then((r) => {

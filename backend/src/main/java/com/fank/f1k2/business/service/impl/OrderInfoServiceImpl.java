@@ -498,7 +498,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
         // 计算供需比
         double supplyDemandRatio = todayStaffOrders.size() > 0 ?
-                (double) todayPassengerOrders.size() / todayStaffOrders.size() : Double.MAX_VALUE;
+                new BigDecimal((double) todayPassengerOrders.size() / todayStaffOrders.size())
+                        .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()
+                : 0;
 
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         result.put("todayPassengerOrders", todayPassengerOrders.size()); // 今日发单量
