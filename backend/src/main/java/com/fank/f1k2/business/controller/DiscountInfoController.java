@@ -2,6 +2,9 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.UserInfo;
+import com.fank.f1k2.business.service.IUserInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.DiscountInfo;
@@ -27,6 +30,8 @@ public class DiscountInfoController {
 
     private final IDiscountInfoService discountInfoService;
 
+    private final IUserInfoService userInfoService;
+
     /**
      * 分页获取优惠券管理
      *
@@ -37,6 +42,18 @@ public class DiscountInfoController {
     @GetMapping("/page")
     public R page(Page<DiscountInfo> page, DiscountInfo queryFrom) {
         return R.ok(discountInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 查询用户优惠券
+     *
+     * @param userId 用户ID
+     * @return 优惠券列表
+     */
+    @GetMapping("/queryDiscountByUser")
+    public R queryDiscountByUser(Integer userId) {
+        UserInfo userInfo = userInfoService.getOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getUserId, userId));
+        return R.ok(discountInfoService.list(Wrappers.<DiscountInfo>lambdaQuery().eq(DiscountInfo::getUserId, userInfo.getId()).eq(DiscountInfo::getStatus, "0")));
     }
 
     /**

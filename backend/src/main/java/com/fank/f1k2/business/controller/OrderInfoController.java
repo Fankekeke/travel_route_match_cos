@@ -245,6 +245,29 @@ public class OrderInfoController {
     }
 
     /**
+     * 订单支付
+     *
+     * @param orderCode 订单编号
+     * @return 订单信息
+     */
+    @GetMapping("/orderPay")
+    public R orderPay(String orderCode) {
+        OrderInfo orderInfo = orderInfoService.getOne(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getCode, orderCode));
+        orderInfo.setPayDate(DateUtil.formatDateTime(new Date()));
+        orderInfo.setStatus("3");
+        // 更新车主收益
+        StaffIncome staffIncome = new StaffIncome();
+        staffIncome.setStaffId(orderInfo.getStaffId());
+        staffIncome.setOrderId(orderInfo.getId());
+        staffIncome.setTotalPrice(orderInfo.getAfterOrderPrice());
+        staffIncome.setCreateDate(DateUtil.formatDateTime(new Date()));
+        staffIncomeService.save(staffIncome);
+        orderInfoService.updateById(orderInfo);
+        orderInfoService.checkOrderStatus(orderInfo.getId());
+        return R.ok(true);
+    }
+
+    /**
      * 修改订单信息
      *
      * @param editFrom 订单信息对象

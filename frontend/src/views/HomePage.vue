@@ -53,6 +53,7 @@
   </div>
 </template>
 <script>
+import { getUrlKey } from '@/utils/urlKey'
 import HeadInfo from '@/views/common/HeadInfo'
 import {mapState} from 'vuex'
 import moment from 'moment'
@@ -132,6 +133,11 @@ export default {
     }
   },
   mounted () {
+    if (getUrlKey('out_trade_no') !== null) {
+      this.$get('/business/order-info/orderPay', { orderCode: getUrlKey('out_trade_no') }).then((r) => {
+        this.$message.success('支付成功')
+      })
+    }
     this.welcomeMessage = this.welcome()
     this.$get(`index/${this.user.username}`).then((r) => {
       let data = r.data.data
