@@ -212,7 +212,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
         routeInfoService.updateById(routeInfo);
 
-        List<OrderInfo> orderInfoList = this.list(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getStaffRouteId, routeStaffInfo.getId()));
+        List<OrderInfo> orderInfoList = this.list(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getStaffRouteId, routeStaffInfo.getId()).eq(OrderInfo::getStatus, "4").ne(OrderInfo::getStatus, "5"));
         // 校验状态是否已经全部支付
         if (orderInfoList.size() == orderInfoList.stream().filter(order -> "3".equals(order.getStatus())).count()) {
             routeStaffInfo.setStatus("1");

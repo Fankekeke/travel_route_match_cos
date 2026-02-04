@@ -3,6 +3,7 @@ package com.fank.f1k2.business.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fank.f1k2.business.entity.*;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +46,9 @@ public class OrderInfoController {
     private final IStaffInfoService staffInfoService;
 
     private final RoutePlanService routePlanService;
+
+    private final IDiscountInfoService discountInfoService;
+
 
     /**
      * 分页获取订单信息
@@ -213,7 +218,7 @@ public class OrderInfoController {
     /**
      * 修改订单状态
      *
-     * @param id     主键ID
+     * @param orderId     主键ID
      * @param status 订单状态
      * @return 订单信息
      */
@@ -255,6 +260,14 @@ public class OrderInfoController {
         OrderInfo orderInfo = orderInfoService.getOne(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getCode, orderCode));
         orderInfo.setPayDate(DateUtil.formatDateTime(new Date()));
         orderInfo.setStatus("3");
+        if (orderInfo.getDiscountId() != null) {
+            discountInfoService.update(Wrappers.<DiscountInfo>lambdaUpdate().set(DiscountInfo::getStatus, "1").eq(DiscountInfo::getId, orderInfo.getDiscountId()));
+        }
+        UserInfo userInfo = userInfoService.getById(orderInfo.getUserId());
+        // 添加用户积分
+        userInfo.setIntegral(NumberUtil.add((userInfo.getIntegral() != null ? userInfo.getIntegral() : BigDecimal.ZERO), (orderInfo.getIntegral() != null ? orderInfo.getIntegral() : BigDecimal.ZERO)));
+        userInfoService.updateById(userInfo);
+
         // 更新车主收益
         StaffIncome staffIncome = new StaffIncome();
         staffIncome.setStaffId(orderInfo.getStaffId());
@@ -262,6 +275,7 @@ public class OrderInfoController {
         staffIncome.setTotalPrice(orderInfo.getAfterOrderPrice());
         staffIncome.setCreateDate(DateUtil.formatDateTime(new Date()));
         staffIncomeService.save(staffIncome);
+
         orderInfoService.updateById(orderInfo);
         orderInfoService.checkOrderStatus(orderInfo.getId());
         return R.ok(true);
