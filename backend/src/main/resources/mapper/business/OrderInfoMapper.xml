@@ -26,13 +26,18 @@
 
         vi.vehicle_no,
         vi.brand,
-        vi.use_type
+        vi.use_type,
+
+        ei.id as evaluateId,
+        ci.id as complaintId
         FROM
         order_info oi
         LEFT JOIN user_info ui ON (ui.id = oi.user_id)
         LEFT JOIN staff_info si ON (si.id = oi.staff_id)
         LEFT JOIN route_staff_info rsi ON (rsi.id = oi.staff_route_id)
         LEFT JOIN vehicle_info vi ON (vi.id = rsi.vehicle_id)
+        LEFT JOIN evaluate_info ei ON (ei.order_id = oi.id)
+        LEFT JOIN complaint_info ci ON (ci.order_code = oi.code)
         WHERE
         1 = 1
         <if test="queryFrom.staffName != null and queryFrom.staffName != ''">

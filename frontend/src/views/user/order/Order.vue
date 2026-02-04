@@ -55,7 +55,6 @@
           </template>
         </template>
         <template slot="operation" slot-scope="text, record">
-<!--          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-left: 15px"></a-icon>-->
           <a-icon
             v-if="record.status === '-1'"
             type="stop"
@@ -65,6 +64,18 @@
           ></a-icon>
           <a-icon v-if="record.status == 2" type="alipay" @click="handlevehiclePayOpen(record)" title="支 付" style="margin-left: 15px"></a-icon>
           <a-icon type="file-search" @click="handlevehicleViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
+          <a-icon
+            v-if="record.status === '3' && !record.evaluateId"
+            type="star"
+            @click="handleEvaluateOpen(record)"
+            title="评 价"  style="margin-left: 15px; color: #1890ff;"
+          ></a-icon>
+          <a-icon
+            v-if="record.status === '3' && !record.complaintId"
+            type="exclamation-circle"
+            @click="handleComplaintOpen(record)"
+            title="投 诉"  style="margin-left: 15px; color: #ff4d4f;"
+          ></a-icon>
         </template>
       </a-table>
     </div>
@@ -90,6 +101,16 @@
       :orderShow="vehiclePay.visiable"
       :orderData="vehiclePay.data">
     </order-pay>
+    <order-evaluate
+      :evaluate-visible.sync="evaluateModal.visible"
+      :order-data="evaluateModal.data"
+      @success="handleEvaluateSuccess"
+    />
+    <order-complaint
+      :complaint-visible.sync="complaintModal.visible"
+      :order-data="complaintModal.data"
+      @success="handleComplaintSuccess"
+    />
   </a-card>
 </template>
 
@@ -100,15 +121,25 @@ import vehicleEdit from './OrderEdit.vue'
 import vehicleView from './OrderView.vue'
 import OrderPay from './OrderPay.vue'
 import {mapState} from 'vuex'
+import OrderEvaluate from './OrderEvaluate.vue'
+import OrderComplaint from './OrderComplaint.vue'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
   name: 'vehicle',
-  components: {vehicleAdd, vehicleEdit, vehicleView, OrderPay, RangeDate},
+  components: {vehicleAdd, vehicleEdit, vehicleView, OrderPay, OrderEvaluate, OrderComplaint, RangeDate},
   data () {
     return {
       advanced: false,
+      evaluateModal: {
+        visible: false,
+        data: null
+      },
+      complaintModal: {
+        visible: false,
+        data: null
+      },
       vehicleAdd: {
         visiable: false
       },
@@ -323,6 +354,30 @@ export default {
     this.fetch()
   },
   methods: {
+    handleComplaintOpen(record) {
+      this.complaintModal.data = record
+      this.complaintModal.visible = true
+    },
+    handleComplaintClose() {
+      this.complaintModal.visible = false
+    },
+    handleComplaintSuccess() {
+      this.complaintModal.visible = false
+      this.$message.success('投诉成功')
+      this.fetch() // 刷新数据
+    },
+    handleEvaluateOpen(record) {
+      this.evaluateModal.data = record
+      this.evaluateModal.visible = true
+    },
+    handleEvaluateClose() {
+      this.evaluateModal.visible = false
+    },
+    handleEvaluateSuccess() {
+      this.evaluateModal.visible = false
+      this.$message.success('评价成功')
+      this.fetch() // 刷新数据
+    },
     cancelOrder (row) {
       this.$confirm({
         title: '确认取消订单',

@@ -5,6 +5,9 @@
       <a-button key="back" @click="onClose" type="default">
         关闭
       </a-button>
+      <a-button key="pay" @click="handlePayment" type="primary" :loading="loading">
+        支付
+      </a-button>
     </template>
 
     <div class="order-detail-container" v-if="orderData !== null">
@@ -56,6 +59,10 @@
                 <div class="coupon-name">{{ discount.couponName }}</div>
                 <div class="coupon-content">{{ discount.content }}</div>
                 <div v-if="!isCouponValid(discount)" class="invalid-tip">未满足门槛金额</div>
+              </div>
+              <!-- 无优惠券时的提示 -->
+              <div v-if="discountList.length === 0" class="no-coupons-tip">
+                暂无可使用的优惠券
               </div>
             </div>
           </div>
@@ -162,29 +169,47 @@ export default {
     return {
       loading: false,
       discountList: [],
-      selectedDiscountId: null, // 选中的优惠券ID
+      selectedDiscountId: null // 选中的优惠券ID
     }
   },
   mounted () {
     this.queryDiscountByUser()
   },
   methods: {
-    isCouponValid(discount) {
+    handlePayment  () {
+      let data = { outTradeNo: this.orderData.code, subject: `${this.orderData.name}`, totalAmount: this.finalAmount, body: '', discountId: this.selectedDiscountId }
+      this.$post('/business/pay/alipay', data).then((r) => {
+        this.onClose()
+        // console.log(r.data.msg)
+        // 添加之前先删除一下，如果单页面，页面不刷新，添加进去的内容会一直保留在页面中，二次调用form表单会出错
+        const divForm = document.getElementsByTagName('div')
+        if (divForm.length) {
+          document.body.removeChild(divForm[0])
+        }
+        const div = document.createElement('div')
+        div.innerHTML = r.data.msg // data就是接口返回的form 表单字符串
+        // console.log(div.innerHTML)
+        document.body.appendChild(div)
+        document.forms[0].setAttribute('target', '_self') // 新开窗口跳转
+        document.forms[0].submit()
+      })
+    },
+    isCouponValid (discount) {
       // 满减券需要校验门槛金额
       if (discount.type === '1') {
-        return this.orderData.orderPrice >= discount.threshold;
+        return this.orderData.orderPrice >= discount.threshold
       }
       // 折扣券无门槛限制，默认可用
-      return true;
+      return true
     },
-    selectCoupon(discount) {
+    selectCoupon (discount) {
       // 如果优惠券不可用，直接返回
       if (!this.isCouponValid(discount)) {
-        this.$message.warning('未满足门槛金额，无法选择此优惠券');
-        return;
+        this.$message.warning('未满足门槛金额，无法选择此优惠券')
+        return
       }
       // 设置选中的优惠券 ID
-      this.selectedDiscountId = discount.id;
+      this.selectedDiscountId = discount.id
     },
     queryDiscountByUser () {
       this.$get(`/business/discount-info/queryDiscountByUser`, {
@@ -390,5 +415,14 @@ export default {
   font-size: 12px;
   color: #ff4d4f;
   margin-top: 4px;
+}
+.no-coupons-tip {
+  font-size: 14px;
+  color: #8c8c8c;
+  text-align: center;
+  padding: 20px 15px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  background-color: #fafafa;
 }
 </style>

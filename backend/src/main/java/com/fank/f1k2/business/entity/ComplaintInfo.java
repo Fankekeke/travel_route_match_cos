@@ -70,6 +70,11 @@ public class ComplaintInfo implements Serializable {
     private String status;
 
     /**
+     * 图片
+     */
+    private String images;
+
+    /**
      * 车主名称
      */
     @TableField(exist = false)

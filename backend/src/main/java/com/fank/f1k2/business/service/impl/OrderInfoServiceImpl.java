@@ -540,7 +540,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
         // 计算交易总额
         BigDecimal totalAmount = transactions.stream()
-                .filter(e -> "-1".equals(e.getStatus()) && e.getDistance() != null)
+                .filter(e -> "3".equals(e.getStatus()) && e.getDistance() != null)
                 .map(e -> e.getDistance())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 

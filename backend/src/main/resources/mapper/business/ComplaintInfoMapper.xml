@@ -11,6 +11,7 @@
         ci.create_date,
         ci.staff_id,
         ci.content,
+        ci.images,
         ci.STATUS,
         ci.deal_content,
         ci.deal_date,
@@ -34,7 +35,7 @@
         FROM
         complaint_info ci
         LEFT JOIN staff_info si ON (si.id = ci.staff_id)
-        LEFT JOIN user_info ui ON (si.user_id = ui.id)
+        LEFT JOIN user_info ui ON (ci.user_id = ui.id)
         LEFT JOIN order_info oi ON (oi.CODE = ci.order_code)
         WHERE
         1 = 1
