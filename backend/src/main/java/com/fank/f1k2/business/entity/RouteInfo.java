@@ -132,6 +132,11 @@ public class RouteInfo implements Serializable {
     private Integer planMinute;
 
     /**
+     * 价格
+     */
+    private BigDecimal price;
+
+    /**
      * 匹配度
      */
     @TableField(exist = false)

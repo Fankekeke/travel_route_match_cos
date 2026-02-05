@@ -128,6 +128,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
         if ("0".equals(status)) {
             orderInfo.setStatus("0");
+
             // 接单操作
             NotifyInfo notifyInfo = new NotifyInfo();
             notifyInfo.setUserId(userInfo.getId());
@@ -136,7 +137,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             notifyInfo.setDelFlag(0);
             this.setOrderDeliverIndexNo(orderInfo.getStaffRouteId());
             // 更新行程状态
-            routeInfoService.update(Wrappers.<RouteInfo>lambdaUpdate().set(RouteInfo::getOrderId, orderId).eq(RouteInfo::getId, orderInfo.getUserRouteId()));
+            routeInfoService.update(Wrappers.<RouteInfo>lambdaUpdate().set(RouteInfo::getOrderId, orderId).set(RouteInfo::getPrice, orderInfo.getOrderPrice()).eq(RouteInfo::getId, orderInfo.getUserRouteId()));
             notifyInfoService.save(notifyInfo);
             // 取消用户此行程其他订单
             this.update(Wrappers.<OrderInfo>lambdaUpdate().set(OrderInfo::getStatus, "5").eq(OrderInfo::getUserRouteId, orderInfo.getUserRouteId()).ne(OrderInfo::getId, orderId));
@@ -540,8 +541,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
         // 计算交易总额
         BigDecimal totalAmount = transactions.stream()
-                .filter(e -> "3".equals(e.getStatus()) && e.getDistance() != null)
-                .map(e -> e.getDistance())
+                .filter(e -> "3".equals(e.getStatus()) && e.getPrice() != null)
+                .map(e -> e.getPrice())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // 按公里数区间统计
@@ -564,7 +565,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 distanceRangeCount.put(range, distanceRangeCount.get(range) + 1);
                 if ("-1".equals(transaction.getStatus())) {
                     distanceRangeAmount.put(range,
-                            distanceRangeAmount.get(range).add(transaction.getDistance()));
+                            distanceRangeAmount.get(range).add(transaction.getPrice()));
                 }
             }
         }

@@ -216,6 +216,36 @@ public class OrderInfoController {
     }
 
     /**
+     * 订单成功率
+     *
+     * @return 订单信息
+     */
+    @GetMapping("/orderSuccessRate")
+    public R orderSuccessRate() {
+        return R.ok(orderInfoService.orderSuccessRate());
+    }
+
+    /**
+     * 订单拼成率
+     *
+     * @return 订单信息
+     */
+    @GetMapping("/assemblyRate")
+    public R assemblyRate() {
+        return R.ok(orderInfoService.assemblyRate());
+    }
+
+    /**
+     * 平均顺路程度
+     *
+     * @return 订单信息
+     */
+    @GetMapping("/queryConvenience")
+    public R queryConvenience() {
+        return R.ok(orderInfoService.queryConvenience());
+    }
+
+    /**
      * 修改订单状态
      *
      * @param orderId     主键ID
